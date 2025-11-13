@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Management System - AuthKit Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .blog-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .blog-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .blog-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .blog-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .blog-card .meta {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .blog-card .content {
+            color: #555;
+            margin-bottom: 15px;
+            padding: 0;
+        }
+
+        .blog-card .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .user-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .user-info strong {
+            color: #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Blog Management System</h1>
+            <p>Demo ứng dụng quản lý blog với AuthKit - Authentication & Authorization</p>
+        </div>
+
+        <div class="nav">
+            <div id="userInfo" class="user-info hidden">
+                <strong>Người dùng:</strong> <span id="userName"></span> | 
+                <strong>Roles:</strong> <span id="userRoles"></span> | 
+                <strong>Token:</strong> <span id="tokenPreview"></span>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-primary" onclick="showLogin()">Đăng nhập</button>
+                <button class="btn btn-success" onclick="showRegister()">Đăng ký</button>
+                <button class="btn btn-secondary hidden" id="logoutBtn" onclick="logout()">Đăng xuất</button>
+                <button class="btn btn-warning hidden" id="adminBtn" onclick="showAdminPanel()">Quản trị</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Login Form -->
+            <div id="loginSection" class="section">
+                <h2>🔐 Đăng nhập</h2>
+                <div id="loginAlert"></div>
+                <div class="form-group">
+                    <label>Email hoặc Username:</label>
+                    <input type="text" id="loginEmail" placeholder="email@example.com hoặc username">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu:</label>
+                    <input type="password" id="loginPassword" placeholder="Nhập mật khẩu">
+                </div>
+                <button class="btn btn-primary" onclick="login()">Đăng nhập</button>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerSection" class="section hidden">
+                <h2>📝 Đăng ký</h2>
+                <div id="registerAlert"></div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="regEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="regUsername" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu:</label>
+                    <input type="password" id="regPassword" placeholder="Tối thiểu 6 ký tự">
+                </div>
+                <div class="form-group">
+                    <label>Họ:</label>
+                    <input type="text" id="regFirstName" placeholder="Họ">
+                </div>
+                <div class="form-group">
+                    <label>Tên:</label>
+                    <input type="text" id="regLastName" placeholder="Tên">
+                </div>
+                <button class="btn btn-success" onclick="register()">Đăng ký</button>
+            </div>
+
+            <!-- Blog List -->
+            <div id="blogSection" class="section">
+                <h2>📚 Danh sách Blog</h2>
+                <div id="blogAlert"></div>
+                <div id="blogList" class="blog-list"></div>
+            </div>
+
+            <!-- Create Blog Form -->
+            <div id="createBlogSection" class="section hidden">
+                <h2>✍️ Tạo Blog Mới</h2>
+                <div id="createBlogAlert"></div>
+                <div class="form-group">
+                    <label>Tiêu đề:</label>
+                    <input type="text" id="blogTitle" placeholder="Nhập tiêu đề blog">
+                </div>
+                <div class="form-group">
+                    <label>Nội dung:</label>
+                    <textarea id="blogContent" placeholder="Nhập nội dung blog"></textarea>
+                </div>
+                <button class="btn btn-success" onclick="createBlog()">Tạo Blog</button>
+                <button class="btn btn-secondary" onclick="hideCreateBlog()">Hủy</button>
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="adminSection" class="section hidden">
+                <h2>⚙️ Quản trị hệ thống</h2>
+                <div id="adminAlert"></div>
+                
+                <div style="margin-bottom: 30px;">
+                    <h3>Quản lý Users & Roles</h3>
+                    <button class="btn btn-primary" onclick="loadUsers()">Tải danh sách Users</button>
+                    <div id="usersList"></div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3>Quản lý Roles</h3>
+                    <button class="btn btn-primary" onclick="loadRoles()">Tải danh sách Roles</button>
+                    <div id="rolesList"></div>
+                </div>
+
+                <div>
+                    <h3>Quản lý Rules</h3>
+                    <button class="btn btn-primary" onclick="loadRules()">Tải danh sách Rules</button>
+                    <div id="rulesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let currentUser = null;
+
+        // Check if user is logged in
+        if (token) {
+            loadProfile();
+        } else {
+            showLogin();
+        }
+
+        // Show login form
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('registerSection').classList.add('hidden');
+            document.getElementById('createBlogSection').classList.add('hidden');
+        }
+
+        // Show register form
+        function showRegister() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.remove('hidden');
+            document.getElementById('createBlogSection').classList.add('hidden');
+        }
+
+        // Hide create blog form
+        function hideCreateBlog() {
+            document.getElementById('createBlogSection').classList.add('hidden');
+        }
+
+        // Show create blog form
+        function showCreateBlog() {
+            if (!token) {
+                alert('Vui lòng đăng nhập để tạo blog');
+                showLogin();
+                return;
+            }
+            document.getElementById('createBlogSection').classList.remove('hidden');
+            document.getElementById('blogTitle').value = '';
+            document.getElementById('blogContent').value = '';
+        }
+
+        // Login
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showAlert('loginAlert', 'Vui lòng nhập đầy đủ thông tin', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        username: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    token = data.data.token;
+                    localStorage.setItem('token', token);
+                    currentUser = data.data.user;
+                    showAlert('loginAlert', 'Đăng nhập thành công!', 'success');
+                    updateUI();
+                    loadBlogs();
+                } else {
+                    showAlert('loginAlert', data.message || 'Đăng nhập thất bại', 'error');
+                }
+            } catch (error) {
+                showAlert('loginAlert', 'Lỗi kết nối: ' + error.message, 'error');
+            }
+        }
+
+        // Register
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const firstName = document.getElementById('regFirstName').value;
+            const lastName = document.getElementById('regLastName').value;
+
+            if (!email || !username || !password) {
+                showAlert('registerAlert', 'Vui lòng nhập đầy đủ thông tin bắt buộc', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('registerAlert', 'Mật khẩu phải có ít nhất 6 ký tự', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        username,
+                        password,
+                        first_name: firstName,
+                        last_name: lastName
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('registerAlert', 'Đăng ký thành công! Vui lòng đăng nhập.', 'success');
+                    setTimeout(() => showLogin(), 2000);
+                } else {
+                    showAlert('registerAlert', data.message || 'Đăng ký thất bại', 'error');
+                }
+            } catch (error) {
+                showAlert('registerAlert', 'Lỗi kết nối: ' + error.message, 'error');
+            }
+        }
+
+        // Logout
+        function logout() {
+            token = null;
+            currentUser = null;
+            localStorage.removeItem('token');
+            updateUI();
+            showLogin();
+            loadBlogs();
+        }
+
+        // Load profile
+        async function loadProfile() {
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.data;
+                    updateUI();
+                } else {
+                    token = null;
+                    localStorage.removeItem('token');
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Update UI based on login status
+        function updateUI() {
+            if (token && currentUser) {
+                document.getElementById('userInfo').classList.remove('hidden');
+                document.getElementById('userName').textContent = currentUser.username || currentUser.email;
+                document.getElementById('userRoles').textContent = currentUser.roles ? currentUser.roles.map(r => r.name).join(', ') : 'Chưa có role';
+                document.getElementById('tokenPreview').textContent = token.substring(0, 20) + '...';
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                
+                // Show admin button if user has admin role
+                const hasAdmin = currentUser.roles && currentUser.roles.some(r => r.name === 'admin');
+                if (hasAdmin) {
+                    document.getElementById('adminBtn').classList.remove('hidden');
+                } else {
+                    document.getElementById('adminBtn').classList.add('hidden');
+                }
+
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('registerSection').classList.add('hidden');
+            } else {
+                document.getElementById('userInfo').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.add('hidden');
+                document.getElementById('adminBtn').classList.add('hidden');
+            }
+        }
+
+        // Load blogs
+        async function loadBlogs() {
+            try {
+                const response = await fetch('/api/blogs');
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayBlogs(data.data || []);
+                } else {
+                    showAlert('blogAlert', 'Lỗi khi tải danh sách blog', 'error');
+                }
+            } catch (error) {
+                showAlert('blogAlert', 'Lỗi kết nối: ' + error.message, 'error');
+            }
+        }
+
+        // Display blogs
+        function displayBlogs(blogs) {
+            const blogList = document.getElementById('blogList');
+            
+            if (blogs.length === 0) {
+                blogList.innerHTML = '<p>Chưa có blog nào.</p>';
+                return;
+            }
+
+            blogList.innerHTML = blogs.map(blog => `
+                <div class="blog-card">
+                    <h3>${blog.title}</h3>
+                    <div class="meta">
+                        Tác giả: ${blog.author ? (blog.author.username || blog.author.email) : 'Unknown'} | 
+                        Ngày tạo: ${new Date(blog.created_at).toLocaleString('vi-VN')}
+                    </div>
+                    <div class="content">${blog.content.substring(0, 200)}${blog.content.length > 200 ? '...' : ''}</div>
+                    <div class="actions">
+                        ${token ? `<button class="btn btn-primary" onclick="viewBlog('${blog.id}')">Xem chi tiết</button>` : ''}
+                        ${canEditBlog(blog) ? `
+                            <button class="btn btn-warning" onclick="editBlog('${blog.id}')">Sửa</button>
+                            <button class="btn btn-danger" onclick="deleteBlog('${blog.id}')">Xóa</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            // Add create button if user can create
+            if (token && canCreateBlog()) {
+                blogList.innerHTML = `
+                    <button class="btn btn-success" onclick="showCreateBlog()" style="margin-bottom: 20px;">+ Tạo Blog Mới</button>
+                ` + blogList.innerHTML;
+            }
+        }
+
+        // Check if user can create blog
+        function canCreateBlog() {
+            if (!currentUser || !currentUser.roles) return false;
+            const roleNames = currentUser.roles.map(r => r.name);
+            return roleNames.includes('admin') || roleNames.includes('editor') || roleNames.includes('author');
+        }
+
+        // Check if user can edit blog
+        function canEditBlog(blog) {
+            if (!currentUser) return false;
+            if (!currentUser.roles) return false;
+            
+            const roleNames = currentUser.roles.map(r => r.name);
+            const isAdmin = roleNames.includes('admin');
+            const isEditor = roleNames.includes('editor');
+            const isAuthor = roleNames.includes('author') && blog.author_id === currentUser.id;
+            
+            return isAdmin || isEditor || isAuthor;
+        }
+
+        // View blog detail
+        async function viewBlog(id) {
+            if (!token) {
+                alert('Vui lòng đăng nhập để xem chi tiết blog');
+                showLogin();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/blogs/${id}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`Tiêu đề: ${data.data.title}\n\nNội dung:\n${data.data.content}\n\nTác giả: ${data.data.author ? (data.data.author.username || data.data.author.email) : 'Unknown'}\nNgày tạo: ${new Date(data.data.created_at).toLocaleString('vi-VN')}`);
+                } else {
+                    alert(data.message || 'Không thể xem chi tiết blog');
+                }
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        // Create blog
+        async function createBlog() {
+            if (!token) {
+                alert('Vui lòng đăng nhập');
+                return;
+            }
+
+            const title = document.getElementById('blogTitle').value;
+            const content = document.getElementById('blogContent').value;
+
+            if (!title || !content) {
+                showAlert('createBlogAlert', 'Vui lòng nhập đầy đủ thông tin', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/blogs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('createBlogAlert', 'Tạo blog thành công!', 'success');
+                    document.getElementById('blogTitle').value = '';
+                    document.getElementById('blogContent').value = '';
+                    hideCreateBlog();
+                    loadBlogs();
+                    loadProfile(); // Refresh user info
+                } else {
+                    showAlert('createBlogAlert', data.message || 'Tạo blog thất bại', 'error');
+                }
+            } catch (error) {
+                showAlert('createBlogAlert', 'Lỗi kết nối: ' + error.message, 'error');
+            }
+        }
+
+        // Edit blog
+        async function editBlog(id) {
+            if (!token) {
+                alert('Vui lòng đăng nhập');
+                return;
+            }
+
+            const title = prompt('Nhập tiêu đề mới:');
+            if (!title) return;
+
+            const content = prompt('Nhập nội dung mới:');
+            if (!content) return;
+
+            try {
+                const response = await fetch(`/api/blogs/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Sửa blog thành công!');
+                    loadBlogs();
+                } else {
+                    alert(data.message || 'Sửa blog thất bại');
+                }
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        // Delete blog
+        async function deleteBlog(id) {
+            if (!token) {
+                alert('Vui lòng đăng nhập');
+                return;
+            }
+
+            if (!confirm('Bạn có chắc chắn muốn xóa blog này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/blogs/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Xóa blog thành công!');
+                    loadBlogs();
+                } else {
+                    alert(data.message || 'Xóa blog thất bại');
+                }
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        // Show admin panel
+        function showAdminPanel() {
+            if (!token || !currentUser) {
+                alert('Vui lòng đăng nhập');
+                return;
+            }
+
+            const hasAdmin = currentUser.roles && currentUser.roles.some(r => r.name === 'admin');
+            if (!hasAdmin) {
+                alert('Bạn không có quyền truy cập');
+                return;
+            }
+
+            document.getElementById('adminSection').classList.remove('hidden');
+            loadUsers();
+            loadRoles();
+            loadRules();
+        }
+
+        // Load users
+        async function loadUsers() {
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/roles', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // This is a simplified version - you'd need to implement user listing endpoint
+                    document.getElementById('usersList').innerHTML = '<p>Chức năng quản lý users cần endpoint riêng</p>';
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        // Load roles
+        async function loadRoles() {
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/roles', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const roles = data.data || [];
+                    document.getElementById('rolesList').innerHTML = `
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tên Role</th>
+                                    <th>Hệ thống</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${roles.map(role => `
+                                    <tr>
+                                        <td>${role.id}</td>
+                                        <td><span class="badge badge-primary">${role.name}</span></td>
+                                        <td>${role.is_system ? 'Có' : 'Không'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading roles:', error);
+            }
+        }
+
+        // Load rules
+        async function loadRules() {
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/rules', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const rules = data.data || [];
+                    document.getElementById('rulesList').innerHTML = `
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Path</th>
+                                    <th>Type</th>
+                                    <th>Roles</th>
+                                    <th>Priority</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rules.map(rule => `
+                                    <tr>
+                                        <td><span class="badge badge-success">${rule.method}</span></td>
+                                        <td>${rule.path}</td>
+                                        <td><span class="badge badge-warning">${rule.type}</span></td>
+                                        <td>${rule.roles ? rule.roles.join(', ') : 'N/A'}</td>
+                                        <td>${rule.priority}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading rules:', error);
+            }
+        }
+
+        // Show alert
+        function showAlert(elementId, message, type) {
+            const alertDiv = document.getElementById(elementId);
+            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Load blogs on page load
+        loadBlogs();
+    </script>
+</body>
+</html>
+
