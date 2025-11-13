@@ -71,7 +71,7 @@ func (s *AuthService) Login(req LoginRequest) (*LoginResponse, error) {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi đăng nhập")
 	}
 
-	if !user.IsActive {
+	if !user.IsActive() {
 		return nil, goerrorkit.NewAuthError(403, "Tài khoản đã bị vô hiệu hóa").WithData(map[string]interface{}{
 			"user_id": user.ID,
 		})
@@ -147,7 +147,7 @@ func (s *AuthService) Register(req RegisterRequest) (*models.User, error) {
 		Password:  hashedPassword,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
-		IsActive:  true,
+		Active:    true,
 	}
 
 	if err := s.userRepo.Create(user); err != nil {
@@ -227,4 +227,3 @@ func (s *AuthService) DeleteProfile(userID uuid.UUID) error {
 	}
 	return nil
 }
-

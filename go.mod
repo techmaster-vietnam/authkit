@@ -1,13 +1,13 @@
 module github.com/techmaster-vietnam/authkit
 
-go 1.24.0
+go 1.25.4
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/techmaster-vietnam/goerrorkit v0.1.5
+	github.com/techmaster-vietnam/goerrorkit v0.1.6
 	golang.org/x/crypto v0.44.0
 	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5

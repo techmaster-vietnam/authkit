@@ -125,10 +125,9 @@ func main() {
         log.Fatal("Failed to connect to database:", err)
     }
 
-    // 4. Chạy migrations (từ bên ngoài module)
-    if err := authkit.Migrate(db); err != nil {
-        log.Fatal("Failed to run migrations:", err)
-    }
+    // 4. Chạy migrations (ứng dụng tự chịu trách nhiệm migrate database)
+    // AuthKit không cung cấp hàm Migrate() - bạn tự migrate database của mình
+    // Xem phần "Database Migration" bên dưới để biết cách migrate
 
     // 5. Tạo Fiber app (từ bên ngoài module)
     app := fiber.New(fiber.Config{
@@ -166,6 +165,45 @@ func getEnv(key, defaultValue string) string {
 }
 ```
 
+### Database Migration
+
+AuthKit **không quản lý database migration** - ứng dụng tự chịu trách nhiệm migrate database. Có 2 cách tiếp cận:
+
+#### Option 1: Sử dụng Reference Models (Khuyến nghị cho bắt đầu)
+
+Nếu bạn sử dụng reference models từ package `models`, bạn có thể migrate như sau:
+
+```go
+import (
+    "github.com/techmaster-vietnam/authkit/models"
+    "gorm.io/gorm"
+)
+
+// Migrate database với reference models
+if err := db.AutoMigrate(
+    &models.User{},
+    &models.Role{},
+    &models.Rule{},
+); err != nil {
+    log.Fatal("Failed to run migrations:", err)
+}
+```
+
+Điều này sẽ tạo các bảng:
+- `users` - Bảng users với các trường cơ bản
+- `roles` - Bảng roles
+- `rules` - Bảng authorization rules
+- `user_roles` - Bảng many-to-many giữa users và roles
+
+#### Option 2: Implement Interfaces với Models riêng
+
+Nếu bạn có models riêng với các trường bổ sung, bạn cần:
+1. Implement các interfaces từ `contracts` package
+2. Tự migrate database theo cấu trúc của bạn
+3. Implement các repository interfaces để làm việc với models của bạn
+
+Xem `contracts/README.md` để biết chi tiết về các interfaces cần implement.
+
 ### Sử dụng với database connection có sẵn
 
 Nếu bạn đã có database connection từ dự án khác, bạn có thể truyền trực tiếp:
@@ -183,8 +221,8 @@ func main() {
     // Giả sử bạn đã có DB connection từ nơi khác
     var existingDB *gorm.DB // = your existing connection
     
-    // Chỉ cần chạy migrations
-    authkit.Migrate(existingDB)
+    // Migrate database (nếu chưa migrate)
+    // ... (xem phần Database Migration ở trên)
     
     // Load config
     cfg := authkit.LoadConfig()
@@ -342,25 +380,93 @@ curl -H "Authorization: Bearer <token>" \
 4. **2FA**: Thêm two-factor authentication
 5. **Password Policy**: Thêm policy cho mật khẩu mạnh hơn
 
+## API Công Khai
+
+Package `authkit` export các API sau:
+
+### Functions
+
+- `LoadConfig() *Config`: Load cấu hình từ environment variables
+- `SetupRoutes(app *fiber.App, db *gorm.DB, cfg *Config) error`: Setup tất cả routes cho AuthKit
+
+### Types
+
+- `Config`: Alias cho `config.Config` - cấu hình của AuthKit
+
+### Packages Export
+
+- `contracts/`: Interfaces cho User, Role, Rule và Repositories
+- `models/`: Reference implementation của các interfaces (có thể extend)
+
+**Lưu ý:** Các package khác (`handlers/`, `middleware/`, `repository/`, `service/`, `router/`, `config/`, `utils/`) là **internal** và không nên sử dụng trực tiếp từ bên ngoài.
+
 ## Cấu trúc Module
 
 ```
 authkit/
-├── authkit.go       # Package chính - export tất cả API công khai (LoadConfig, Migrate, SetupRoutes)
+├── authkit.go       # Package chính - export API công khai (LoadConfig, SetupRoutes)
+├── contracts/       # Interfaces cho User, Role, Rule (export)
+│   └── README.md    # Hướng dẫn sử dụng interfaces
+├── models/          # Reference implementation của contracts (export, có thể extend)
 ├── config/          # Cấu hình (internal)
-├── database/        # Database migration (internal)
 ├── handlers/        # HTTP handlers (internal)
 ├── middleware/      # Authentication và authorization middleware (internal)
-├── models/          # GORM models (export User, Role, Rule)
 ├── repository/      # Database repository layer (internal)
 ├── router/          # Route setup (internal)
 ├── service/         # Business logic layer (internal)
 ├── utils/           # Utilities (JWT, password hashing) (internal)
-└── examples/         # Ví dụ sử dụng module
+└── examples/        # Ví dụ sử dụng module
     ├── demo/        # Ví dụ đầy đủ với goerrorkit
     ├── basic/       # Ví dụ cơ bản
     └── init_rules.go # Ví dụ khởi tạo rules
 ```
+
+### Nguyên tắc thiết kế theo SOLID
+
+- ✅ **Single Responsibility**: AuthKit chỉ tập trung vào authentication và authorization
+- ✅ **Open/Closed**: Mở rộng thông qua interfaces, không sửa đổi code core
+- ✅ **Liskov Substitution**: Models implement interfaces có thể thay thế lẫn nhau
+- ✅ **Interface Segregation**: Interfaces nhỏ gọn, chỉ định nghĩa những gì cần thiết
+- ✅ **Dependency Inversion**: Phụ thuộc vào interfaces, không phụ thuộc vào implementation cụ thể
+
+### Contracts và Models
+
+AuthKit sử dụng **Interface-based design** để cho phép ứng dụng linh hoạt trong việc sử dụng models:
+
+- **`contracts/`**: Định nghĩa interfaces - đây là contracts mà ứng dụng cần implement
+  - `UserInterface`: Interface cho User model
+  - `RoleInterface`: Interface cho Role model
+  - `RuleInterface`: Interface cho Rule model
+  - Repository interfaces: `UserRepositoryInterface`, `RoleRepositoryInterface`, `RuleRepositoryInterface`
+
+- **`models/`**: Reference implementation - implementation mẫu của các interfaces
+  - `models.User`: Reference implementation của `contracts.UserInterface`
+  - `models.Role`: Reference implementation của `contracts.RoleInterface`
+  - `models.Rule`: Reference implementation của `contracts.RuleInterface`
+  - Có thể sử dụng trực tiếp hoặc extend với các trường bổ sung
+
+**Lợi ích của thiết kế này:**
+- ✅ Ứng dụng có thể thêm các trường vào models mà không phá vỡ AuthKit
+- ✅ Ứng dụng có thể implement interfaces với models hoàn toàn mới
+- ✅ AuthKit không ép buộc cấu trúc database cụ thể
+- ✅ Dễ dàng test với mock implementations
+
+**Ví dụ extend models:**
+```go
+import "github.com/techmaster-vietnam/authkit/models"
+
+// Extend User model với các trường bổ sung
+type MyUser struct {
+    models.User  // Embed reference implementation
+    CompanyID uuid.UUID `gorm:"type:uuid" json:"company_id"`
+    Phone     string    `json:"phone"`
+    // ... các trường khác
+}
+
+// MyUser tự động implement UserInterface thông qua embedding
+```
+
+Xem `contracts/README.md` để biết cách implement interfaces với models của riêng bạn.
 
 ### Nguyên tắc thiết kế module
 
@@ -368,6 +474,9 @@ authkit/
 - ✅ **Không có side effects**: Module không tự khởi tạo global state
 - ✅ **Export functions**: Chỉ export các constructor và utility functions
 - ✅ **Tái sử dụng cao**: Có thể sử dụng với database connection có sẵn
+- ✅ **Không quản lý migration**: Ứng dụng tự chịu trách nhiệm migrate database
+- ✅ **Interface-based**: Sử dụng interfaces để cho phép ứng dụng implement models riêng
+- ✅ **Single Responsibility**: AuthKit chỉ tập trung vào authentication và authorization, không chứa business logic khác (như Blog)
 
 ## License
 

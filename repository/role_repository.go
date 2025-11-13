@@ -46,7 +46,7 @@ func (r *RoleRepository) Delete(id uuid.UUID) error {
 	if err := r.db.First(&role, id).Error; err != nil {
 		return err
 	}
-	if role.IsSystem {
+	if role.IsSystem() {
 		return gorm.ErrRecordNotFound // Cannot delete system roles
 	}
 	return r.db.Delete(&role).Error
@@ -119,4 +119,3 @@ func (r *RoleRepository) ListUsersHasRole(roleName string) ([]models.User, error
 		Find(&users).Error
 	return users, err
 }
-

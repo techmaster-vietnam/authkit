@@ -46,7 +46,7 @@ func (m *AuthMiddleware) RequireAuth() fiber.Handler {
 			return goerrorkit.WrapWithMessage(err, "Người dùng không tồn tại")
 		}
 
-		if !user.IsActive {
+		if !user.IsActive() {
 			return goerrorkit.NewAuthError(403, "Tài khoản đã bị vô hiệu hóa").WithData(map[string]interface{}{
 				"user_id": user.ID,
 			})
@@ -86,4 +86,3 @@ func GetUserIDFromContext(c *fiber.Ctx) (uuid.UUID, bool) {
 	userID, ok := c.Locals("userID").(uuid.UUID)
 	return userID, ok
 }
-

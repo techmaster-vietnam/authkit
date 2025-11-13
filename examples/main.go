@@ -11,13 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/joho/godotenv"
 	"github.com/techmaster-vietnam/authkit"
-	"github.com/techmaster-vietnam/authkit/handlers"
-	"github.com/techmaster-vietnam/authkit/middleware"
-	"github.com/techmaster-vietnam/authkit/models"
-	"github.com/techmaster-vietnam/authkit/repository"
-	"github.com/techmaster-vietnam/authkit/service"
 	"github.com/techmaster-vietnam/goerrorkit"
-	fiberadapter "github.com/techmaster-vietnam/goerrorkit/adapters/fiber"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -63,8 +57,20 @@ func main() {
 	}
 
 	// 5. Run migrations
-	if err := authkit.Migrate(db); err != nil {
-		log.Fatal("Failed to run migrations:", err)
+	// Migrate AuthKit models
+	if err := db.AutoMigrate(
+		&authkit.User{},
+		&authkit.Role{},
+		&authkit.Rule{},
+	); err != nil {
+		log.Fatal("Failed to migrate AuthKit models:", err)
+	}
+
+	// Migrate application models (Blog)
+	if err := db.AutoMigrate(
+		&Blog{},
+	); err != nil {
+		log.Fatal("Failed to migrate Blog model:", err)
 	}
 
 	// 6. Initialize roles
@@ -85,7 +91,7 @@ func main() {
 	// 9. Add middleware (RequestID must be before ErrorHandler)
 	app.Use(requestid.New())
 	app.Use(logger.New())
-	app.Use(fiberadapter.ErrorHandler()) // goerrorkit error handler
+	app.Use(goerrorkit.FiberErrorHandler()) // goerrorkit error handler
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
@@ -93,26 +99,26 @@ func main() {
 	}))
 
 	// 10. Initialize repositories
-	userRepo := repository.NewUserRepository(db)
-	roleRepo := repository.NewRoleRepository(db)
-	ruleRepo := repository.NewRuleRepository(db)
-	blogRepo := repository.NewBlogRepository(db)
+	userRepo := authkit.NewUserRepository(db)
+	roleRepo := authkit.NewRoleRepository(db)
+	ruleRepo := authkit.NewRuleRepository(db)
+	blogRepo := NewBlogRepository(db) // Application-specific repository
 
 	// 11. Initialize services
-	authService := service.NewAuthService(userRepo, cfg)
-	roleService := service.NewRoleService(roleRepo)
-	ruleService := service.NewRuleService(ruleRepo)
-	blogService := service.NewBlogService(blogRepo, userRepo, roleRepo)
+	authService := authkit.NewAuthService(userRepo, cfg)
+	roleService := authkit.NewRoleService(roleRepo)
+	ruleService := authkit.NewRuleService(ruleRepo)
+	blogService := NewBlogService(blogRepo, userRepo, roleRepo) // Application-specific service
 
 	// 12. Initialize middleware
-	authMiddleware := middleware.NewAuthMiddleware(cfg, userRepo)
-	authzMiddleware := middleware.NewAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
+	authMiddleware := authkit.NewAuthMiddleware(cfg, userRepo)
+	authzMiddleware := authkit.NewAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
 
 	// 13. Initialize handlers
-	authHandler := handlers.NewAuthHandler(authService)
-	roleHandler := handlers.NewRoleHandler(roleService)
-	ruleHandler := handlers.NewRuleHandler(ruleService, authzMiddleware)
-	blogHandler := handlers.NewBlogHandler(blogService, roleRepo)
+	authHandler := authkit.NewAuthHandler(authService)
+	roleHandler := authkit.NewRoleHandler(roleService)
+	ruleHandler := authkit.NewRuleHandler(ruleService, authzMiddleware)
+	blogHandler := NewBlogHandler(blogService, roleRepo) // Application-specific handler
 
 	// 14. Setup routes
 	setupRoutes(app, authHandler, roleHandler, ruleHandler, blogHandler, authMiddleware, authzMiddleware)
@@ -126,7 +132,7 @@ func main() {
 
 // initRoles initializes default roles
 func initRoles(db *gorm.DB) error {
-	roleRepo := repository.NewRoleRepository(db)
+	roleRepo := authkit.NewRoleRepository(db)
 
 	roles := []string{"admin", "editor", "author", "reader"}
 
@@ -137,7 +143,7 @@ func initRoles(db *gorm.DB) error {
 			continue
 		}
 
-		role := &models.Role{
+		role := &authkit.Role{
 			Name: roleName,
 		}
 
@@ -153,35 +159,35 @@ func initRoles(db *gorm.DB) error {
 
 // initRules initializes default rules for blog management
 func initRules(db *gorm.DB) error {
-	ruleRepo := repository.NewRuleRepository(db)
+	ruleRepo := authkit.NewRuleRepository(db)
 
-	rules := []models.Rule{
+	rules := []authkit.Rule{
 		// Public endpoints
 		{
 			Method:   "POST",
 			Path:     "/api/auth/login",
-			Type:     models.RuleTypePublic,
+			Type:     authkit.RuleTypePublic,
 			Roles:    []string{},
 			Priority: 100,
 		},
 		{
 			Method:   "POST",
 			Path:     "/api/auth/register",
-			Type:     models.RuleTypePublic,
+			Type:     authkit.RuleTypePublic,
 			Roles:    []string{},
 			Priority: 100,
 		},
 		{
 			Method:   "GET",
 			Path:     "/api/blogs",
-			Type:     models.RuleTypePublic,
+			Type:     authkit.RuleTypePublic,
 			Roles:    []string{},
 			Priority: 100,
 		},
 		{
 			Method:   "GET",
 			Path:     "/",
-			Type:     models.RuleTypePublic,
+			Type:     authkit.RuleTypePublic,
 			Roles:    []string{},
 			Priority: 100,
 		},
@@ -190,35 +196,35 @@ func initRules(db *gorm.DB) error {
 		{
 			Method:   "GET",
 			Path:     "/api/auth/profile",
-			Type:     models.RuleTypeAuth,
+			Type:     authkit.RuleTypeAuth,
 			Roles:    []string{},
 			Priority: 90,
 		},
 		{
 			Method:   "PUT",
 			Path:     "/api/auth/profile",
-			Type:     models.RuleTypeAuth,
+			Type:     authkit.RuleTypeAuth,
 			Roles:    []string{},
 			Priority: 90,
 		},
 		{
 			Method:   "DELETE",
 			Path:     "/api/auth/profile",
-			Type:     models.RuleTypeAuth,
+			Type:     authkit.RuleTypeAuth,
 			Roles:    []string{},
 			Priority: 90,
 		},
 		{
 			Method:   "POST",
 			Path:     "/api/auth/change-password",
-			Type:     models.RuleTypeAuth,
+			Type:     authkit.RuleTypeAuth,
 			Roles:    []string{},
 			Priority: 90,
 		},
 		{
 			Method:   "GET",
 			Path:     "/api/blogs/my",
-			Type:     models.RuleTypeAuth,
+			Type:     authkit.RuleTypeAuth,
 			Roles:    []string{},
 			Priority: 90,
 		},
@@ -227,7 +233,7 @@ func initRules(db *gorm.DB) error {
 		{
 			Method:   "GET",
 			Path:     "/api/blogs/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"reader", "author", "editor", "admin"},
 			Priority: 80,
 		},
@@ -236,21 +242,21 @@ func initRules(db *gorm.DB) error {
 		{
 			Method:   "POST",
 			Path:     "/api/blogs",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"author", "editor", "admin"},
 			Priority: 80,
 		},
 		{
 			Method:   "PUT",
 			Path:     "/api/blogs/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"author", "editor", "admin"},
 			Priority: 80,
 		},
 		{
 			Method:   "DELETE",
 			Path:     "/api/blogs/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"author", "editor", "admin"},
 			Priority: 80,
 		},
@@ -259,77 +265,77 @@ func initRules(db *gorm.DB) error {
 		{
 			Method:   "GET",
 			Path:     "/api/roles",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "POST",
 			Path:     "/api/roles",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "DELETE",
 			Path:     "/api/roles/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "GET",
 			Path:     "/api/rules",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "POST",
 			Path:     "/api/rules",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "PUT",
 			Path:     "/api/rules/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "DELETE",
 			Path:     "/api/rules/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "GET",
 			Path:     "/api/users",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "GET",
 			Path:     "/api/users/*/roles",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "POST",
 			Path:     "/api/users/*/roles/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
 		{
 			Method:   "DELETE",
 			Path:     "/api/users/*/roles/*",
-			Type:     models.RuleTypeAllow,
+			Type:     authkit.RuleTypeAllow,
 			Roles:    []string{"admin"},
 			Priority: 70,
 		},
@@ -357,12 +363,12 @@ func initRules(db *gorm.DB) error {
 // setupRoutes sets up all routes
 func setupRoutes(
 	app *fiber.App,
-	authHandler *handlers.AuthHandler,
-	roleHandler *handlers.RoleHandler,
-	ruleHandler *handlers.RuleHandler,
-	blogHandler *handlers.BlogHandler,
-	authMiddleware *middleware.AuthMiddleware,
-	authzMiddleware *middleware.AuthorizationMiddleware,
+	authHandler *authkit.AuthHandler,
+	roleHandler *authkit.RoleHandler,
+	ruleHandler *authkit.RuleHandler,
+	blogHandler *BlogHandler, // Application-specific handler
+	authMiddleware *authkit.AuthMiddleware,
+	authzMiddleware *authkit.AuthorizationMiddleware,
 ) {
 	// Serve static HTML file
 	app.Get("/", func(c *fiber.Ctx) error {

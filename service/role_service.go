@@ -48,7 +48,7 @@ func (s *RoleService) AddRole(req AddRoleRequest) (*models.Role, error) {
 	role := &models.Role{
 		Name:        req.Name,
 		Description: req.Description,
-		IsSystem:    false,
+		System:      false,
 	}
 
 	if err := s.roleRepo.Create(role); err != nil {
@@ -134,4 +134,3 @@ func (s *RoleService) ListUsersHasRole(roleName string) ([]models.User, error) {
 	}
 	return users, nil
 }
-

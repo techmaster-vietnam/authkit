@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/techmaster-vietnam/goerrorkit"
-	"github.com/techmaster-vietnam/goerrorkit/adapters/fiber"
 )
 
 func main() {
@@ -63,7 +62,7 @@ func main() {
 	// 4. Add middlewares (RequestID must be before ErrorHandler)
 	app.Use(requestid.New())
 	app.Use(logger.New())
-	app.Use(fiber.ErrorHandler())
+	app.Use(goerrorkit.FiberErrorHandler())
 
 	// 5. Routes - Demo different error types
 	app.Get("/", homeHandler)
