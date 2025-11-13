@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/models"
 	"gorm.io/gorm"
 )
@@ -22,7 +21,7 @@ func (r *UserRepository) Create(user *models.User) error {
 }
 
 // GetByID gets a user by ID
-func (r *UserRepository) GetByID(id uuid.UUID) (*models.User, error) {
+func (r *UserRepository) GetByID(id string) (*models.User, error) {
 	var user models.User
 	err := r.db.Preload("Roles").Where("id = ?", id).First(&user).Error
 	return &user, err
@@ -35,20 +34,13 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	return &user, err
 }
 
-// GetByUsername gets a user by username
-func (r *UserRepository) GetByUsername(username string) (*models.User, error) {
-	var user models.User
-	err := r.db.Preload("Roles").Where("username = ?", username).First(&user).Error
-	return &user, err
-}
-
 // Update updates a user
 func (r *UserRepository) Update(user *models.User) error {
 	return r.db.Save(user).Error
 }
 
 // Delete soft deletes a user
-func (r *UserRepository) Delete(id uuid.UUID) error {
+func (r *UserRepository) Delete(id string) error {
 	return r.db.Delete(&models.User{}, id).Error
 }
 

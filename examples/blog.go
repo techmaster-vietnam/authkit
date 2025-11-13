@@ -3,18 +3,18 @@ package main
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit"
+	"github.com/techmaster-vietnam/authkit/utils"
 	"gorm.io/gorm"
 )
 
 // Blog represents a blog post
 // Đây là model riêng của ứng dụng, không thuộc authkit core
 type Blog struct {
-	ID        uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID        string         `gorm:"type:varchar(12);primary_key" json:"id"`
 	Title     string         `gorm:"not null" json:"title"`
 	Content   string         `gorm:"type:text;not null" json:"content"`
-	AuthorID  uuid.UUID      `gorm:"type:uuid;not null;index" json:"author_id"`
+	AuthorID  string         `gorm:"type:varchar(12);not null;index" json:"author_id"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
@@ -23,10 +23,14 @@ type Blog struct {
 	Author *authkit.User `gorm:"foreignKey:AuthorID" json:"author,omitempty"`
 }
 
-// BeforeCreate hook to generate UUID
+// BeforeCreate hook to generate ID
 func (b *Blog) BeforeCreate(tx *gorm.DB) error {
-	if b.ID == uuid.Nil {
-		b.ID = uuid.New()
+	if b.ID == "" {
+		id, err := utils.GenerateID()
+		if err != nil {
+			return err
+		}
+		b.ID = id
 	}
 	return nil
 }

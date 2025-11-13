@@ -2,8 +2,8 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/repository"
 	"github.com/techmaster-vietnam/goerrorkit"
@@ -22,18 +22,16 @@ func NewRuleService(ruleRepo *repository.RuleRepository) *RuleService {
 
 // AddRuleRequest represents add rule request
 type AddRuleRequest struct {
-	Method   string   `json:"method"`
-	Path     string   `json:"path"`
-	Type     string   `json:"type"` // PUBLIC, ALLOW, FORBIDE, AUTHENTICATED
-	Roles    []string `json:"roles"`
-	Priority int      `json:"priority"`
+	Method string   `json:"method"`
+	Path   string   `json:"path"`
+	Type   string   `json:"type"` // PUBLIC, ALLOW, FORBIDE
+	Roles  []string `json:"roles"`
 }
 
 // UpdateRuleRequest represents update rule request
 type UpdateRuleRequest struct {
-	Type     string   `json:"type"`
-	Roles    []string `json:"roles"`
-	Priority int      `json:"priority"`
+	Type  string   `json:"type"`
+	Roles []string `json:"roles"`
 }
 
 // AddRule creates a new rule
@@ -50,13 +48,13 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 		})
 	}
 
-	ruleType := models.RuleType(req.Type)
-	if ruleType != models.RuleTypePublic && ruleType != models.RuleTypeAllow &&
-		ruleType != models.RuleTypeForbid && ruleType != models.RuleTypeAuth {
-		return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW, FORBIDE hoặc AUTHENTICATED", map[string]interface{}{
+	ruleType := models.AccessType(req.Type)
+	if ruleType != models.AccessPublic && ruleType != models.AccessAllow &&
+		ruleType != models.AccessForbid {
+		return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW hoặc FORBIDE", map[string]interface{}{
 			"field":    "type",
 			"received": req.Type,
-			"allowed":  []string{"PUBLIC", "ALLOW", "FORBIDE", "AUTHENTICATED"},
+			"allowed":  []string{"PUBLIC", "ALLOW", "FORBIDE"},
 		})
 	}
 
@@ -72,12 +70,14 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi kiểm tra rule")
 	}
 
+	// Generate ID from Method and Path
+	ruleID := fmt.Sprintf("%s|%s", req.Method, req.Path)
 	rule := &models.Rule{
-		Method:   req.Method,
-		Path:     req.Path,
-		Type:     ruleType,
-		Roles:    req.Roles,
-		Priority: req.Priority,
+		ID:     ruleID,
+		Method: req.Method,
+		Path:   req.Path,
+		Type:   ruleType,
+		Roles:  req.Roles,
 	}
 
 	if err := s.ruleRepo.Create(rule); err != nil {
@@ -88,7 +88,7 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 }
 
 // UpdateRule updates a rule
-func (s *RuleService) UpdateRule(ruleID uuid.UUID, req UpdateRuleRequest) (*models.Rule, error) {
+func (s *RuleService) UpdateRule(ruleID string, req UpdateRuleRequest) (*models.Rule, error) {
 	rule, err := s.ruleRepo.GetByID(ruleID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -100,13 +100,13 @@ func (s *RuleService) UpdateRule(ruleID uuid.UUID, req UpdateRuleRequest) (*mode
 	}
 
 	if req.Type != "" {
-		ruleType := models.RuleType(req.Type)
-		if ruleType != models.RuleTypePublic && ruleType != models.RuleTypeAllow &&
-			ruleType != models.RuleTypeForbid && ruleType != models.RuleTypeAuth {
-			return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW, FORBIDE hoặc AUTHENTICATED", map[string]interface{}{
+		ruleType := models.AccessType(req.Type)
+		if ruleType != models.AccessPublic && ruleType != models.AccessAllow &&
+			ruleType != models.AccessForbid {
+			return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW hoặc FORBIDE", map[string]interface{}{
 				"field":    "type",
 				"received": req.Type,
-				"allowed":  []string{"PUBLIC", "ALLOW", "FORBIDE", "AUTHENTICATED"},
+				"allowed":  []string{"PUBLIC", "ALLOW", "FORBIDE"},
 			})
 		}
 		rule.Type = ruleType
@@ -114,10 +114,6 @@ func (s *RuleService) UpdateRule(ruleID uuid.UUID, req UpdateRuleRequest) (*mode
 
 	if req.Roles != nil {
 		rule.Roles = req.Roles
-	}
-
-	if req.Priority != 0 {
-		rule.Priority = req.Priority
 	}
 
 	if err := s.ruleRepo.Update(rule); err != nil {
@@ -128,7 +124,7 @@ func (s *RuleService) UpdateRule(ruleID uuid.UUID, req UpdateRuleRequest) (*mode
 }
 
 // RemoveRule removes a rule
-func (s *RuleService) RemoveRule(ruleID uuid.UUID) error {
+func (s *RuleService) RemoveRule(ruleID string) error {
 	if err := s.ruleRepo.Delete(ruleID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return goerrorkit.NewBusinessError(404, "Không tìm thấy rule").WithData(map[string]interface{}{
@@ -148,4 +144,3 @@ func (s *RuleService) ListRules() ([]models.Rule, error) {
 	}
 	return rules, nil
 }
-

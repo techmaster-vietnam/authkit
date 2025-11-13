@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +20,7 @@ func (r *BlogRepository) Create(blog *Blog) error {
 }
 
 // GetByID gets a blog by ID
-func (r *BlogRepository) GetByID(id uuid.UUID) (*Blog, error) {
+func (r *BlogRepository) GetByID(id string) (*Blog, error) {
 	var blog Blog
 	err := r.db.Preload("Author").Where("id = ?", id).First(&blog).Error
 	return &blog, err
@@ -33,7 +32,7 @@ func (r *BlogRepository) Update(blog *Blog) error {
 }
 
 // Delete soft deletes a blog
-func (r *BlogRepository) Delete(id uuid.UUID) error {
+func (r *BlogRepository) Delete(id string) error {
 	return r.db.Delete(&Blog{}, id).Error
 }
 
@@ -51,7 +50,7 @@ func (r *BlogRepository) List(offset, limit int) ([]Blog, int64, error) {
 }
 
 // ListByAuthor lists blogs by author ID
-func (r *BlogRepository) ListByAuthor(authorID uuid.UUID, offset, limit int) ([]Blog, int64, error) {
+func (r *BlogRepository) ListByAuthor(authorID string, offset, limit int) ([]Blog, int64, error) {
 	var blogs []Blog
 	var total int64
 

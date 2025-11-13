@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit"
 	"github.com/techmaster-vietnam/goerrorkit"
 )
@@ -52,8 +51,8 @@ func (h *BlogHandler) Create(c *fiber.Ctx) error {
 // GetByID handles get blog by ID request
 // GET /api/blogs/:id
 func (h *BlogHandler) GetByID(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return goerrorkit.NewValidationError("ID không hợp lệ", map[string]interface{}{
 			"id": c.Params("id"),
 		})
@@ -78,8 +77,8 @@ func (h *BlogHandler) Update(c *fiber.Ctx) error {
 		return goerrorkit.NewAuthError(401, "Yêu cầu đăng nhập")
 	}
 
-	id, err := uuid.Parse(c.Params("id"))
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return goerrorkit.NewValidationError("ID không hợp lệ", map[string]interface{}{
 			"id": c.Params("id"),
 		})
@@ -122,8 +121,8 @@ func (h *BlogHandler) Delete(c *fiber.Ctx) error {
 		return goerrorkit.NewAuthError(401, "Yêu cầu đăng nhập")
 	}
 
-	id, err := uuid.Parse(c.Params("id"))
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return goerrorkit.NewValidationError("ID không hợp lệ", map[string]interface{}{
 			"id": c.Params("id"),
 		})

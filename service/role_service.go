@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/repository"
 	"github.com/techmaster-vietnam/goerrorkit"
@@ -22,8 +21,7 @@ func NewRoleService(roleRepo *repository.RoleRepository) *RoleService {
 
 // AddRoleRequest represents add role request
 type AddRoleRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name string `json:"name"`
 }
 
 // AddRole creates a new role
@@ -46,9 +44,8 @@ func (s *RoleService) AddRole(req AddRoleRequest) (*models.Role, error) {
 	}
 
 	role := &models.Role{
-		Name:        req.Name,
-		Description: req.Description,
-		System:      false,
+		Name:   req.Name,
+		System: false,
 	}
 
 	if err := s.roleRepo.Create(role); err != nil {
@@ -59,7 +56,7 @@ func (s *RoleService) AddRole(req AddRoleRequest) (*models.Role, error) {
 }
 
 // RemoveRole removes a role
-func (s *RoleService) RemoveRole(roleID uuid.UUID) error {
+func (s *RoleService) RemoveRole(roleID uint) error {
 	if err := s.roleRepo.Delete(roleID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return goerrorkit.NewBusinessError(404, "Không tìm thấy role").WithData(map[string]interface{}{
@@ -81,7 +78,7 @@ func (s *RoleService) ListRoles() ([]models.Role, error) {
 }
 
 // AddRoleToUser adds a role to a user
-func (s *RoleService) AddRoleToUser(userID, roleID uuid.UUID) error {
+func (s *RoleService) AddRoleToUser(userID string, roleID uint) error {
 	if err := s.roleRepo.AddRoleToUser(userID, roleID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return goerrorkit.NewBusinessError(404, "Không tìm thấy user hoặc role").WithData(map[string]interface{}{
@@ -95,7 +92,7 @@ func (s *RoleService) AddRoleToUser(userID, roleID uuid.UUID) error {
 }
 
 // RemoveRoleFromUser removes a role from a user
-func (s *RoleService) RemoveRoleFromUser(userID, roleID uuid.UUID) error {
+func (s *RoleService) RemoveRoleFromUser(userID string, roleID uint) error {
 	if err := s.roleRepo.RemoveRoleFromUser(userID, roleID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return goerrorkit.NewBusinessError(404, "Không tìm thấy user hoặc role").WithData(map[string]interface{}{
@@ -109,7 +106,7 @@ func (s *RoleService) RemoveRoleFromUser(userID, roleID uuid.UUID) error {
 }
 
 // CheckUserHasRole checks if a user has a specific role
-func (s *RoleService) CheckUserHasRole(userID uuid.UUID, roleName string) (bool, error) {
+func (s *RoleService) CheckUserHasRole(userID string, roleName string) (bool, error) {
 	hasRole, err := s.roleRepo.CheckUserHasRole(userID, roleName)
 	if err != nil {
 		return false, goerrorkit.WrapWithMessage(err, "Lỗi khi kiểm tra role")
@@ -118,7 +115,7 @@ func (s *RoleService) CheckUserHasRole(userID uuid.UUID, roleName string) (bool,
 }
 
 // ListRolesOfUser lists all roles of a user
-func (s *RoleService) ListRolesOfUser(userID uuid.UUID) ([]models.Role, error) {
+func (s *RoleService) ListRolesOfUser(userID string) ([]models.Role, error) {
 	roles, err := s.roleRepo.ListRolesOfUser(userID)
 	if err != nil {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách role của user")

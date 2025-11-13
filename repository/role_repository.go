@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/models"
 	"gorm.io/gorm"
 )
@@ -22,7 +21,7 @@ func (r *RoleRepository) Create(role *models.Role) error {
 }
 
 // GetByID gets a role by ID
-func (r *RoleRepository) GetByID(id uuid.UUID) (*models.Role, error) {
+func (r *RoleRepository) GetByID(id uint) (*models.Role, error) {
 	var role models.Role
 	err := r.db.Where("id = ?", id).First(&role).Error
 	return &role, err
@@ -40,8 +39,8 @@ func (r *RoleRepository) Update(role *models.Role) error {
 	return r.db.Save(role).Error
 }
 
-// Delete soft deletes a role (only if not system role)
-func (r *RoleRepository) Delete(id uuid.UUID) error {
+// Delete hard deletes a role (only if not system role)
+func (r *RoleRepository) Delete(id uint) error {
 	var role models.Role
 	if err := r.db.First(&role, id).Error; err != nil {
 		return err
@@ -49,7 +48,7 @@ func (r *RoleRepository) Delete(id uuid.UUID) error {
 	if role.IsSystem() {
 		return gorm.ErrRecordNotFound // Cannot delete system roles
 	}
-	return r.db.Delete(&role).Error
+	return r.db.Unscoped().Delete(&role).Error
 }
 
 // List lists all roles
@@ -60,11 +59,11 @@ func (r *RoleRepository) List() ([]models.Role, error) {
 }
 
 // AddRoleToUser adds a role to a user
-func (r *RoleRepository) AddRoleToUser(userID, roleID uuid.UUID) error {
+func (r *RoleRepository) AddRoleToUser(userID string, roleID uint) error {
 	var user models.User
 	var role models.Role
 
-	if err := r.db.First(&user, userID).Error; err != nil {
+	if err := r.db.Where("id = ?", userID).First(&user).Error; err != nil {
 		return err
 	}
 	if err := r.db.First(&role, roleID).Error; err != nil {
@@ -75,11 +74,11 @@ func (r *RoleRepository) AddRoleToUser(userID, roleID uuid.UUID) error {
 }
 
 // RemoveRoleFromUser removes a role from a user
-func (r *RoleRepository) RemoveRoleFromUser(userID, roleID uuid.UUID) error {
+func (r *RoleRepository) RemoveRoleFromUser(userID string, roleID uint) error {
 	var user models.User
 	var role models.Role
 
-	if err := r.db.First(&user, userID).Error; err != nil {
+	if err := r.db.Where("id = ?", userID).First(&user).Error; err != nil {
 		return err
 	}
 	if err := r.db.First(&role, roleID).Error; err != nil {
@@ -90,7 +89,7 @@ func (r *RoleRepository) RemoveRoleFromUser(userID, roleID uuid.UUID) error {
 }
 
 // CheckUserHasRole checks if a user has a specific role
-func (r *RoleRepository) CheckUserHasRole(userID uuid.UUID, roleName string) (bool, error) {
+func (r *RoleRepository) CheckUserHasRole(userID string, roleName string) (bool, error) {
 	var count int64
 	err := r.db.Table("user_roles").
 		Joins("JOIN roles ON user_roles.role_id = roles.id").
@@ -100,9 +99,9 @@ func (r *RoleRepository) CheckUserHasRole(userID uuid.UUID, roleName string) (bo
 }
 
 // ListRolesOfUser lists all roles of a user
-func (r *RoleRepository) ListRolesOfUser(userID uuid.UUID) ([]models.Role, error) {
+func (r *RoleRepository) ListRolesOfUser(userID string) ([]models.Role, error) {
 	var user models.User
-	if err := r.db.Preload("Roles").First(&user, userID).Error; err != nil {
+	if err := r.db.Where("id = ?", userID).Preload("Roles").First(&user).Error; err != nil {
 		return nil, err
 	}
 	return user.Roles, nil

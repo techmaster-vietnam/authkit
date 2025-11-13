@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/middleware"
 	"github.com/techmaster-vietnam/authkit/service"
 	"github.com/techmaster-vietnam/goerrorkit"
@@ -10,8 +9,8 @@ import (
 
 // RuleHandler handles rule endpoints
 type RuleHandler struct {
-	ruleService              *service.RuleService
-	authorizationMiddleware  *middleware.AuthorizationMiddleware
+	ruleService             *service.RuleService
+	authorizationMiddleware *middleware.AuthorizationMiddleware
 }
 
 // NewRuleHandler creates a new rule handler
@@ -52,10 +51,10 @@ func (h *RuleHandler) AddRule(c *fiber.Ctx) error {
 // UpdateRule handles update rule request
 // PUT /api/rules/:id
 func (h *RuleHandler) UpdateRule(c *fiber.Ctx) error {
-	ruleID, err := uuid.Parse(c.Params("id"))
-	if err != nil {
+	ruleID := c.Params("id")
+	if ruleID == "" {
 		return goerrorkit.NewValidationError("ID không hợp lệ", map[string]interface{}{
-			"id": c.Params("id"),
+			"id": ruleID,
 		})
 	}
 
@@ -83,10 +82,10 @@ func (h *RuleHandler) UpdateRule(c *fiber.Ctx) error {
 // RemoveRule handles remove rule request
 // DELETE /api/rules/:id
 func (h *RuleHandler) RemoveRule(c *fiber.Ctx) error {
-	ruleID, err := uuid.Parse(c.Params("id"))
-	if err != nil {
+	ruleID := c.Params("id")
+	if ruleID == "" {
 		return goerrorkit.NewValidationError("ID không hợp lệ", map[string]interface{}{
-			"id": c.Params("id"),
+			"id": ruleID,
 		})
 	}
 
@@ -116,4 +115,3 @@ func (h *RuleHandler) ListRules(c *fiber.Ctx) error {
 		"data":    rules,
 	})
 }
-

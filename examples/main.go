@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"fmt" 
+	"net"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -19,7 +21,7 @@ import (
 func main() {
 	// 0. Load .env file
 	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: .env file not found, using default values or environment variables")
+		_ = goerrorkit.WrapWithMessage(err, "Warning: .env file not found, using default values or environment variables")
 	}
 
 	// 1. Initialize goerrorkit logger
@@ -53,34 +55,35 @@ func main() {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		panic(goerrorkit.NewSystemError(err).
+			WithData(map[string]interface{}{
+				"host":     dbHost,
+				"port":     dbPort,
+				"user":     dbUser,
+				"database": dbName,
+				"sslmode":  dbSSLMode,
+			}))
+	}
+	// 5. Reset database (only if RESET_DB=true)
+	if err := resetDatabase(db); err != nil {
+		panic(err)
 	}
 
-	// 5. Run migrations
-	// Migrate AuthKit models
-	if err := db.AutoMigrate(
-		&authkit.User{},
-		&authkit.Role{},
-		&authkit.Rule{},
-	); err != nil {
-		log.Fatal("Failed to migrate AuthKit models:", err)
+	// 6. Run migrations
+	if err := runMigrations(db, dbName); err != nil {
+		panic(goerrorkit.NewSystemError(err).
+			WithData(map[string]interface{}{
+				"operation": "migration",
+				"database":  dbName,
+			}))
 	}
 
-	// Migrate application models (Blog)
-	if err := db.AutoMigrate(
-		&Blog{},
-	); err != nil {
-		log.Fatal("Failed to migrate Blog model:", err)
-	}
-
-	// 6. Initialize roles
-	if err := initRoles(db); err != nil {
-		log.Fatal("Failed to initialize roles:", err)
-	}
-
-	// 7. Initialize rules
-	if err := initRules(db); err != nil {
-		log.Fatal("Failed to initialize rules:", err)
+	// 7. Seed initial data (roles and rules)
+	if err := SeedData(db); err != nil {
+		panic(goerrorkit.WrapWithMessage(err, "Failed to seed initial data").
+			WithData(map[string]interface{}{
+				"operation": "seed_data",
+			}))
 	}
 
 	// 8. Create Fiber app
@@ -123,241 +126,48 @@ func main() {
 	// 14. Setup routes
 	setupRoutes(app, authHandler, roleHandler, ruleHandler, blogHandler, authMiddleware, authzMiddleware)
 
-	// 15. Start server
-	log.Printf("Server starting on port %s", cfg.Server.Port)
-	if err := app.Listen(":" + cfg.Server.Port); err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
-}
-
-// initRoles initializes default roles
-func initRoles(db *gorm.DB) error {
-	roleRepo := authkit.NewRoleRepository(db)
-
-	roles := []string{"admin", "editor", "author", "reader"}
-
-	for _, roleName := range roles {
-		_, err := roleRepo.GetByName(roleName)
-		if err == nil {
-			// Role already exists
-			continue
+	// 15. Check if port is available before starting server
+	port := cfg.Server.Port
+	if isPortInUse(port) {
+		processInfo := getPortProcessInfo(port)
+		errorMsg := fmt.Sprintf("Cổng %s đang được sử dụng", port)
+		if processInfo != "" {
+			errorMsg += fmt.Sprintf("\nThông tin process đang sử dụng cổng:\n%s", processInfo)
+			errorMsg += "\n\nĐể giải phóng cổng, bạn có thể:\n"
+			errorMsg += "1. Dừng process đang sử dụng cổng\n"
+			errorMsg += "2. Hoặc thay đổi cổng trong file .env (SERVER_PORT=<cổng_khác>)"
 		}
-
-		role := &authkit.Role{
-			Name: roleName,
-		}
-
-		if err := roleRepo.Create(role); err != nil {
-			log.Printf("Failed to create role %s: %v", roleName, err)
-			return err
-		}
-		log.Printf("Created role: %s", roleName)
+		panic(goerrorkit.WrapWithMessage(fmt.Errorf("port %s is already in use", port), errorMsg).
+			WithData(map[string]interface{}{
+				"port":         port,
+				"process_info": processInfo,
+			}))
 	}
 
-	return nil
-}
-
-// initRules initializes default rules for blog management
-func initRules(db *gorm.DB) error {
-	ruleRepo := authkit.NewRuleRepository(db)
-
-	rules := []authkit.Rule{
-		// Public endpoints
-		{
-			Method:   "POST",
-			Path:     "/api/auth/login",
-			Type:     authkit.RuleTypePublic,
-			Roles:    []string{},
-			Priority: 100,
-		},
-		{
-			Method:   "POST",
-			Path:     "/api/auth/register",
-			Type:     authkit.RuleTypePublic,
-			Roles:    []string{},
-			Priority: 100,
-		},
-		{
-			Method:   "GET",
-			Path:     "/api/blogs",
-			Type:     authkit.RuleTypePublic,
-			Roles:    []string{},
-			Priority: 100,
-		},
-		{
-			Method:   "GET",
-			Path:     "/",
-			Type:     authkit.RuleTypePublic,
-			Roles:    []string{},
-			Priority: 100,
-		},
-
-		// Authenticated endpoints
-		{
-			Method:   "GET",
-			Path:     "/api/auth/profile",
-			Type:     authkit.RuleTypeAuth,
-			Roles:    []string{},
-			Priority: 90,
-		},
-		{
-			Method:   "PUT",
-			Path:     "/api/auth/profile",
-			Type:     authkit.RuleTypeAuth,
-			Roles:    []string{},
-			Priority: 90,
-		},
-		{
-			Method:   "DELETE",
-			Path:     "/api/auth/profile",
-			Type:     authkit.RuleTypeAuth,
-			Roles:    []string{},
-			Priority: 90,
-		},
-		{
-			Method:   "POST",
-			Path:     "/api/auth/change-password",
-			Type:     authkit.RuleTypeAuth,
-			Roles:    []string{},
-			Priority: 90,
-		},
-		{
-			Method:   "GET",
-			Path:     "/api/blogs/my",
-			Type:     authkit.RuleTypeAuth,
-			Roles:    []string{},
-			Priority: 90,
-		},
-
-		// Reader can view blog details
-		{
-			Method:   "GET",
-			Path:     "/api/blogs/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"reader", "author", "editor", "admin"},
-			Priority: 80,
-		},
-
-		// Author can create, edit, delete their own blogs
-		{
-			Method:   "POST",
-			Path:     "/api/blogs",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"author", "editor", "admin"},
-			Priority: 80,
-		},
-		{
-			Method:   "PUT",
-			Path:     "/api/blogs/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"author", "editor", "admin"},
-			Priority: 80,
-		},
-		{
-			Method:   "DELETE",
-			Path:     "/api/blogs/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"author", "editor", "admin"},
-			Priority: 80,
-		},
-
-		// Admin endpoints
-		{
-			Method:   "GET",
-			Path:     "/api/roles",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "POST",
-			Path:     "/api/roles",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "DELETE",
-			Path:     "/api/roles/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "GET",
-			Path:     "/api/rules",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "POST",
-			Path:     "/api/rules",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "PUT",
-			Path:     "/api/rules/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "DELETE",
-			Path:     "/api/rules/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "GET",
-			Path:     "/api/users",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "GET",
-			Path:     "/api/users/*/roles",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "POST",
-			Path:     "/api/users/*/roles/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-		{
-			Method:   "DELETE",
-			Path:     "/api/users/*/roles/*",
-			Type:     authkit.RuleTypeAllow,
-			Roles:    []string{"admin"},
-			Priority: 70,
-		},
-	}
-
-	// Create rules
-	for _, rule := range rules {
-		// Check if rule already exists
-		_, err := ruleRepo.GetByMethodAndPath(rule.Method, rule.Path)
-		if err == nil {
-			// Rule already exists
-			continue
+	// 16. Start server
+	fmt.Printf("Server starting on port %s\n", port)
+	if err := app.Listen(":" + port); err != nil {
+		// Check if error is related to port already in use
+		if strings.Contains(err.Error(), "address already in use") || strings.Contains(err.Error(), "bind: address already in use") {
+			processInfo := getPortProcessInfo(port)
+			errorMsg := fmt.Sprintf("Không thể khởi động server: Cổng %s đang được sử dụng", port)
+			if processInfo != "" {
+				errorMsg += fmt.Sprintf("\nThông tin process đang sử dụng cổng:\n%s", processInfo)
+			}
+			errorMsg += "\n\nĐể giải phóng cổng, bạn có thể:\n"
+			errorMsg += "1. Dừng process đang sử dụng cổng\n"
+			errorMsg += "2. Hoặc thay đổi cổng trong file .env (SERVER_PORT=<cổng_khác>)"
+			panic(goerrorkit.WrapWithMessage(err, errorMsg).
+				WithData(map[string]interface{}{
+					"port":         port,
+					"process_info": processInfo,
+				}))
 		}
-
-		if err := ruleRepo.Create(&rule); err != nil {
-			log.Printf("Failed to create rule %s %s: %v", rule.Method, rule.Path, err)
-			return err
-		}
-		log.Printf("Created rule: %s %s", rule.Method, rule.Path)
+		panic(goerrorkit.NewSystemError(err).
+			WithData(map[string]interface{}{
+				"port": port,
+			}))
 	}
-
-	return nil
 }
 
 // setupRoutes sets up all routes
@@ -370,6 +180,11 @@ func setupRoutes(
 	authMiddleware *authkit.AuthMiddleware,
 	authzMiddleware *authkit.AuthorizationMiddleware,
 ) {
+	// Serve favicon
+	app.Get("/favicon.ico", func(c *fiber.Ctx) error {
+		return c.SendFile("favicon.png")
+	})
+
 	// Serve static HTML file
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendFile("index.html")
@@ -430,4 +245,41 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+// isPortInUse checks if a port is already in use
+func isPortInUse(port string) bool {
+	ln, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		return true
+	}
+	ln.Close()
+	return false
+}
+
+// getPortProcessInfo gets information about the process using the port
+func getPortProcessInfo(port string) string {
+	// Try to get process info using lsof command (works on macOS and Linux)
+	cmd := exec.Command("lsof", "-i", ":"+port)
+	output, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	if len(lines) < 2 {
+		return ""
+	}
+
+	// Skip header line and format the output
+	var info strings.Builder
+	info.WriteString("COMMAND    PID    USER    FD    TYPE    DEVICE    SIZE/OFF    NODE    NAME\n")
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) != "" {
+			info.WriteString(lines[i])
+			info.WriteString("\n")
+		}
+	}
+
+	return info.String()
 }

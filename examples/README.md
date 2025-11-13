@@ -56,6 +56,41 @@ go run .
 - `PUT /api/blogs/:id` - Cập nhật blog
 - `DELETE /api/blogs/:id` - Xóa blog
 
+## Reset Database
+
+Nếu bạn muốn xóa toàn bộ dữ liệu và chạy lại migrations từ đầu:
+
+### Cách 1: Sử dụng SQL (Khuyến nghị)
+
+Kết nối vào PostgreSQL và chạy lệnh sau để xóa tất cả bảng:
+
+```sql
+DROP TABLE IF EXISTS blogs CASCADE;
+DROP TABLE IF EXISTS user_roles CASCADE;
+DROP TABLE IF EXISTS rules CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS schema_migrations CASCADE;
+```
+
+Sau đó chạy lại ứng dụng, migrations sẽ tự động chạy:
+
+```bash
+cd examples
+go run .
+```
+
+### Cách 2: Sử dụng biến môi trường RESET_DB
+
+Ứng dụng có hỗ trợ tự động reset database khi set biến môi trường `RESET_DB=true`:
+
+```bash
+cd examples
+RESET_DB=true go run .
+```
+
+**⚠️ CẢNH BÁO**: Cả hai cách trên sẽ XÓA TẤT CẢ DỮ LIỆU trong database!
+
 ## Ghi chú
 
 - Migrations chạy tự động khi khởi động

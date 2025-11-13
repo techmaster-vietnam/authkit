@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/config"
 	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/repository"
@@ -82,7 +81,7 @@ func GetUserFromContext(c *fiber.Ctx) (*models.User, bool) {
 }
 
 // GetUserIDFromContext gets user ID from context
-func GetUserIDFromContext(c *fiber.Ctx) (uuid.UUID, bool) {
-	userID, ok := c.Locals("userID").(uuid.UUID)
+func GetUserIDFromContext(c *fiber.Ctx) (string, bool) {
+	userID, ok := c.Locals("userID").(string)
 	return userID, ok
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit"
 	"github.com/techmaster-vietnam/goerrorkit"
 	"gorm.io/gorm"
@@ -38,7 +37,7 @@ type UpdateBlogRequest struct {
 }
 
 // Create creates a new blog
-func (s *BlogService) Create(authorID uuid.UUID, req CreateBlogRequest) (*Blog, error) {
+func (s *BlogService) Create(authorID string, req CreateBlogRequest) (*Blog, error) {
 	if req.Title == "" {
 		return nil, goerrorkit.NewValidationError("Tiêu đề là bắt buộc", map[string]interface{}{
 			"field": "title",
@@ -65,7 +64,7 @@ func (s *BlogService) Create(authorID uuid.UUID, req CreateBlogRequest) (*Blog, 
 }
 
 // GetByID gets a blog by ID
-func (s *BlogService) GetByID(id uuid.UUID) (*Blog, error) {
+func (s *BlogService) GetByID(id string) (*Blog, error) {
 	blog, err := s.blogRepo.GetByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -79,7 +78,7 @@ func (s *BlogService) GetByID(id uuid.UUID) (*Blog, error) {
 }
 
 // Update updates a blog (with permission check)
-func (s *BlogService) Update(blogID uuid.UUID, userID uuid.UUID, userRoles []string, req UpdateBlogRequest) (*Blog, error) {
+func (s *BlogService) Update(blogID string, userID string, userRoles []string, req UpdateBlogRequest) (*Blog, error) {
 	blog, err := s.blogRepo.GetByID(blogID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -122,7 +121,7 @@ func (s *BlogService) Update(blogID uuid.UUID, userID uuid.UUID, userRoles []str
 }
 
 // Delete soft deletes a blog (with permission check)
-func (s *BlogService) Delete(blogID uuid.UUID, userID uuid.UUID, userRoles []string) error {
+func (s *BlogService) Delete(blogID string, userID string, userRoles []string) error {
 	blog, err := s.blogRepo.GetByID(blogID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -167,7 +166,7 @@ func (s *BlogService) List(offset, limit int) ([]Blog, int64, error) {
 }
 
 // ListByAuthor lists blogs by author ID
-func (s *BlogService) ListByAuthor(authorID uuid.UUID, offset, limit int) ([]Blog, int64, error) {
+func (s *BlogService) ListByAuthor(authorID string, offset, limit int) ([]Blog, int64, error) {
 	blogs, total, err := s.blogRepo.ListByAuthor(authorID, offset, limit)
 	if err != nil {
 		return nil, 0, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách blog của tác giả")

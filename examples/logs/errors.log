@@ -1,0 +1,813 @@
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T11:17:11+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T11:26:18+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T12:21:32+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T12:23:48+07:00"
+}
+{
+  "cause": "Cannot GET /favicon.ico",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /favicon.ico",
+  "timestamp": "2025-11-13T12:30:23+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T14:37:46+07:00"
+}
+{
+  "cause": "Cannot GET /favicon.ico",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /favicon.ico",
+  "timestamp": "2025-11-13T14:38:11+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T14:53:00+07:00"
+}
+{
+  "cause": "Cannot GET /favicon.ico",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /favicon.ico",
+  "timestamp": "2025-11-13T14:53:27+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T15:05:57+07:00"
+}
+{
+  "cause": "Cannot GET /favicon.ico",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /favicon.ico",
+  "timestamp": "2025-11-13T15:06:13+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T15:12:08+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T15:44:37+07:00"
+}
+{
+  "cause": "ERROR: column \"full_name\" of relation \"users\" does not exist (SQLSTATE 42703)",
+  "error_type": "SYSTEM",
+  "file": "auth_service.go:126",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Lỗi khi tạo tài khoản",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T15:45:14+07:00"
+}
+{
+  "cause": "ERROR: column \"full_name\" of relation \"users\" does not exist (SQLSTATE 42703)",
+  "error_type": "SYSTEM",
+  "file": "auth_service.go:126",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Lỗi khi tạo tài khoản",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T15:46:11+07:00"
+}
+{
+  "cause": "ERROR: column \"full_name\" of relation \"users\" does not exist (SQLSTATE 42703)",
+  "error_type": "SYSTEM",
+  "file": "auth_service.go:126",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Lỗi khi tạo tài khoản",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T15:46:24+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T15:56:53+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T15:57:07+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T15:58:13+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T15:58:54+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T16:01:39+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T16:30:18+07:00"
+}
+{
+  "cause": "ERROR: column \"c8aeu9qolloi\" does not exist (SQLSTATE 42703)",
+  "data": {
+    "user_id": "c8aEU9QoLLOI"
+  },
+  "error_type": "SYSTEM",
+  "file": "authorization_middleware.go:82",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Lỗi khi lấy roles của user",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-13T16:30:58+07:00"
+}
+{
+  "cause": "ERROR: column \"c8aeu9qolloi\" does not exist (SQLSTATE 42703)",
+  "data": {
+    "user_id": "c8aEU9QoLLOI"
+  },
+  "error_type": "SYSTEM",
+  "file": "authorization_middleware.go:82",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Lỗi khi lấy roles của user",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-13T16:30:59+07:00"
+}
+{
+  "cause": "ERROR: column \"c8aeu9qolloi\" does not exist (SQLSTATE 42703)",
+  "data": {
+    "user_id": "c8aEU9QoLLOI"
+  },
+  "error_type": "SYSTEM",
+  "file": "authorization_middleware.go:82",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Lỗi khi lấy roles của user",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-13T16:30:59+07:00"
+}
+{
+  "cause": "ERROR: column \"c8aeu9qolloi\" does not exist (SQLSTATE 42703)",
+  "data": {
+    "user_id": "c8aEU9QoLLOI"
+  },
+  "error_type": "SYSTEM",
+  "file": "authorization_middleware.go:82",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Lỗi khi lấy roles của user",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-13T16:31:00+07:00"
+}
+{
+  "cause": "ERROR: column \"c8aeu9qolloi\" does not exist (SQLSTATE 42703)",
+  "data": {
+    "user_id": "c8aEU9QoLLOI"
+  },
+  "error_type": "SYSTEM",
+  "file": "authorization_middleware.go:82",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Lỗi khi lấy roles của user",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-13T16:31:01+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T16:32:57+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T16:48:26+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:22:26+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:58",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:22:52+07:00"
+}
+{
+  "cause": "ERROR: trailing junk after numeric literal at or near \"4qyIQMCjGMGs\" (SQLSTATE 42601)",
+  "error_type": "SYSTEM",
+  "file": "auth_service.go:196",
+  "function": "service.(*AuthService).DeleteProfile",
+  "level": "error",
+  "message": "Lỗi khi xóa profile",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-13T17:23:18+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:151",
+  "function": "service.(*AuthService).ChangePassword",
+  "level": "error",
+  "message": "Mật khẩu cũ không đúng",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-13T17:23:20+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/users/1/roles",
+    "user_roles": {
+      "reader": true
+    }
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:168",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/users/1/roles",
+  "timestamp": "2025-11-13T17:23:26+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:23:40+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:23:48+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:30:09+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:33:14+07:00"
+}
+{
+  "cause": "Cannot GET /.well-known/appspecific/com.chrome.devtools.json",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /.well-known/appspecific/com.chrome.devtools.json",
+  "timestamp": "2025-11-13T17:33:31+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:36:41+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-13T17:36:59+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-13T17:37:01+07:00"
+}
+{
+  "data": {
+    "blog_id": "my"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-13T17:37:03+07:00"
+}
+{
+  "data": {
+    "blog_id": "1"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-13T17:37:04+07:00"
+}
+{
+  "data": {
+    "blog_id": "1"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-13T17:37:08+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "PUT /api/rules/1",
+  "timestamp": "2025-11-13T17:37:15+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "PUT /api/auth/profile",
+  "timestamp": "2025-11-13T17:37:23+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:38:18+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:39:00+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:39:01+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:39:02+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:39:03+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:39:03+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:39:06+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:39:12+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:39:14+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:39:20+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:39:22+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:41:13+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:45:01+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:46:16+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:46:23+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:47:07+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:50:55+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:51:08+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:51:13+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:51:23+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:51:44+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:52:16+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:53:57+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:54:31+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:54:32+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-13T17:56:24+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:56:39+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:102",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-13T17:56:42+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-13T17:57:42+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "PUT /api/auth/profile",
+  "timestamp": "2025-11-13T17:57:44+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:70",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-13T17:57:56+07:00"
+}
+{
+  "cause": "ERROR: column \"xptonodlt4ph\" does not exist (SQLSTATE 42703)",
+  "error_type": "SYSTEM",
+  "file": "auth_service.go:196",
+  "function": "service.(*AuthService).DeleteProfile",
+  "level": "error",
+  "message": "Lỗi khi xóa profile",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-13T17:58:16+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:151",
+  "function": "service.(*AuthService).ChangePassword",
+  "level": "error",
+  "message": "Mật khẩu cũ không đúng",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-13T17:58:39+07:00"
+}
+{
+  "data": {
+    "blog_id": "1"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:85",
+  "function": "main.(*BlogService).Update",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-13T17:58:46+07:00"
+}
+{
+  "data": {
+    "blog_id": "1"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-13T17:59:01+07:00"
+}
+{
+  "data": {
+    "blog_id": "1"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-13T17:59:02+07:00"
+}
+{
+  "data": {
+    "blog_id": "1"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-13T17:59:03+07:00"
+}
+{
+  "data": {
+    "blog_id": "1"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-13T17:59:04+07:00"
+}
+{
+  "data": {
+    "blog_id": "my"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-13T18:00:35+07:00"
+}
+{
+  "data": {
+    "blog_id": "my"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-13T18:01:08+07:00"
+}
+{
+  "data": {
+    "blog_id": "my"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-13T18:01:10+07:00"
+}
+{
+  "data": {
+    "blog_id": "my"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-13T18:01:11+07:00"
+}
+{
+  "data": {
+    "blog_id": "my"
+  },
+  "error_type": "BUSINESS",
+  "file": "blog_service.go:71",
+  "function": "main.(*BlogService).GetByID",
+  "level": "error",
+  "message": "Không tìm thấy blog",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-13T18:01:11+07:00"
+}

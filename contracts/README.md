@@ -46,7 +46,7 @@ type RuleInterface interface {
     GetID() uuid.UUID
     GetMethod() string
     GetPath() string
-    GetType() RuleType
+    GetType() AccessType
     GetRoles() []string
     GetPriority() int
 }

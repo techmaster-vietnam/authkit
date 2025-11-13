@@ -109,8 +109,7 @@ func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 
 	var req struct {
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
+		FullName string `json:"full_name"`
 	}
 
 	if err := c.BodyParser(&req); err != nil {
@@ -119,7 +118,7 @@ func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := h.authService.UpdateProfile(userID, req.FirstName, req.LastName)
+	user, err := h.authService.UpdateProfile(userID, req.FullName)
 	if err != nil {
 		return err
 	}

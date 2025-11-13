@@ -1,18 +1,13 @@
 package contracts
 
-import "github.com/google/uuid"
-
 // UserInterface định nghĩa interface cho User trong hệ thống authentication/authorization
 // Ứng dụng bên ngoài cần implement interface này với model User của họ
 type UserInterface interface {
 	// GetID trả về ID của user
-	GetID() uuid.UUID
+	GetID() string
 
 	// GetEmail trả về email của user
 	GetEmail() string
-
-	// GetUsername trả về username của user
-	GetUsername() string
 
 	// GetPassword trả về password đã hash của user
 	GetPassword() string

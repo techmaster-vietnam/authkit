@@ -51,7 +51,7 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 		// Refresh cache if needed
 		m.refreshCacheIfNeeded()
 
-		// Get all matching rules (sorted by priority)
+		// Get all matching rules
 		matchingRules := m.findMatchingRules(method, path)
 
 		// If no rule found, default to FORBIDE
@@ -64,7 +64,7 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 
 		// Check for PUBLIC rule first (allows anonymous)
 		for _, rule := range matchingRules {
-			if rule.Type == models.RuleTypePublic {
+			if rule.Type == models.AccessPublic {
 				return c.Next()
 			}
 		}
@@ -108,15 +108,13 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 			return c.Next()
 		}
 
-		// Process rules in priority order
-		// FORBIDE rules have higher priority than ALLOW rules
+		// Process rules: FORBIDE rules have higher priority than ALLOW rules
 		hasForbidMatch := false
 		hasAllowMatch := false
-		hasAuthMatch := false
 
 		for _, rule := range matchingRules {
 			switch rule.Type {
-			case models.RuleTypeForbid:
+			case models.AccessForbid:
 				// FORBIDE rules: check if user has forbidden roles
 				if len(rule.Roles) == 0 {
 					// Empty roles array means forbid everyone
@@ -131,10 +129,10 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 					}
 				}
 
-			case models.RuleTypeAllow:
+			case models.AccessAllow:
 				// ALLOW rules: check if user has allowed roles
+				// Empty roles array means any authenticated user can access
 				if len(rule.Roles) == 0 {
-					// Empty roles array means any authenticated user can access
 					hasAllowMatch = true
 				} else {
 					// Check if user has any of the allowed roles
@@ -145,36 +143,33 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 						}
 					}
 				}
-
-			case models.RuleTypeAuth:
-				// AUTHENTICATED: any authenticated user can access
-				hasAuthMatch = true
 			}
 		}
 
-		// Apply priority: FORBIDE > ALLOW > AUTHENTICATED
+		// Apply priority: FORBIDE > ALLOW
 		if hasForbidMatch {
 			return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
-				"method":    method,
-				"path":      path,
+				"method":     method,
+				"path":       path,
 				"user_roles": userRoleNames,
 			})
 		}
 
-		if hasAllowMatch || hasAuthMatch {
+		if hasAllowMatch {
 			return c.Next()
 		}
 
 		// Default deny if no rule matches user's roles
 		return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
-			"method":    method,
-			"path":      path,
+			"method":     method,
+			"path":       path,
 			"user_roles": userRoleNames,
 		})
 	}
 }
 
-// findMatchingRules finds all matching rules for method and path, sorted by priority
+// findMatchingRules finds all matching rules for method and path
+// Returns exact matches first, then pattern matches
 func (m *AuthorizationMiddleware) findMatchingRules(method, path string) []models.Rule {
 	m.cacheMutex.RLock()
 	defer m.cacheMutex.RUnlock()
@@ -200,7 +195,6 @@ func (m *AuthorizationMiddleware) findMatchingRules(method, path string) []model
 	}
 
 	// Combine: exact matches first, then pattern matches
-	// Rules are already sorted by priority from database query
 	allMatches := append(exactMatches, patternMatches...)
 
 	return allMatches
@@ -259,4 +253,3 @@ func (m *AuthorizationMiddleware) refreshCacheIfNeeded() {
 func (m *AuthorizationMiddleware) InvalidateCache() {
 	m.refreshCache()
 }
-

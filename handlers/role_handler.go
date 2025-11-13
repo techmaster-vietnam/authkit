@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/service"
 	"github.com/techmaster-vietnam/goerrorkit"
 )
@@ -41,14 +42,14 @@ func (h *RoleHandler) AddRole(c *fiber.Ctx) error {
 // RemoveRole handles remove role request
 // DELETE /api/roles/:id
 func (h *RoleHandler) RemoveRole(c *fiber.Ctx) error {
-	roleID, err := uuid.Parse(c.Params("id"))
+	roleID, err := strconv.ParseUint(c.Params("id"), 10, 32)
 	if err != nil {
 		return goerrorkit.NewValidationError("ID không hợp lệ", map[string]interface{}{
 			"id": c.Params("id"),
 		})
 	}
 
-	if err := h.roleService.RemoveRole(roleID); err != nil {
+	if err := h.roleService.RemoveRole(uint(roleID)); err != nil {
 		return err
 	}
 
@@ -75,21 +76,21 @@ func (h *RoleHandler) ListRoles(c *fiber.Ctx) error {
 // AddRoleToUser handles add role to user request
 // POST /api/users/:user_id/roles/:role_id
 func (h *RoleHandler) AddRoleToUser(c *fiber.Ctx) error {
-	userID, err := uuid.Parse(c.Params("user_id"))
-	if err != nil {
+	userID := c.Params("user_id")
+	if userID == "" {
 		return goerrorkit.NewValidationError("User ID không hợp lệ", map[string]interface{}{
 			"user_id": c.Params("user_id"),
 		})
 	}
 
-	roleID, err := uuid.Parse(c.Params("role_id"))
+	roleID, err := strconv.ParseUint(c.Params("role_id"), 10, 32)
 	if err != nil {
 		return goerrorkit.NewValidationError("Role ID không hợp lệ", map[string]interface{}{
 			"role_id": c.Params("role_id"),
 		})
 	}
 
-	if err := h.roleService.AddRoleToUser(userID, roleID); err != nil {
+	if err := h.roleService.AddRoleToUser(userID, uint(roleID)); err != nil {
 		return err
 	}
 
@@ -102,21 +103,21 @@ func (h *RoleHandler) AddRoleToUser(c *fiber.Ctx) error {
 // RemoveRoleFromUser handles remove role from user request
 // DELETE /api/users/:user_id/roles/:role_id
 func (h *RoleHandler) RemoveRoleFromUser(c *fiber.Ctx) error {
-	userID, err := uuid.Parse(c.Params("user_id"))
-	if err != nil {
+	userID := c.Params("user_id")
+	if userID == "" {
 		return goerrorkit.NewValidationError("User ID không hợp lệ", map[string]interface{}{
 			"user_id": c.Params("user_id"),
 		})
 	}
 
-	roleID, err := uuid.Parse(c.Params("role_id"))
+	roleID, err := strconv.ParseUint(c.Params("role_id"), 10, 32)
 	if err != nil {
 		return goerrorkit.NewValidationError("Role ID không hợp lệ", map[string]interface{}{
 			"role_id": c.Params("role_id"),
 		})
 	}
 
-	if err := h.roleService.RemoveRoleFromUser(userID, roleID); err != nil {
+	if err := h.roleService.RemoveRoleFromUser(userID, uint(roleID)); err != nil {
 		return err
 	}
 
@@ -129,8 +130,8 @@ func (h *RoleHandler) RemoveRoleFromUser(c *fiber.Ctx) error {
 // CheckUserHasRole handles check user has role request
 // GET /api/users/:user_id/roles/:role_name/check
 func (h *RoleHandler) CheckUserHasRole(c *fiber.Ctx) error {
-	userID, err := uuid.Parse(c.Params("user_id"))
-	if err != nil {
+	userID := c.Params("user_id")
+	if userID == "" {
 		return goerrorkit.NewValidationError("User ID không hợp lệ", map[string]interface{}{
 			"user_id": c.Params("user_id"),
 		})
@@ -159,8 +160,8 @@ func (h *RoleHandler) CheckUserHasRole(c *fiber.Ctx) error {
 // ListRolesOfUser handles list roles of user request
 // GET /api/users/:user_id/roles
 func (h *RoleHandler) ListRolesOfUser(c *fiber.Ctx) error {
-	userID, err := uuid.Parse(c.Params("user_id"))
-	if err != nil {
+	userID := c.Params("user_id")
+	if userID == "" {
 		return goerrorkit.NewValidationError("User ID không hợp lệ", map[string]interface{}{
 			"user_id": c.Params("user_id"),
 		})

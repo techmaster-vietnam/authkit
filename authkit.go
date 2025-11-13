@@ -2,7 +2,6 @@ package authkit
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/config"
 	"github.com/techmaster-vietnam/authkit/handlers"
 	"github.com/techmaster-vietnam/authkit/middleware"
@@ -23,13 +22,11 @@ type (
 	Rule = models.Rule
 )
 
-// RuleType constants
+// AccessType constants
 const (
-	RuleTypePublic        = models.RuleTypePublic
-	RuleTypeAllow         = models.RuleTypeAllow
-	RuleTypeForbid        = models.RuleTypeForbid
-	RuleTypeAuth          = models.RuleTypeAuth
-	RuleTypeAuthenticated = models.RuleTypeAuth
+	AccessPublic = models.AccessPublic
+	AccessAllow  = models.AccessAllow
+	AccessForbid = models.AccessForbid
 )
 
 // Repositories - Export repository types và constructors
@@ -111,7 +108,7 @@ func GetUserFromContext(c *fiber.Ctx) (*User, bool) {
 	return middleware.GetUserFromContext(c)
 }
 
-func GetUserIDFromContext(c *fiber.Ctx) (uuid.UUID, bool) {
+func GetUserIDFromContext(c *fiber.Ctx) (string, bool) {
 	return middleware.GetUserIDFromContext(c)
 }
 

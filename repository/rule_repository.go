@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/google/uuid"
 	"github.com/techmaster-vietnam/authkit/models"
 	"gorm.io/gorm"
 )
@@ -22,7 +21,7 @@ func (r *RuleRepository) Create(rule *models.Rule) error {
 }
 
 // GetByID gets a rule by ID
-func (r *RuleRepository) GetByID(id uuid.UUID) (*models.Rule, error) {
+func (r *RuleRepository) GetByID(id string) (*models.Rule, error) {
 	var rule models.Rule
 	err := r.db.Where("id = ?", id).First(&rule).Error
 	return &rule, err
@@ -40,22 +39,21 @@ func (r *RuleRepository) Update(rule *models.Rule) error {
 	return r.db.Save(rule).Error
 }
 
-// Delete deletes a rule
-func (r *RuleRepository) Delete(id uuid.UUID) error {
-	return r.db.Delete(&models.Rule{}, id).Error
+// Delete hard deletes a rule
+func (r *RuleRepository) Delete(id string) error {
+	return r.db.Unscoped().Delete(&models.Rule{}, id).Error
 }
 
-// List lists all rules ordered by priority
+// List lists all rules
 func (r *RuleRepository) List() ([]models.Rule, error) {
 	var rules []models.Rule
-	err := r.db.Order("priority DESC, created_at ASC").Find(&rules).Error
+	err := r.db.Find(&rules).Error
 	return rules, err
 }
 
 // GetAllRulesForCache gets all rules for caching (used by middleware)
 func (r *RuleRepository) GetAllRulesForCache() ([]models.Rule, error) {
 	var rules []models.Rule
-	err := r.db.Order("priority DESC, created_at ASC").Find(&rules).Error
+	err := r.db.Find(&rules).Error
 	return rules, err
 }
-
