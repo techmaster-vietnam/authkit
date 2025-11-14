@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -13,13 +14,14 @@ import (
 
 // AuthorizationMiddleware handles authorization based on rules
 type AuthorizationMiddleware struct {
-	ruleRepo    *repository.RuleRepository
-	roleRepo    *repository.RoleRepository
-	userRepo    *repository.UserRepository
-	rulesCache  []models.Rule
-	cacheMutex  sync.RWMutex
-	lastRefresh time.Time
-	cacheTTL    time.Duration
+	ruleRepo     *repository.RuleRepository
+	roleRepo     *repository.RoleRepository
+	userRepo     *repository.UserRepository
+	exactRulesMap map[string][]models.Rule // key = "METHOD|PATH" for O(1) lookup
+	patternRules []models.Rule              // Rules with wildcard patterns
+	cacheMutex   sync.RWMutex
+	lastRefresh  time.Time
+	cacheTTL     time.Duration
 }
 
 // NewAuthorizationMiddleware creates a new authorization middleware
@@ -29,11 +31,12 @@ func NewAuthorizationMiddleware(
 	userRepo *repository.UserRepository,
 ) *AuthorizationMiddleware {
 	mw := &AuthorizationMiddleware{
-		ruleRepo:   ruleRepo,
-		roleRepo:   roleRepo,
-		userRepo:   userRepo,
-		cacheTTL:   5 * time.Minute, // Cache rules for 5 minutes
-		rulesCache: []models.Rule{},
+		ruleRepo:     ruleRepo,
+		roleRepo:     roleRepo,
+		userRepo:     userRepo,
+		cacheTTL:     5 * time.Minute, // Cache rules for 5 minutes
+		exactRulesMap: make(map[string][]models.Rule),
+		patternRules:  []models.Rule{},
 	}
 
 	// Load initial rules
@@ -170,34 +173,29 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 
 // findMatchingRules finds all matching rules for method and path
 // Returns exact matches first, then pattern matches
+// Optimized with O(1) lookup for exact matches using map
 func (m *AuthorizationMiddleware) findMatchingRules(method, path string) []models.Rule {
 	m.cacheMutex.RLock()
 	defer m.cacheMutex.RUnlock()
 
-	var exactMatches []models.Rule
-	var patternMatches []models.Rule
+	// O(1) lookup for exact match
+	key := fmt.Sprintf("%s|%s", method, path)
+	exactMatches, hasExactMatch := m.exactRulesMap[key]
 
-	// Find exact matches first
-	for i := range m.rulesCache {
-		rule := m.rulesCache[i]
-		if rule.Method == method && rule.Path == path {
-			exactMatches = append(exactMatches, rule)
-		}
+	// If exact match found, return it immediately (no need to check patterns)
+	if hasExactMatch && len(exactMatches) > 0 {
+		return exactMatches
 	}
 
-	// Try pattern matching (simple wildcard support)
-	for i := range m.rulesCache {
-		rule := m.rulesCache[i]
-		// Skip if already found as exact match
-		if rule.Method == method && rule.Path != path && m.matchPath(rule.Path, path) {
+	// Only check pattern matching if no exact match found
+	var patternMatches []models.Rule
+	for _, rule := range m.patternRules {
+		if rule.Method == method && m.matchPath(rule.Path, path) {
 			patternMatches = append(patternMatches, rule)
 		}
 	}
 
-	// Combine: exact matches first, then pattern matches
-	allMatches := append(exactMatches, patternMatches...)
-
-	return allMatches
+	return patternMatches
 }
 
 // matchPath matches path pattern (supports * wildcard)
@@ -223,7 +221,7 @@ func (m *AuthorizationMiddleware) matchPath(pattern, path string) bool {
 	return true
 }
 
-// refreshCache refreshes the rules cache
+// refreshCache refreshes the rules cache and rebuilds the map structure
 func (m *AuthorizationMiddleware) refreshCache() {
 	rules, err := m.ruleRepo.GetAllRulesForCache()
 	if err != nil {
@@ -234,7 +232,24 @@ func (m *AuthorizationMiddleware) refreshCache() {
 	m.cacheMutex.Lock()
 	defer m.cacheMutex.Unlock()
 
-	m.rulesCache = rules
+	// Rebuild exact rules map and pattern rules list
+	exactRulesMap := make(map[string][]models.Rule)
+	patternRules := make([]models.Rule, 0)
+
+	for _, rule := range rules {
+		// Check if rule contains wildcard pattern
+		if strings.Contains(rule.Path, "*") {
+			patternRules = append(patternRules, rule)
+		} else {
+			// Build key for exact match: "METHOD|PATH"
+			key := fmt.Sprintf("%s|%s", rule.Method, rule.Path)
+			exactRulesMap[key] = append(exactRulesMap[key], rule)
+		}
+	}
+
+	// Update cache
+	m.exactRulesMap = exactRulesMap
+	m.patternRules = patternRules
 	m.lastRefresh = time.Now()
 }
 

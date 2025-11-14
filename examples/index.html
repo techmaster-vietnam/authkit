@@ -686,63 +686,46 @@
             loadActions();
         }
 
-        // Load and display actions
-        function loadActions() {
-            displayActions();
-        }
-
         // Display actions grouped by type
-        function displayActions() {
+        function loadActions() {
             const actionsList = document.getElementById('actionsList');
-            
-            // Group rules by type
             const publicRules = rules.filter(r => r.type === 'Public');
             const authRules = rules.filter(r => r.type === 'Auth');
             const allowRules = rules.filter(r => r.type === 'Allow');
             
-            let html = '';
+            let index = 0;
+            const sections = [
+                { rules: publicRules, title: '🌐 Công khai (Public)', desc: 'Tất cả mọi người đều có thể truy cập', color: '#28a745' },
+                { rules: authRules, title: '🔑 Yêu cầu đăng nhập (Auth)', desc: 'Chỉ cần đăng nhập, không cần role cụ thể', color: '#667eea' },
+                { rules: allowRules, title: '👥 Yêu cầu role cụ thể (Allow)', desc: 'Cần có role phù hợp để truy cập', color: '#ffc107' }
+            ];
             
-            // Public section
-            html += `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="color: #28a745; margin-bottom: 15px;">🌐 Công khai (Public)</h3>
-                    <p style="color: #6c757d; margin-bottom: 15px;">Tất cả mọi người đều có thể truy cập</p>
-                    <div style="display: grid; gap: 10px;">
-                        ${publicRules.map((rule, index) => createActionCard(rule, index)).join('')}
+            actionsList.innerHTML = sections.map(section => {
+                const sectionHtml = section.rules.map(rule => createActionCard(rule, index++)).join('');
+                return `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: ${section.color}; margin-bottom: 15px;">${section.title}</h3>
+                        <p style="color: #6c757d; margin-bottom: 15px;">${section.desc}</p>
+                        <div style="display: grid; gap: 10px;">${sectionHtml}</div>
                     </div>
-                </div>
-            `;
-            
-            // Auth section
-            html += `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">🔑 Yêu cầu đăng nhập (Auth)</h3>
-                    <p style="color: #6c757d; margin-bottom: 15px;">Chỉ cần đăng nhập, không cần role cụ thể</p>
-                    <div style="display: grid; gap: 10px;">
-                        ${authRules.map((rule, index) => createActionCard(rule, index + publicRules.length)).join('')}
-                    </div>
-                </div>
-            `;
-            
-            // Allow section
-            html += `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="color: #ffc107; margin-bottom: 15px;">👥 Yêu cầu role cụ thể (Allow)</h3>
-                    <p style="color: #6c757d; margin-bottom: 15px;">Cần có role phù hợp để truy cập</p>
-                    <div style="display: grid; gap: 10px;">
-                        ${allowRules.map((rule, index) => createActionCard(rule, index + publicRules.length + authRules.length)).join('')}
-                    </div>
-                </div>
-            `;
-            
-            actionsList.innerHTML = html;
+                `;
+            }).join('');
         }
 
         // Create action card
         function createActionCard(rule, index) {
-            const roleBadges = rule.roles.length > 0 
-                ? rule.roles.map(r => `<span class="badge badge-primary" style="margin-right: 5px;">${r}</span>`).join('')
-                : '<span style="color: #6c757d;">Tất cả</span>';
+            // Format access type và roles theo yêu cầu
+            let accessInfo = '';
+            if (rule.type === 'Public') {
+                accessInfo = '<strong style="color: #28a745;">PUBLIC</strong>';
+            } else if (rule.type === 'Forbid') {
+                const rolesStr = rule.roles.length > 0 ? ` (${rule.roles.join(', ')})` : '()';
+                accessInfo = `<strong style="color: #dc3545;">FORBIDE${rolesStr}</strong>`;
+            } else {
+                // Auth hoặc Allow
+                const rolesStr = rule.roles.length > 0 ? ` (${rule.roles.join(', ')})` : '()';
+                accessInfo = `<strong style="color: #667eea;">ALLOW${rolesStr}</strong>`;
+            }
             
             const methodColor = {
                 'GET': '#28a745',
@@ -761,7 +744,7 @@
                             </div>
                             <div style="color: #555; margin-bottom: 8px;">${rule.description}</div>
                             <div style="font-size: 0.9em; color: #6c757d;">
-                                <strong>Roles:</strong> ${roleBadges}
+                                ${accessInfo}
                             </div>
                         </div>
                         <button class="btn btn-primary btn-sm" onclick="testAction(${index})" id="test-btn-${index}">
@@ -773,46 +756,80 @@
             `;
         }
 
+        // Helper: Get request body for POST/PUT requests
+        function getRequestBody(path, method) {
+            if (path.includes('/auth/login')) {
+                return JSON.stringify({ email: 'test@example.com', password: 'test' });
+            }
+            if (path.includes('/auth/register')) {
+                return JSON.stringify({ email: 'test@example.com', password: 'test123', full_name: 'Test' });
+            }
+            if (path.includes('/auth/change-password')) {
+                return JSON.stringify({ old_password: 'old', new_password: 'new123' });
+            }
+            if (path.includes('/auth/profile') && method === 'PUT') {
+                return JSON.stringify({ full_name: 'Updated Name' });
+            }
+            if (path.includes('/blogs') && !path.includes('/blogs/my')) {
+                return JSON.stringify({ title: 'Test Blog', content: 'Test content for authorization check' });
+            }
+            if (path.includes('/roles') && method === 'POST') {
+                return JSON.stringify({ name: 'test_role' });
+            }
+            if (path.includes('/rules') && method === 'POST') {
+                return JSON.stringify({ method: 'GET', path: '/test', type: 'Public', roles: [] });
+            }
+            return null;
+        }
+
+        // Helper: Extract error message from response
+        async function getErrorMessage(response) {
+            try {
+                const text = await response.text();
+                if (!text) return '';
+                try {
+                    const data = JSON.parse(text);
+                    return data.message || data.error || text;
+                } catch {
+                    return text;
+                }
+            } catch {
+                return '';
+            }
+        }
+
+        // Helper: Display authorization result
+        function displayResult(resultDiv, statusCode, errorMessage) {
+            const statusInfo = errorMessage ? `${statusCode}: ${errorMessage}` : `Status code: ${statusCode}`;
+            
+            if (statusCode === 401) {
+                resultDiv.innerHTML = `<div class="alert alert-info" style="margin: 0; padding: 10px;">🔒 <strong>YÊU CẦU ĐĂNG NHẬP</strong><br>${statusInfo}</div>`;
+            } else if (statusCode === 403) {
+                resultDiv.innerHTML = `<div class="alert alert-error" style="margin: 0; padding: 10px;">❌ <strong>FORBIDDEN</strong><br>${statusInfo}</div>`;
+            } else {
+                const errorInfo = statusCode >= 400 && errorMessage ? `<br>${statusCode}: ${errorMessage}` : (statusCode >= 400 ? `<br>Status code: ${statusCode}` : '');
+                resultDiv.innerHTML = `<div class="alert alert-success" style="margin: 0; padding: 10px;">✅ <strong>ALLOWED</strong>${errorInfo}</div>`;
+            }
+        }
+
         // Test action authorization
         async function testAction(index) {
             const rule = rules[index];
             const resultDiv = document.getElementById(`result-${index}`);
             const testBtn = document.getElementById(`test-btn-${index}`);
             
-            // Show loading
             testBtn.disabled = true;
             testBtn.textContent = 'Đang kiểm tra...';
             resultDiv.innerHTML = '<div style="color: #667eea;">⏳ Đang kiểm tra quyền truy cập...</div>';
             
             try {
                 const headers = {};
+                if (token) headers['Authorization'] = 'Bearer ' + token;
                 
-                // Add authorization header if user is logged in
-                if (token) {
-                    headers['Authorization'] = 'Bearer ' + token;
-                }
-                
-                // Prepare request body for POST/PUT requests
-                let body = null;
-                if (rule.method === 'POST' || rule.method === 'PUT') {
-                    headers['Content-Type'] = 'application/json';
-                    
-                    if (rule.path.includes('/auth/login')) {
-                        body = JSON.stringify({ email: 'test@example.com', password: 'test' });
-                    } else if (rule.path.includes('/auth/register')) {
-                        body = JSON.stringify({ email: 'test@example.com', password: 'test123', full_name: 'Test' });
-                    } else if (rule.path.includes('/auth/change-password')) {
-                        body = JSON.stringify({ old_password: 'old', new_password: 'new123' });
-                    } else if (rule.path.includes('/blogs') && !rule.path.includes('/blogs/my')) {
-                        body = JSON.stringify({ title: 'Test Blog', content: 'Test content for authorization check' });
-                    } else if (rule.path.includes('/roles') && rule.method === 'POST') {
-                        body = JSON.stringify({ name: 'test_role' });
-                    } else if (rule.path.includes('/rules') && rule.method === 'POST') {
-                        body = JSON.stringify({ method: 'GET', path: '/test', type: 'Public', roles: [] });
-                    } else if (rule.path.includes('/auth/profile') && rule.method === 'PUT') {
-                        body = JSON.stringify({ full_name: 'Updated Name' });
-                    }
-                }
+                const body = (rule.method === 'POST' || rule.method === 'PUT') 
+                    ? getRequestBody(rule.path, rule.method) 
+                    : null;
+                if (body) headers['Content-Type'] = 'application/json';
                 
                 const response = await fetch(rule.path, {
                     method: rule.method,
@@ -820,95 +837,10 @@
                     body: body
                 });
                 
-                let data = {};
-                try {
-                    const text = await response.text();
-                    if (text) {
-                        data = JSON.parse(text);
-                    }
-                } catch (e) {
-                    // Response might not be JSON
-                    data = { message: response.statusText };
-                }
-
-                // Determine if access is allowed
-                const isAllowed = response.ok || response.status === 200 || response.status === 201;
-                const statusCode = response.status;
-                
-                // Check if this is a public auth endpoint (login/register)
-                const isPublicAuthEndpoint = rule.path.includes('/auth/login') || rule.path.includes('/auth/register');
-                
-                // Check if error is business/validation error (not authorization error)
-                const isBusinessError = data.error_type === 'BUSINESS' || 
-                                       (data.message && (
-                                           data.message.includes('đã tồn tại') ||
-                                           data.message.includes('Email') ||
-                                           data.message.includes('Mật khẩu') ||
-                                           data.message.includes('validation') ||
-                                           data.message.includes('invalid')
-                                       ));
-                
-                // For public auth endpoints, any 4xx error (except 403) is considered validation/business error
-                const isClientError = statusCode >= 400 && statusCode < 500;
-                const isPublicAuthClientError = isPublicAuthEndpoint && isClientError && statusCode !== 403;
-                
-                if (isAllowed) {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success" style="margin: 0; padding: 10px;">
-                            ✅ <strong>ALLOWED</strong> - Bạn có quyền truy cập (Status: ${statusCode})
-                        </div>
-                    `;
-                } else if (statusCode === 401) {
-                    // For public auth endpoints, 401 means wrong credentials, not authorization issue
-                    if (isPublicAuthEndpoint) {
-                        const errorMsg = data.message || 'sai thông tin đăng nhập (email/mật khẩu không đúng)';
-                        resultDiv.innerHTML = `
-                            <div class="alert alert-success" style="margin: 0; padding: 10px;">
-                                ✅ <strong>ALLOWED</strong> - Bạn có quyền truy cập endpoint này (Status: ${statusCode})
-                                <br><small style="color: #856404;">⚠️ Lưu ý: Lỗi này là do <strong>${errorMsg}</strong>, không phải do thiếu quyền truy cập. Endpoint này là public, anonymous user có thể gửi request.</small>
-                                ${data.error_type ? `<br><small><strong>Loại lỗi:</strong> ${data.error_type}</small>` : ''}
-                            </div>
-                        `;
-                    } else {
-                        resultDiv.innerHTML = `
-                            <div class="alert alert-info" style="margin: 0; padding: 10px;">
-                                🔒 <strong>YÊU CẦU ĐĂNG NHẬP</strong> - Vui lòng đăng nhập để truy cập (Status: ${statusCode})
-                            </div>
-                        `;
-                    }
-                } else if (statusCode === 403) {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-error" style="margin: 0; padding: 10px;">
-                            ❌ <strong>FORBIDDEN</strong> - Bạn không có quyền truy cập (Status: ${statusCode})
-                            ${data.message ? `<br><small>${data.message}</small>` : ''}
-                        </div>
-                    `;
-                } else if (isPublicAuthClientError || (isPublicAuthEndpoint && isBusinessError)) {
-                    // For public auth endpoints with client errors (400, 409, 422, etc.), show ALLOWED with detailed message
-                    const errorMsg = data.message || (statusCode === 409 ? 'dữ liệu đã tồn tại (conflict)' :
-                                       statusCode === 400 ? 'dữ liệu không hợp lệ' :
-                                       statusCode === 422 ? 'dữ liệu không thể xử lý' :
-                                       'dữ liệu không hợp lệ hoặc vi phạm quy tắc nghiệp vụ');
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success" style="margin: 0; padding: 10px;">
-                            ✅ <strong>ALLOWED</strong> - Bạn có quyền truy cập endpoint này (Status: ${statusCode})
-                            <br><small style="color: #856404;">⚠️ Lưu ý: Lỗi này là do <strong>${errorMsg}</strong>, không phải do thiếu quyền truy cập. Endpoint này là public, anonymous user có thể gửi request.</small>
-                            ${data.error_type ? `<br><small><strong>Loại lỗi:</strong> ${data.error_type}</small>` : ''}
-                        </div>
-                    `;
-                } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-error" style="margin: 0; padding: 10px;">
-                            ❌ <strong>LỖI</strong> - ${data.message || 'Không thể truy cập'} (Status: ${statusCode})
-                        </div>
-                    `;
-                }
+                const errorMessage = await getErrorMessage(response);
+                displayResult(resultDiv, response.status, errorMessage);
             } catch (error) {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-error" style="margin: 0; padding: 10px;">
-                        ❌ <strong>LỖI KẾT NỐI</strong> - ${error.message}
-                    </div>
-                `;
+                resultDiv.innerHTML = `<div class="alert alert-error" style="margin: 0; padding: 10px;">❌ <strong>LỖI KẾT NỐI</strong> - ${error.message}</div>`;
             } finally {
                 testBtn.disabled = false;
                 testBtn.textContent = 'Kiểm tra';

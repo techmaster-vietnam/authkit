@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt" 
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -105,13 +105,11 @@ func main() {
 	userRepo := authkit.NewUserRepository(db)
 	roleRepo := authkit.NewRoleRepository(db)
 	ruleRepo := authkit.NewRuleRepository(db)
-	blogRepo := NewBlogRepository(db) // Application-specific repository
 
 	// 11. Initialize services
 	authService := authkit.NewAuthService(userRepo, cfg)
 	roleService := authkit.NewRoleService(roleRepo)
 	ruleService := authkit.NewRuleService(ruleRepo)
-	blogService := NewBlogService(blogRepo, userRepo, roleRepo) // Application-specific service
 
 	// 12. Initialize middleware
 	authMiddleware := authkit.NewAuthMiddleware(cfg, userRepo)
@@ -121,7 +119,7 @@ func main() {
 	authHandler := authkit.NewAuthHandler(authService)
 	roleHandler := authkit.NewRoleHandler(roleService)
 	ruleHandler := authkit.NewRuleHandler(ruleService, authzMiddleware)
-	blogHandler := NewBlogHandler(blogService, roleRepo) // Application-specific handler
+	blogHandler := NewBlogHandler() // Application-specific handler
 
 	// 14. Setup routes
 	setupRoutes(app, authHandler, roleHandler, ruleHandler, blogHandler, authMiddleware, authzMiddleware)
@@ -208,10 +206,10 @@ func setupRoutes(
 
 	// Blog routes
 	blogs := api.Group("/blogs")
-	blogs.Get("/", blogHandler.List)                                                                  // Public: list blogs
-	blogs.Get("/:id", blogHandler.GetByID, authMiddleware.RequireAuth(), authzMiddleware.Authorize()) // Protected: view detail
+	blogs.Get("/", blogHandler.List) // Public: list blogs
 
 	blogsProtected := blogs.Group("", authMiddleware.RequireAuth(), authzMiddleware.Authorize())
+	blogsProtected.Get("/:id", blogHandler.GetByID) // Protected: view detail
 	blogsProtected.Post("/", blogHandler.Create)
 	blogsProtected.Put("/:id", blogHandler.Update)
 	blogsProtected.Delete("/:id", blogHandler.Delete)
