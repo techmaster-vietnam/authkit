@@ -51,9 +51,18 @@ func (m *AuthMiddleware) RequireAuth() fiber.Handler {
 			})
 		}
 
-		// Store user in context
+		// Extract role IDs from validated JWT token
+		// Role IDs are safe because token signature has been verified
+		// If hacker modified role_ids, ValidateToken would have failed
+		roleIDs := claims.RoleIDs
+		if roleIDs == nil {
+			roleIDs = []uint{} // Ensure non-nil slice
+		}
+
+		// Store user and role IDs in context
 		c.Locals("user", user)
 		c.Locals("userID", user.ID)
+		c.Locals("roleIDs", roleIDs) // Store role IDs from validated token
 
 		return c.Next()
 	}
@@ -84,4 +93,15 @@ func GetUserFromContext(c *fiber.Ctx) (*models.User, bool) {
 func GetUserIDFromContext(c *fiber.Ctx) (string, bool) {
 	userID, ok := c.Locals("userID").(string)
 	return userID, ok
+}
+
+// GetRoleIDsFromContext gets role IDs from context (from validated JWT token)
+// Role IDs are safe because they come from a token that has been validated
+// This function does NOT query database - it only reads from memory (context)
+func GetRoleIDsFromContext(c *fiber.Ctx) ([]uint, bool) {
+	roleIDs, ok := c.Locals("roleIDs").([]uint)
+	if !ok {
+		return nil, false
+	}
+	return roleIDs, true
 }

@@ -34,6 +34,16 @@ func (r *RoleRepository) GetByName(name string) (*models.Role, error) {
 	return &role, err
 }
 
+// GetByIDs gets roles by IDs (used to get role names from role IDs in JWT token)
+func (r *RoleRepository) GetByIDs(ids []uint) ([]models.Role, error) {
+	if len(ids) == 0 {
+		return []models.Role{}, nil
+	}
+	var roles []models.Role
+	err := r.db.Where("id IN ?", ids).Find(&roles).Error
+	return roles, err
+}
+
 // Update updates a role
 func (r *RoleRepository) Update(role *models.Role) error {
 	return r.db.Save(role).Error

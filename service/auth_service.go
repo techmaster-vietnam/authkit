@@ -14,13 +14,15 @@ import (
 // AuthService handles authentication business logic
 type AuthService struct {
 	userRepo *repository.UserRepository
+	roleRepo *repository.RoleRepository
 	config   *config.Config
 }
 
 // NewAuthService creates a new auth service
-func NewAuthService(userRepo *repository.UserRepository, cfg *config.Config) *AuthService {
+func NewAuthService(userRepo *repository.UserRepository, roleRepo *repository.RoleRepository, cfg *config.Config) *AuthService {
 	return &AuthService{
 		userRepo: userRepo,
+		roleRepo: roleRepo,
 		config:   cfg,
 	}
 }
@@ -70,7 +72,18 @@ func (s *AuthService) Login(req LoginRequest) (*LoginResponse, error) {
 		return nil, goerrorkit.NewAuthError(401, "Email hoặc mật khẩu không đúng")
 	}
 
-	token, err := utils.GenerateToken(user.ID, user.Email, s.config.JWT.Secret, s.config.JWT.Expiration)
+	// Get user roles - already loaded via Preload("Roles") in GetByEmail()
+	// Roles will be protected by JWT signature - cannot be tampered
+	userRoles := user.Roles
+
+	// Extract role IDs
+	roleIDs := make([]uint, 0, len(userRoles))
+	for _, role := range userRoles {
+		roleIDs = append(roleIDs, role.ID)
+	}
+
+	// Generate token with role IDs - protected by HMAC-SHA256 signature
+	token, err := utils.GenerateToken(user.ID, user.Email, roleIDs, s.config.JWT.Secret, s.config.JWT.Expiration)
 	if err != nil {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi tạo token")
 	}

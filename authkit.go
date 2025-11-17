@@ -69,8 +69,8 @@ type (
 )
 
 // NewAuthService creates a new auth service
-func NewAuthService(userRepo *UserRepository, cfg *Config) *AuthService {
-	return service.NewAuthService(userRepo, cfg)
+func NewAuthService(userRepo *UserRepository, roleRepo *RoleRepository, cfg *Config) *AuthService {
+	return service.NewAuthService(userRepo, roleRepo, cfg)
 }
 
 // NewRoleService creates a new role service

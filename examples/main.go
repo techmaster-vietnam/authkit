@@ -107,7 +107,7 @@ func main() {
 	ruleRepo := authkit.NewRuleRepository(db)
 
 	// 11. Initialize services
-	authService := authkit.NewAuthService(userRepo, cfg)
+	authService := authkit.NewAuthService(userRepo, roleRepo, cfg)
 	roleService := authkit.NewRoleService(roleRepo)
 	ruleService := authkit.NewRuleService(ruleRepo)
 

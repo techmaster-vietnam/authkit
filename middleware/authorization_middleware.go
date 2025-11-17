@@ -14,14 +14,14 @@ import (
 
 // AuthorizationMiddleware handles authorization based on rules
 type AuthorizationMiddleware struct {
-	ruleRepo     *repository.RuleRepository
-	roleRepo     *repository.RoleRepository
-	userRepo     *repository.UserRepository
+	ruleRepo      *repository.RuleRepository
+	roleRepo      *repository.RoleRepository
+	userRepo      *repository.UserRepository
 	exactRulesMap map[string][]models.Rule // key = "METHOD|PATH" for O(1) lookup
-	patternRules []models.Rule              // Rules with wildcard patterns
-	cacheMutex   sync.RWMutex
-	lastRefresh  time.Time
-	cacheTTL     time.Duration
+	patternRules  []models.Rule            // Rules with wildcard patterns
+	cacheMutex    sync.RWMutex
+	lastRefresh   time.Time
+	cacheTTL      time.Duration
 }
 
 // NewAuthorizationMiddleware creates a new authorization middleware
@@ -31,10 +31,10 @@ func NewAuthorizationMiddleware(
 	userRepo *repository.UserRepository,
 ) *AuthorizationMiddleware {
 	mw := &AuthorizationMiddleware{
-		ruleRepo:     ruleRepo,
-		roleRepo:     roleRepo,
-		userRepo:     userRepo,
-		cacheTTL:     5 * time.Minute, // Cache rules for 5 minutes
+		ruleRepo:      ruleRepo,
+		roleRepo:      roleRepo,
+		userRepo:      userRepo,
+		cacheTTL:      5 * time.Minute, // Cache rules for 5 minutes
 		exactRulesMap: make(map[string][]models.Rule),
 		patternRules:  []models.Rule{},
 	}
@@ -79,17 +79,45 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 			return goerrorkit.NewAuthError(401, "Yêu cầu đăng nhập")
 		}
 
-		// Get user roles (with optional role context from header)
-		userRoles, err := m.roleRepo.ListRolesOfUser(user.ID)
-		if err != nil {
-			return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy roles của user").WithData(map[string]interface{}{
-				"user_id": user.ID,
-			})
+		// Get role IDs from context (from validated JWT token - no DB query needed)
+		// Role IDs are safe because they come from a token that has been validated
+		// If hacker modified role_ids, ValidateToken would have failed
+		roleIDs, ok := GetRoleIDsFromContext(c)
+		if !ok {
+			// Fallback: if roles not in context, query from DB (backward compatibility)
+			userRoles, err := m.roleRepo.ListRolesOfUser(user.ID)
+			if err != nil {
+				return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy roles của user").WithData(map[string]interface{}{
+					"user_id": user.ID,
+				})
+			}
+			roleIDs = make([]uint, 0, len(userRoles))
+			for _, role := range userRoles {
+				roleIDs = append(roleIDs, role.ID)
+			}
 		}
 
+		// Get role names from role IDs (needed for rule checking)
+		// This is a lightweight query - only fetch role names by IDs
 		userRoleNames := make(map[string]bool)
-		for _, role := range userRoles {
-			userRoleNames[role.Name] = true
+		if len(roleIDs) > 0 {
+			roles, err := m.roleRepo.GetByIDs(roleIDs)
+			if err == nil {
+				for _, role := range roles {
+					userRoleNames[role.Name] = true
+				}
+			} else {
+				// Fallback: query all roles of user if GetByIDs fails
+				userRoles, err := m.roleRepo.ListRolesOfUser(user.ID)
+				if err != nil {
+					return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy roles của user").WithData(map[string]interface{}{
+						"user_id": user.ID,
+					})
+				}
+				for _, role := range userRoles {
+					userRoleNames[role.Name] = true
+				}
+			}
 		}
 
 		// Check for optional X-Role-Context header
