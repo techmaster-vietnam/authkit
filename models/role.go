@@ -1,8 +1,6 @@
 package models
 
 // Role represents a role in the system
-// Đây là reference implementation của contracts.RoleInterface
-// Ứng dụng bên ngoài có thể sử dụng model này hoặc implement RoleInterface với model của riêng họ
 type Role struct {
 	ID     uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name   string `gorm:"uniqueIndex;not null" json:"name"`
@@ -16,8 +14,6 @@ type Role struct {
 func (Role) TableName() string {
 	return "roles"
 }
-
-// Implement contracts.RoleInterface
 
 // GetID trả về ID của role
 func (r *Role) GetID() uint {

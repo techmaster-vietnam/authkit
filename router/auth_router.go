@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/techmaster-vietnam/authkit/middleware"
+	"github.com/techmaster-vietnam/authkit/models"
 )
 
 // AuthRouter wrapper cho fiber.Router với fluent API để cấu hình routes và phân quyền
@@ -107,13 +108,13 @@ func (ar *AuthRouter) createRouteBuilder(method, path string, handler fiber.Hand
 	// Ví dụ: /api/blogs/:id -> /api/blogs/*
 	fullPathPattern := convertPathToPattern(fullPath)
 	
-	return &RouteBuilder{
+		return &RouteBuilder{
 		metadata: &RouteMetadata{
 			Method:      method,
 			Path:        path,            // Relative path (để register vào router)
 			FullPath:    fullPathPattern, // Full path pattern (để sync vào DB và match)
 			Handler:     handler,
-			AccessType:  "", // Sẽ được set bởi Public/Allow/Forbid
+			AccessType:  models.AccessType(""), // Sẽ được set bởi Public/Allow/Forbid
 			Roles:       []string{},
 			Fixed:       false,
 			Description: "",

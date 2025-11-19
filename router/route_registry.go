@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/techmaster-vietnam/authkit/contracts"
+	"github.com/techmaster-vietnam/authkit/models"
 )
 
 // RouteMetadata lưu thông tin route được khai báo trong code
@@ -15,7 +15,7 @@ type RouteMetadata struct {
 	Path        string // Relative path (để register vào router)
 	FullPath    string // Full path bao gồm prefix (để sync vào DB)
 	Handler     fiber.Handler
-	AccessType  contracts.AccessType
+	AccessType  models.AccessType
 	Roles       []string
 	Fixed       bool
 	Description string

@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/techmaster-vietnam/authkit/contracts"
+	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/middleware"
 )
 
@@ -17,21 +17,21 @@ type RouteBuilder struct {
 
 // Public đánh dấu route là public (không cần authentication)
 func (rb *RouteBuilder) Public() *RouteBuilder {
-	rb.metadata.AccessType = contracts.AccessPublic
+	rb.metadata.AccessType = models.AccessPublic
 	rb.metadata.Roles = []string{}
 	return rb
 }
 
 // Allow cho phép các roles cụ thể truy cập (roles rỗng = mọi user đã đăng nhập)
 func (rb *RouteBuilder) Allow(roles ...string) *RouteBuilder {
-	rb.metadata.AccessType = contracts.AccessAllow
+	rb.metadata.AccessType = models.AccessAllow
 	rb.metadata.Roles = roles
 	return rb
 }
 
 // Forbid cấm các roles cụ thể truy cập
 func (rb *RouteBuilder) Forbid(roles ...string) *RouteBuilder {
-	rb.metadata.AccessType = contracts.AccessForbid
+	rb.metadata.AccessType = models.AccessForbid
 	rb.metadata.Roles = roles
 	return rb
 }
@@ -54,7 +54,7 @@ func (rb *RouteBuilder) Register() {
 	rb.registry.Register(rb.metadata)
 
 	// Áp dụng middleware dựa trên AccessType
-	if rb.metadata.AccessType == contracts.AccessPublic {
+	if rb.metadata.AccessType == models.AccessPublic {
 		// Public route: không cần authentication và authorization
 		rb.router.Add(rb.metadata.Method, rb.metadata.Path, rb.metadata.Handler)
 	} else {

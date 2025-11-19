@@ -3,14 +3,11 @@ package models
 import (
 	"time"
 
-	"github.com/techmaster-vietnam/authkit/contracts"
 	"github.com/techmaster-vietnam/authkit/utils"
 	"gorm.io/gorm"
 )
 
 // User represents a user in the system
-// Đây là reference implementation của contracts.UserInterface
-// Ứng dụng bên ngoài có thể sử dụng model này hoặc implement UserInterface với model của riêng họ
 type User struct {
 	ID        string         `gorm:"type:varchar(12);primary_key" json:"id"`
 	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
@@ -41,8 +38,6 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 func (User) TableName() string {
 	return "users"
 }
-
-// Implement contracts.UserInterface
 
 // GetID trả về ID của user
 func (u *User) GetID() string {
@@ -75,10 +70,6 @@ func (u *User) SetActive(active bool) {
 }
 
 // GetRoles trả về danh sách roles của user
-func (u *User) GetRoles() []contracts.RoleInterface {
-	roles := make([]contracts.RoleInterface, len(u.Roles))
-	for i := range u.Roles {
-		roles[i] = &u.Roles[i]
-	}
-	return roles
+func (u *User) GetRoles() []Role {
+	return u.Roles
 }
