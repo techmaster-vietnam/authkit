@@ -10,9 +10,10 @@ import (
 )
 
 // SyncRoutesToDatabase đồng bộ routes từ code vào database
-// - Nếu Fixed=true: chỉ tạo mới nếu chưa tồn tại, không update
-// - Nếu Fixed=false: upsert (tạo mới hoặc update)
-// - Convert role names (string) từ routes → role IDs (uint) khi lưu vào DB
+//   - Nếu Fixed=true: chỉ tạo mới nếu chưa tồn tại, không update
+//   - Nếu Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
+//     (giữ nguyên Type và Roles từ database vì đó là mong muốn của người dùng)
+//   - Convert role names (string) từ routes → role IDs (uint) khi lưu vào DB
 func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepository, roleRepo *repository.RoleRepository) error {
 	routes := registry.GetAllRoutes()
 
@@ -40,7 +41,7 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 	// Convert role names to IDs for each route
 	for _, route := range routes {
 		ruleID := fmt.Sprintf("%s|%s", route.Method, route.FullPath)
-		
+
 		// Convert role names to role IDs
 		roleIDs := make([]uint, 0, len(route.Roles))
 		for _, roleName := range route.Roles {
@@ -52,7 +53,7 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 				// The role might be created later
 			}
 		}
-		
+
 		rule := &models.Rule{
 			ID:          ruleID,
 			Method:      route.Method,
@@ -87,11 +88,11 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 			}
 			// Rule đã tồn tại, bỏ qua (không update)
 		} else {
-			// Fixed=false: upsert (tạo mới hoặc update)
-			// Thử update trước, nếu không tồn tại thì create
+			// Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
+			// Giữ nguyên Type và Roles từ database vì đó là mong muốn của người dùng
 			_, err := ruleRepo.GetByID(ruleID)
 			if err == gorm.ErrRecordNotFound {
-				// Chưa tồn tại, tạo mới
+				// Rule chưa tồn tại, tạo mới
 				if createErr := ruleRepo.Create(rule); createErr != nil {
 					return goerrorkit.WrapWithMessage(createErr, fmt.Sprintf("Failed to create rule %s", ruleID)).
 						WithData(map[string]interface{}{
@@ -101,26 +102,17 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 						})
 				}
 			} else if err != nil {
+				// Lỗi khác khi query
 				return goerrorkit.WrapWithMessage(err, fmt.Sprintf("Failed to check rule %s", ruleID)).
 					WithData(map[string]interface{}{
 						"rule_id": ruleID,
 						"method":  route.Method,
 						"path":    route.Path,
 					})
-			} else {
-				// Đã tồn tại, update
-				if updateErr := ruleRepo.Update(rule); updateErr != nil {
-					return goerrorkit.WrapWithMessage(updateErr, fmt.Sprintf("Failed to update rule %s", ruleID)).
-						WithData(map[string]interface{}{
-							"rule_id": ruleID,
-							"method":  route.Method,
-							"path":    route.Path,
-						})
-				}
 			}
+			// Rule đã tồn tại, bỏ qua (không update) để giữ nguyên Type và Roles từ database
 		}
 	}
 
 	return nil
 }
-
