@@ -24,6 +24,6 @@ type RuleInterface interface {
 	// GetType trả về loại rule
 	GetType() AccessType
 
-	// GetRoles trả về danh sách roles được áp dụng cho rule này
-	GetRoles() []string
+	// GetRoles trả về danh sách role IDs được áp dụng cho rule này
+	GetRoles() []uint
 }

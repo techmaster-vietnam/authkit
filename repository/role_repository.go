@@ -128,3 +128,22 @@ func (r *RoleRepository) ListUsersHasRole(roleName string) ([]models.User, error
 		Find(&users).Error
 	return users, err
 }
+
+// GetIDsByNames gets role IDs by role names (optimized batch query)
+// Returns map of role name -> role ID for efficient lookup
+func (r *RoleRepository) GetIDsByNames(names []string) (map[string]uint, error) {
+	if len(names) == 0 {
+		return make(map[string]uint), nil
+	}
+	var roles []models.Role
+	err := r.db.Where("name IN ?", names).Find(&roles).Error
+	if err != nil {
+		return nil, err
+	}
+	
+	result := make(map[string]uint, len(roles))
+	for _, role := range roles {
+		result[role.Name] = role.ID
+	}
+	return result, nil
+}

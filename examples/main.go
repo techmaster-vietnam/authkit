@@ -110,7 +110,7 @@ func main() {
 	// 11. Initialize services
 	authService := authkit.NewAuthService(userRepo, roleRepo, cfg)
 	roleService := authkit.NewRoleService(roleRepo)
-	ruleService := authkit.NewRuleService(ruleRepo)
+	ruleService := authkit.NewRuleService(ruleRepo, roleRepo)
 
 	// 12. Initialize middleware
 	authMiddleware := authkit.NewAuthMiddleware(cfg, userRepo)
@@ -129,7 +129,7 @@ func main() {
 	setupRoutes(app, routeRegistry, authHandler, roleHandler, ruleHandler, blogHandler, authMiddleware, authzMiddleware)
 
 	// 16. Sync routes từ code vào database
-	if err := router.SyncRoutesToDatabase(routeRegistry, ruleRepo); err != nil {
+	if err := router.SyncRoutesToDatabase(routeRegistry, ruleRepo, roleRepo); err != nil {
 		panic(goerrorkit.WrapWithMessage(err, "Failed to sync routes to database").
 			WithData(map[string]interface{}{
 				"operation": "sync_routes",

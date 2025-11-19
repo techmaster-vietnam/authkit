@@ -20,7 +20,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) error {
 	// Initialize services
 	authService := service.NewAuthService(userRepo, roleRepo, cfg)
 	roleService := service.NewRoleService(roleRepo)
-	ruleService := service.NewRuleService(ruleRepo)
+	ruleService := service.NewRuleService(ruleRepo, roleRepo)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg, userRepo)

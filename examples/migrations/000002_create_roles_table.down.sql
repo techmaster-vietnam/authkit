@@ -1,3 +1,3 @@
 -- Drop roles table
-DROP TABLE IF EXISTS roles CASCADE;
+DROP TABLE IF EXISTS roles;
 

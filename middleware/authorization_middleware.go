@@ -14,14 +14,17 @@ import (
 
 // AuthorizationMiddleware handles authorization based on rules
 type AuthorizationMiddleware struct {
-	ruleRepo      *repository.RuleRepository
-	roleRepo      *repository.RoleRepository
-	userRepo      *repository.UserRepository
-	exactRulesMap map[string][]models.Rule // key = "METHOD|PATH" for O(1) lookup
-	patternRules  []models.Rule            // Rules with wildcard patterns
-	cacheMutex    sync.RWMutex
-	lastRefresh   time.Time
-	cacheTTL      time.Duration
+	ruleRepo           *repository.RuleRepository
+	roleRepo           *repository.RoleRepository
+	userRepo           *repository.UserRepository
+	exactRulesMap      map[string][]models.Rule // key = "METHOD|PATH" for O(1) lookup
+	patternRules       []models.Rule            // Rules with wildcard patterns
+	cacheMutex         sync.RWMutex
+	lastRefresh        time.Time
+	cacheTTL           time.Duration
+	superAdminID       *uint           // Cached super_admin role ID (nil if not loaded yet)
+	roleNameToIDMap    map[string]uint // Cached role name -> ID mapping for X-Role-Context
+	roleNameCacheMutex sync.RWMutex    // Mutex for role name cache
 }
 
 // NewAuthorizationMiddleware creates a new authorization middleware
@@ -31,16 +34,21 @@ func NewAuthorizationMiddleware(
 	userRepo *repository.UserRepository,
 ) *AuthorizationMiddleware {
 	mw := &AuthorizationMiddleware{
-		ruleRepo:      ruleRepo,
-		roleRepo:      roleRepo,
-		userRepo:      userRepo,
-		cacheTTL:      5 * time.Minute, // Cache rules for 5 minutes
-		exactRulesMap: make(map[string][]models.Rule),
-		patternRules:  []models.Rule{},
+		ruleRepo:           ruleRepo,
+		roleRepo:           roleRepo,
+		userRepo:           userRepo,
+		cacheTTL:           5 * time.Minute, // Cache rules for 5 minutes
+		exactRulesMap:      make(map[string][]models.Rule),
+		patternRules:       []models.Rule{},
+		superAdminID:       nil,
+		roleNameToIDMap:    make(map[string]uint),
+		roleNameCacheMutex: sync.RWMutex{},
 	}
 
 	// Load initial rules
 	mw.refreshCache()
+	// Load super_admin ID and common role names cache
+	mw.loadRoleNameCache()
 
 	return mw
 }
@@ -52,7 +60,7 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 		path := c.Path()
 
 		// Refresh cache if needed
-		m.refreshCacheIfNeeded()
+		// m.refreshCacheIfNeeded()
 
 		// Get all matching rules
 		matchingRules := m.findMatchingRules(method, path)
@@ -97,46 +105,36 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 			}
 		}
 
-		// Get role names from role IDs (needed for rule checking)
-		// This is a lightweight query - only fetch role names by IDs
-		userRoleNames := make(map[string]bool)
-		if len(roleIDs) > 0 {
-			roles, err := m.roleRepo.GetByIDs(roleIDs)
-			if err == nil {
-				for _, role := range roles {
-					userRoleNames[role.Name] = true
-				}
-			} else {
-				// Fallback: query all roles of user if GetByIDs fails
-				userRoles, err := m.roleRepo.ListRolesOfUser(user.ID)
-				if err != nil {
-					return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy roles của user").WithData(map[string]interface{}{
-						"user_id": user.ID,
-					})
-				}
-				for _, role := range userRoles {
-					userRoleNames[role.Name] = true
-				}
-			}
+		// Convert role IDs to map for O(1) lookup (no DB query needed!)
+		userRoleIDs := make(map[uint]bool, len(roleIDs))
+		for _, roleID := range roleIDs {
+			userRoleIDs[roleID] = true
+		}
+
+		// Check for super admin role (bypass all rules) - using cached ID
+		if m.getSuperAdminID() != nil && userRoleIDs[*m.getSuperAdminID()] {
+			return c.Next()
 		}
 
 		// Check for optional X-Role-Context header
-		// If provided, validate that user has this role
+		// If provided, validate that user has this role and filter to only that role
 		roleContext := c.Get("X-Role-Context")
 		if roleContext != "" {
-			if !userRoleNames[roleContext] {
+			roleContextID, err := m.getRoleIDByName(roleContext)
+			if err != nil {
 				return goerrorkit.NewAuthError(403, "Không có quyền sử dụng role context này").WithData(map[string]interface{}{
 					"requested_role": roleContext,
-					"user_roles":     userRoleNames,
+					"error":          "Role không tồn tại",
+				})
+			}
+			if !userRoleIDs[roleContextID] {
+				return goerrorkit.NewAuthError(403, "Không có quyền sử dụng role context này").WithData(map[string]interface{}{
+					"requested_role": roleContext,
+					"user_role_ids":  roleIDs,
 				})
 			}
 			// Filter to only use the specified role context
-			userRoleNames = map[string]bool{roleContext: true}
-		}
-
-		// Check for super admin role (bypass all rules)
-		if userRoleNames["super_admin"] {
-			return c.Next()
+			userRoleIDs = map[uint]bool{roleContextID: true}
 		}
 
 		// Process rules: FORBIDE rules have higher priority than ALLOW rules
@@ -151,9 +149,9 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 					// Empty roles array means forbid everyone
 					hasForbidMatch = true
 				} else {
-					// Check if user has any of the forbidden roles
-					for _, roleName := range rule.Roles {
-						if userRoleNames[roleName] {
+					// Check if user has any of the forbidden roles (compare IDs directly)
+					for _, roleID := range rule.Roles {
+						if userRoleIDs[roleID] {
 							hasForbidMatch = true
 							break
 						}
@@ -166,9 +164,9 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 				if len(rule.Roles) == 0 {
 					hasAllowMatch = true
 				} else {
-					// Check if user has any of the allowed roles
-					for _, roleName := range rule.Roles {
-						if userRoleNames[roleName] {
+					// Check if user has any of the allowed roles (compare IDs directly)
+					for _, roleID := range rule.Roles {
+						if userRoleIDs[roleID] {
 							hasAllowMatch = true
 							break
 						}
@@ -180,9 +178,9 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 		// Apply priority: FORBIDE > ALLOW
 		if hasForbidMatch {
 			return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
-				"method":     method,
-				"path":       path,
-				"user_roles": userRoleNames,
+				"method":        method,
+				"path":          path,
+				"user_role_ids": roleIDs,
 			})
 		}
 
@@ -192,9 +190,9 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 
 		// Default deny if no rule matches user's roles
 		return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
-			"method":     method,
-			"path":       path,
-			"user_roles": userRoleNames,
+			"method":        method,
+			"path":          path,
+			"user_role_ids": roleIDs,
 		})
 	}
 }
@@ -296,4 +294,60 @@ func (m *AuthorizationMiddleware) refreshCacheIfNeeded() {
 // InvalidateCache invalidates the cache (call this after rule changes)
 func (m *AuthorizationMiddleware) InvalidateCache() {
 	m.refreshCache()
+}
+
+// loadRoleNameCache loads super_admin ID and common role names into cache
+// This is called once at initialization to avoid repeated DB queries
+func (m *AuthorizationMiddleware) loadRoleNameCache() {
+	// Load super_admin ID
+	superAdmin, err := m.roleRepo.GetByName("super_admin")
+	if err == nil {
+		m.roleNameCacheMutex.Lock()
+		m.superAdminID = &superAdmin.ID
+		m.roleNameToIDMap["super_admin"] = superAdmin.ID
+		m.roleNameCacheMutex.Unlock()
+	}
+
+	// Pre-load common role names (optional optimization)
+	commonRoles := []string{"admin", "editor", "author", "reader"}
+	roleMap, err := m.roleRepo.GetIDsByNames(commonRoles)
+	if err == nil {
+		m.roleNameCacheMutex.Lock()
+		for name, id := range roleMap {
+			m.roleNameToIDMap[name] = id
+		}
+		m.roleNameCacheMutex.Unlock()
+	}
+}
+
+// getSuperAdminID returns cached super_admin role ID
+func (m *AuthorizationMiddleware) getSuperAdminID() *uint {
+	m.roleNameCacheMutex.RLock()
+	defer m.roleNameCacheMutex.RUnlock()
+	return m.superAdminID
+}
+
+// getRoleIDByName gets role ID by name with caching
+// First checks cache, if not found, queries DB and updates cache
+func (m *AuthorizationMiddleware) getRoleIDByName(roleName string) (uint, error) {
+	// Check cache first
+	m.roleNameCacheMutex.RLock()
+	if roleID, exists := m.roleNameToIDMap[roleName]; exists {
+		m.roleNameCacheMutex.RUnlock()
+		return roleID, nil
+	}
+	m.roleNameCacheMutex.RUnlock()
+
+	// Not in cache, query DB
+	role, err := m.roleRepo.GetByName(roleName)
+	if err != nil {
+		return 0, err
+	}
+
+	// Update cache
+	m.roleNameCacheMutex.Lock()
+	m.roleNameToIDMap[roleName] = role.ID
+	m.roleNameCacheMutex.Unlock()
+
+	return role.ID, nil
 }

@@ -79,8 +79,8 @@ func NewRoleService(roleRepo *RoleRepository) *RoleService {
 }
 
 // NewRuleService creates a new rule service
-func NewRuleService(ruleRepo *RuleRepository) *RuleService {
-	return service.NewRuleService(ruleRepo)
+func NewRuleService(ruleRepo *RuleRepository, roleRepo *RoleRepository) *RuleService {
+	return service.NewRuleService(ruleRepo, roleRepo)
 }
 
 // Middleware - Export middleware types và constructors

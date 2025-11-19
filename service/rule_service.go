@@ -13,11 +13,15 @@ import (
 // RuleService handles rule business logic
 type RuleService struct {
 	ruleRepo *repository.RuleRepository
+	roleRepo *repository.RoleRepository
 }
 
 // NewRuleService creates a new rule service
-func NewRuleService(ruleRepo *repository.RuleRepository) *RuleService {
-	return &RuleService{ruleRepo: ruleRepo}
+func NewRuleService(ruleRepo *repository.RuleRepository, roleRepo *repository.RoleRepository) *RuleService {
+	return &RuleService{
+		ruleRepo: ruleRepo,
+		roleRepo: roleRepo,
+	}
 }
 
 // AddRuleRequest represents add rule request
@@ -70,6 +74,24 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi kiểm tra rule")
 	}
 
+	// Convert role names to role IDs
+	roleIDs := make([]uint, 0)
+	if len(req.Roles) > 0 {
+		roleNameToIDMap, err := s.roleRepo.GetIDsByNames(req.Roles)
+		if err != nil {
+			return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi convert role names sang IDs").
+				WithData(map[string]interface{}{
+					"role_names": req.Roles,
+				})
+		}
+		// Convert map to slice, skip roles that don't exist
+		for _, roleName := range req.Roles {
+			if roleID, exists := roleNameToIDMap[roleName]; exists {
+				roleIDs = append(roleIDs, roleID)
+			}
+		}
+	}
+
 	// Generate ID from Method and Path
 	ruleID := fmt.Sprintf("%s|%s", req.Method, req.Path)
 	rule := &models.Rule{
@@ -77,7 +99,7 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 		Method: req.Method,
 		Path:   req.Path,
 		Type:   ruleType,
-		Roles:  req.Roles,
+		Roles:  models.FromUintSlice(roleIDs), // Store role IDs instead of names
 	}
 
 	if err := s.ruleRepo.Create(rule); err != nil {
@@ -113,7 +135,24 @@ func (s *RuleService) UpdateRule(ruleID string, req UpdateRuleRequest) (*models.
 	}
 
 	if req.Roles != nil {
-		rule.Roles = req.Roles
+		// Convert role names to role IDs
+		roleIDs := make([]uint, 0)
+		if len(req.Roles) > 0 {
+			roleNameToIDMap, err := s.roleRepo.GetIDsByNames(req.Roles)
+			if err != nil {
+				return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi convert role names sang IDs").
+					WithData(map[string]interface{}{
+						"role_names": req.Roles,
+					})
+			}
+			// Convert map to slice, skip roles that don't exist
+			for _, roleName := range req.Roles {
+				if roleID, exists := roleNameToIDMap[roleName]; exists {
+					roleIDs = append(roleIDs, roleID)
+				}
+			}
+		}
+		rule.Roles = models.FromUintSlice(roleIDs) // Store role IDs instead of names
 	}
 
 	if err := s.ruleRepo.Update(rule); err != nil {

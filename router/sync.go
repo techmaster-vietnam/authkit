@@ -12,18 +12,53 @@ import (
 // SyncRoutesToDatabase đồng bộ routes từ code vào database
 // - Nếu Fixed=true: chỉ tạo mới nếu chưa tồn tại, không update
 // - Nếu Fixed=false: upsert (tạo mới hoặc update)
-func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepository) error {
+// - Convert role names (string) từ routes → role IDs (uint) khi lưu vào DB
+func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepository, roleRepo *repository.RoleRepository) error {
 	routes := registry.GetAllRoutes()
 
+	// Collect all unique role names from all routes for batch conversion
+	roleNameSet := make(map[string]bool)
+	for _, route := range routes {
+		for _, roleName := range route.Roles {
+			roleNameSet[roleName] = true
+		}
+	}
+
+	// Convert all role names to IDs in one batch query (optimized)
+	roleNames := make([]string, 0, len(roleNameSet))
+	for roleName := range roleNameSet {
+		roleNames = append(roleNames, roleName)
+	}
+	roleNameToIDMap, err := roleRepo.GetIDsByNames(roleNames)
+	if err != nil {
+		return goerrorkit.WrapWithMessage(err, "Failed to convert role names to IDs").
+			WithData(map[string]interface{}{
+				"role_names": roleNames,
+			})
+	}
+
+	// Convert role names to IDs for each route
 	for _, route := range routes {
 		ruleID := fmt.Sprintf("%s|%s", route.Method, route.FullPath)
+		
+		// Convert role names to role IDs
+		roleIDs := make([]uint, 0, len(route.Roles))
+		for _, roleName := range route.Roles {
+			if roleID, exists := roleNameToIDMap[roleName]; exists {
+				roleIDs = append(roleIDs, roleID)
+			} else {
+				// Role name not found - log warning but continue
+				// This allows routes to be registered even if role doesn't exist yet
+				// The role might be created later
+			}
+		}
 		
 		rule := &models.Rule{
 			ID:          ruleID,
 			Method:      route.Method,
 			Path:        route.FullPath, // Sử dụng FullPath để sync vào DB
 			Type:        route.AccessType,
-			Roles:       route.Roles,
+			Roles:       models.FromUintSlice(roleIDs), // Store role IDs instead of names
 			Fixed:       route.Fixed,
 			Description: route.Description,
 		}
