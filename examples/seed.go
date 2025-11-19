@@ -34,25 +34,35 @@ func SeedData(db *gorm.DB) error {
 
 // initRoles initializes default roles using UPSERT
 func initRoles(db *gorm.DB) error {
-	roles := []string{"admin", "editor", "author", "reader"}
+	roles := []struct {
+		id   uint
+		name string
+	}{
+		{id: 1, name: "admin"},
+		{id: 2, name: "editor"},
+		{id: 3, name: "author"},
+		{id: 4, name: "reader"},
+	}
 
-	for _, roleName := range roles {
+	for _, roleData := range roles {
 		role := &authkit.Role{
-			Name: roleName,
+			ID:   roleData.id,
+			Name: roleData.name,
 		}
 
-		// FirstOrCreate: tìm theo Name, nếu không có thì tạo mới
-		result := db.Where("name = ?", roleName).FirstOrCreate(role)
+		// FirstOrCreate: tìm theo Name, nếu không có thì tạo mới với ID cụ thể
+		result := db.Where("name = ?", roleData.name).FirstOrCreate(role)
 		if result.Error != nil {
-			return goerrorkit.WrapWithMessage(result.Error, fmt.Sprintf("Failed to initialize role %s", roleName)).
+			return goerrorkit.WrapWithMessage(result.Error, fmt.Sprintf("Failed to initialize role %s", roleData.name)).
 				WithData(map[string]interface{}{
-					"role_name": roleName,
+					"role_id":   roleData.id,
+					"role_name": roleData.name,
 				})
 		}
 
 		// result.RowsAffected > 0 nghĩa là đã tạo mới
 		if result.RowsAffected > 0 {
-			fmt.Printf("Created role: %s\n", roleName)
+			fmt.Printf("Created role: %s (ID: %d)\n", roleData.name, roleData.id)
 		}
 	}
 

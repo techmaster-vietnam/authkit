@@ -2,7 +2,7 @@ package models
 
 // Role represents a role in the system
 type Role struct {
-	ID     uint   `gorm:"primaryKey;autoIncrement" json:"id"`
+	ID     uint   `gorm:"primaryKey" json:"id"`
 	Name   string `gorm:"uniqueIndex;not null" json:"name"`
 	System bool   `gorm:"column:is_system;default:false" json:"is_system"` // System roles cannot be deleted
 

@@ -21,21 +21,38 @@ func NewRoleService(roleRepo *repository.RoleRepository) *RoleService {
 
 // AddRoleRequest represents add role request
 type AddRoleRequest struct {
+	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
 // AddRole creates a new role
 func (s *RoleService) AddRole(req AddRoleRequest) (*models.Role, error) {
+	if req.ID == 0 {
+		return nil, goerrorkit.NewValidationError("ID role là bắt buộc", map[string]interface{}{
+			"field": "id",
+		})
+	}
 	if req.Name == "" {
 		return nil, goerrorkit.NewValidationError("Tên role là bắt buộc", map[string]interface{}{
 			"field": "name",
 		})
 	}
 
-	// Check if role already exists
-	_, err := s.roleRepo.GetByName(req.Name)
+	// Check if role ID already exists
+	_, err := s.roleRepo.GetByID(req.ID)
 	if err == nil {
-		return nil, goerrorkit.NewBusinessError(409, "Role đã tồn tại").WithData(map[string]interface{}{
+		return nil, goerrorkit.NewBusinessError(409, "Role với ID này đã tồn tại").WithData(map[string]interface{}{
+			"id": req.ID,
+		})
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi kiểm tra role")
+	}
+
+	// Check if role name already exists
+	_, err = s.roleRepo.GetByName(req.Name)
+	if err == nil {
+		return nil, goerrorkit.NewBusinessError(409, "Role với tên này đã tồn tại").WithData(map[string]interface{}{
 			"name": req.Name,
 		})
 	}
@@ -44,6 +61,7 @@ func (s *RoleService) AddRole(req AddRoleRequest) (*models.Role, error) {
 	}
 
 	role := &models.Role{
+		ID:     req.ID,
 		Name:   req.Name,
 		System: false,
 	}
