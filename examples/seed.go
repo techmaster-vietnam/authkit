@@ -9,7 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// SeedData seeds initial data (roles and rules) into the database
+// SeedData seeds initial data (roles and users) into the database
+// Note: Rules sẽ được sync tự động từ routes trong main.go
 func SeedData(db *gorm.DB) error {
 	// Initialize roles
 	if err := initRoles(db); err != nil {
@@ -19,15 +20,8 @@ func SeedData(db *gorm.DB) error {
 			})
 	}
 
-	// Initialize rules
-	if err := initRules(db); err != nil {
-		return goerrorkit.WrapWithMessage(err, "Failed to initialize rules").
-			WithData(map[string]interface{}{
-				"operation": "init_rules",
-			})
-	}
-
 	// Initialize users
+	// Note: Rules sẽ được sync tự động từ routes trong main.go
 	if err := initUsers(db); err != nil {
 		return goerrorkit.WrapWithMessage(err, "Failed to initialize users").
 			WithData(map[string]interface{}{
@@ -59,187 +53,6 @@ func initRoles(db *gorm.DB) error {
 		// result.RowsAffected > 0 nghĩa là đã tạo mới
 		if result.RowsAffected > 0 {
 			fmt.Printf("Created role: %s\n", roleName)
-		}
-	}
-
-	return nil
-}
-
-// initRules initializes default rules for blog management using UPSERT
-func initRules(db *gorm.DB) error {
-	rules := []authkit.Rule{
-		// Public endpoints
-		{
-			Method: "POST",
-			Path:   "/api/auth/login",
-			Type:   authkit.AccessPublic,
-			Roles:  []string{},
-		},
-		{
-			Method: "POST",
-			Path:   "/api/auth/register",
-			Type:   authkit.AccessPublic,
-			Roles:  []string{},
-		},
-		{
-			Method: "GET",
-			Path:   "/api/blogs",
-			Type:   authkit.AccessPublic,
-			Roles:  []string{},
-		},
-		{
-			Method: "GET",
-			Path:   "/",
-			Type:   authkit.AccessPublic,
-			Roles:  []string{},
-		},
-
-		// Authenticated endpoints (AccessAllow with empty roles = any authenticated user)
-		{
-			Method: "GET",
-			Path:   "/api/auth/profile",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{},
-		},
-		{
-			Method: "PUT",
-			Path:   "/api/auth/profile",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{},
-		},
-		{
-			Method: "DELETE",
-			Path:   "/api/auth/profile",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{},
-		},
-		{
-			Method: "POST",
-			Path:   "/api/auth/change-password",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{},
-		},
-		{
-			Method: "GET",
-			Path:   "/api/blogs/my",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{},
-		},
-
-		// Reader can view blog details
-		{
-			Method: "GET",
-			Path:   "/api/blogs/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"reader", "author", "editor", "admin"},
-		},
-
-		// Author can create, edit, delete their own blogs
-		{
-			Method: "POST",
-			Path:   "/api/blogs",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"author", "editor", "admin"},
-		},
-		{
-			Method: "PUT",
-			Path:   "/api/blogs/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"author", "editor", "admin"},
-		},
-		{
-			Method: "DELETE",
-			Path:   "/api/blogs/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"author", "editor", "admin"},
-		},
-
-		// Admin endpoints
-		{
-			Method: "GET",
-			Path:   "/api/roles",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "POST",
-			Path:   "/api/roles",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "DELETE",
-			Path:   "/api/roles/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "GET",
-			Path:   "/api/rules",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "POST",
-			Path:   "/api/rules",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "PUT",
-			Path:   "/api/rules/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "DELETE",
-			Path:   "/api/rules/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "GET",
-			Path:   "/api/users",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "GET",
-			Path:   "/api/users/*/roles",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "POST",
-			Path:   "/api/users/*/roles/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-		{
-			Method: "DELETE",
-			Path:   "/api/users/*/roles/*",
-			Type:   authkit.AccessAllow,
-			Roles:  []string{"admin"},
-		},
-	}
-
-	// Create rules using UPSERT
-	for _, rule := range rules {
-		// FirstOrCreate: tìm theo Method và Path, nếu không có thì tạo mới
-		result := db.Where("method = ? AND path = ?", rule.Method, rule.Path).FirstOrCreate(&rule)
-		if result.Error != nil {
-			return goerrorkit.WrapWithMessage(result.Error, fmt.Sprintf("Failed to initialize rule %s %s", rule.Method, rule.Path)).
-				WithData(map[string]interface{}{
-					"method": rule.Method,
-					"path":   rule.Path,
-					"type":   rule.Type,
-					"roles":  rule.Roles,
-				})
-		}
-
-		// result.RowsAffected > 0 nghĩa là đã tạo mới
-		if result.RowsAffected > 0 {
-			fmt.Printf("Created rule: %s %s\n", rule.Method, rule.Path)
 		}
 	}
 

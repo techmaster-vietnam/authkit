@@ -2284,3 +2284,1129 @@
   "path": "DELETE /api/rules/1",
   "timestamp": "2025-11-17T15:00:15+07:00"
 }
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-18T18:34:43+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T18:35:03+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T18:35:05+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:72",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-18T18:35:14+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-18T18:35:17+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-18T18:35:18+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/users/1/roles/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/users/1/roles/1",
+  "timestamp": "2025-11-18T18:35:31+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-18T18:35:42+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/users/1/roles"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/users/1/roles",
+  "timestamp": "2025-11-18T18:35:43+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/users/1/roles/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/users/1/roles/1",
+  "timestamp": "2025-11-18T18:35:49+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/rules"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/rules",
+  "timestamp": "2025-11-18T18:36:36+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-18T18:36:38+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T18:36:50+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-18T18:36:53+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "POST /api/blogs",
+  "timestamp": "2025-11-18T18:36:57+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-18T18:36:58+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/blogs/1",
+  "timestamp": "2025-11-18T18:37:02+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-18T18:37:08+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:72",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-18T19:54:15+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:115",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-18T19:54:17+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T19:54:22+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "PUT /api/auth/profile",
+  "timestamp": "2025-11-18T19:54:25+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-18T19:54:26+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-18T19:54:28+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-18T19:54:30+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-18T19:54:32+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "POST /api/blogs",
+  "timestamp": "2025-11-18T19:54:34+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-18T19:54:35+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/blogs/1",
+  "timestamp": "2025-11-18T19:54:36+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-18T19:54:37+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-18T19:54:38+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/roles/1",
+  "timestamp": "2025-11-18T19:54:40+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:72",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-18T21:50:55+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:115",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-18T21:50:56+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T21:51:01+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:115",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-18T21:53:46+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T21:53:54+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "PUT /api/auth/profile",
+  "timestamp": "2025-11-18T21:53:57+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-18T21:53:59+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/auth/change-password"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-18T21:54:05+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/my"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-18T21:54:07+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-18T21:54:08+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/blogs"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/blogs",
+  "timestamp": "2025-11-18T21:54:10+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-18T21:54:19+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-18T21:54:26+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-18T21:58:03+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/blogs/1",
+  "timestamp": "2025-11-18T21:58:04+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-18T21:58:05+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-18T22:05:29+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:72",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-18T22:05:57+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:115",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-18T22:05:59+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T22:06:06+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "PUT /api/auth/profile",
+  "timestamp": "2025-11-18T22:06:08+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-18T22:06:10+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "DELETE /api/users/1/roles/1",
+  "timestamp": "2025-11-18T22:06:12+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T22:06:19+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "PUT /api/auth/profile",
+  "timestamp": "2025-11-18T22:06:20+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-18T22:06:23+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/auth/change-password"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-18T22:06:25+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/my"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/blogs/my",
+  "timestamp": "2025-11-18T22:06:27+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-18T22:06:28+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/blogs"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/blogs",
+  "timestamp": "2025-11-18T22:06:30+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-18T22:06:32+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-18T22:06:55+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T22:07:26+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/blogs/1",
+  "timestamp": "2025-11-18T22:07:39+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-18T22:07:41+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/users/1/roles/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/users/1/roles/1",
+  "timestamp": "2025-11-18T22:07:51+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/users/1/roles/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/users/1/roles/1",
+  "timestamp": "2025-11-18T22:07:52+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/users/1/roles"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/users/1/roles",
+  "timestamp": "2025-11-18T22:07:53+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-18T22:19:17+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/users/1/roles/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/users/1/roles/1",
+  "timestamp": "2025-11-18T22:19:28+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "DELETE /api/blogs/1",
+  "timestamp": "2025-11-18T22:19:33+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-18T22:32:32+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/blogs"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/blogs",
+  "timestamp": "2025-11-18T22:45:44+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T00:01:01+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-19T00:01:20+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-19T00:03:13+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T00:03:29+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T00:03:31+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T00:03:31+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T00:03:44+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T00:03:45+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T06:23:04+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-19T06:26:46+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/blogs"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "POST /api/blogs",
+  "timestamp": "2025-11-19T06:44:32+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/1"
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:62",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập endpoint này",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T06:44:47+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T07:08:01+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T07:16:37+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T07:20:42+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:22:12+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T07:22:46+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:24:55+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:24:56+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:24:57+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:24:57+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:24:58+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:25:42+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:25:42+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:25:43+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:25:43+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:25:44+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:25:45+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T07:27:03+07:00"
+}
+{
+  "cause": "record not found",
+  "error_type": "SYSTEM",
+  "file": "auth_middleware.go:45",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Người dùng không tồn tại",
+  "path": "GET /api/auth/profile",
+  "timestamp": "2025-11-19T07:28:07+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_middleware.go:33",
+  "function": "middleware.(*AuthMiddleware).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T07:28:12+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/users/1/roles/1",
+    "user_roles": {
+      "author": true,
+      "editor": true
+    }
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:194",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "DELETE /api/users/1/roles/1",
+  "timestamp": "2025-11-19T07:44:08+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/users/1/roles/1",
+    "user_roles": {
+      "author": true,
+      "editor": true
+    }
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:194",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "POST /api/users/1/roles/1",
+  "timestamp": "2025-11-19T07:44:24+07:00"
+}

@@ -22,11 +22,13 @@ const (
 // Ứng dụng bên ngoài có thể sử dụng model này hoặc implement RuleInterface với model của riêng họ
 // ID format: "METHOD|PATH" (ví dụ: "GET|/api/users")
 type Rule struct {
-	ID     string     `gorm:"primaryKey" json:"id"`                               // Format: "METHOD|PATH"
-	Method string     `gorm:"not null;uniqueIndex:idx_method_path" json:"method"` // GET, POST, PUT, DELETE, etc.
-	Path   string     `gorm:"not null;uniqueIndex:idx_method_path" json:"path"`   // URL path pattern
-	Type   AccessType `gorm:"type:varchar(20);not null" json:"type"`              // PUBLIC, ALLOW, FORBIDE
-	Roles  []string   `gorm:"type:text;serializer:json" json:"roles"`             // Stored as JSON in database
+	ID          string     `gorm:"primaryKey" json:"id"`                               // Format: "METHOD|PATH"
+	Method      string     `gorm:"not null;uniqueIndex:idx_method_path" json:"method"` // GET, POST, PUT, DELETE, etc.
+	Path        string     `gorm:"not null;uniqueIndex:idx_method_path" json:"path"`   // URL path pattern
+	Type        AccessType `gorm:"type:varchar(20);not null" json:"type"`              // PUBLIC, ALLOW, FORBIDE
+	Roles       []string   `gorm:"type:text;serializer:json" json:"roles"`             // Stored as JSON in database
+	Fixed       bool       `gorm:"default:false" json:"fixed"`                         // Fixed=true: rule từ code, không thể sửa từ DB
+	Description string     `gorm:"type:text" json:"description"`                      // Mô tả rule
 }
 
 // BeforeCreate hook to generate ID from Method and Path

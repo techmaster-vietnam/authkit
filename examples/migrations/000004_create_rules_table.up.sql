@@ -5,7 +5,10 @@ CREATE TABLE IF NOT EXISTS rules (
     path VARCHAR(500) NOT NULL,
     type VARCHAR(20) NOT NULL,
     roles TEXT, -- JSON array stored as text
+    fixed BOOLEAN DEFAULT FALSE,
+    description TEXT,
     UNIQUE(method, path)
 );
 
 CREATE INDEX IF NOT EXISTS idx_method_path ON rules(method, path);
+

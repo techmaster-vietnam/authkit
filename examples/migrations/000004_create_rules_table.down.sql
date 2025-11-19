@@ -1,2 +1,3 @@
 -- Drop rules table
-DROP TABLE IF EXISTS rules;
+DROP TABLE IF EXISTS rules CASCADE;
+

@@ -266,6 +266,7 @@ func (m *AuthorizationMiddleware) refreshCache() {
 
 	for _, rule := range rules {
 		// Check if rule contains wildcard pattern
+		// Rules với path parameters đã được convert thành * khi sync vào DB từ auth_router.go
 		if strings.Contains(rule.Path, "*") {
 			patternRules = append(patternRules, rule)
 		} else {

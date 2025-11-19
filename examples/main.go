@@ -13,6 +13,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/joho/godotenv"
 	"github.com/techmaster-vietnam/authkit"
+	"github.com/techmaster-vietnam/authkit/router"
 	"github.com/techmaster-vietnam/goerrorkit"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -78,7 +79,7 @@ func main() {
 			}))
 	}
 
-	// 7. Seed initial data (roles and rules)
+	// 7. Seed initial data (roles and users only, rules sẽ được sync từ routes)
 	if err := SeedData(db); err != nil {
 		panic(goerrorkit.WrapWithMessage(err, "Failed to seed initial data").
 			WithData(map[string]interface{}{
@@ -121,10 +122,24 @@ func main() {
 	ruleHandler := authkit.NewRuleHandler(ruleService, authzMiddleware)
 	blogHandler := NewBlogHandler() // Application-specific handler
 
-	// 14. Setup routes
-	setupRoutes(app, authHandler, roleHandler, ruleHandler, blogHandler, authMiddleware, authzMiddleware)
+	// 14. Create route registry
+	routeRegistry := router.NewRouteRegistry()
 
-	// 15. Check if port is available before starting server
+	// 15. Setup routes với fluent API
+	setupRoutes(app, routeRegistry, authHandler, roleHandler, ruleHandler, blogHandler, authMiddleware, authzMiddleware)
+
+	// 16. Sync routes từ code vào database
+	if err := router.SyncRoutesToDatabase(routeRegistry, ruleRepo); err != nil {
+		panic(goerrorkit.WrapWithMessage(err, "Failed to sync routes to database").
+			WithData(map[string]interface{}{
+				"operation": "sync_routes",
+			}))
+	}
+
+	// 16.1. Refresh authorization middleware cache sau khi sync routes
+	authzMiddleware.InvalidateCache()
+
+	// 17. Check if port is available before starting server
 	port := cfg.Server.Port
 	if isPortInUse(port) {
 		processInfo := getPortProcessInfo(port)
@@ -142,7 +157,7 @@ func main() {
 			}))
 	}
 
-	// 16. Start server
+	// 18. Start server
 	fmt.Printf("Server starting on port %s\n", port)
 	if err := app.Listen(":" + port); err != nil {
 		// Check if error is related to port already in use
@@ -168,73 +183,161 @@ func main() {
 	}
 }
 
-// setupRoutes sets up all routes
+// setupRoutes sets up all routes với fluent API
 func setupRoutes(
 	app *fiber.App,
+	registry *router.RouteRegistry,
 	authHandler *authkit.AuthHandler,
 	roleHandler *authkit.RoleHandler,
 	ruleHandler *authkit.RuleHandler,
-	blogHandler *BlogHandler, // Application-specific handler
+	blogHandler *BlogHandler,
 	authMiddleware *authkit.AuthMiddleware,
 	authzMiddleware *authkit.AuthorizationMiddleware,
 ) {
-	// Serve favicon
+	// Serve favicon (public, không cần đăng ký vào registry)
 	app.Get("/favicon.ico", func(c *fiber.Ctx) error {
 		return c.SendFile("favicon.png")
 	})
 
-	// Serve static HTML file
+	// Serve static HTML file (public)
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendFile("index.html")
 	})
 
-	// API routes
-	api := app.Group("/api")
+	// Tạo AuthRouter cho API routes
+	// Sử dụng Group() để tự động tính prefix, không cần truyền prefix thủ công
+	apiRouter := router.NewAuthRouter(app, registry, authMiddleware, authzMiddleware).Group("/api")
 
 	// Auth routes (public)
-	auth := api.Group("/auth")
-	auth.Post("/login", authHandler.Login)
-	auth.Post("/register", authHandler.Register)
-	auth.Post("/logout", authHandler.Logout)
+	auth := apiRouter.Group("/auth")
+	auth.Post("/login", authHandler.Login).
+		Public().
+		Description("Đăng nhập người dùng").
+		Register()
+	auth.Post("/register", authHandler.Register).
+		Public().
+		Description("Đăng ký người dùng mới").
+		Register()
+	auth.Post("/logout", authHandler.Logout).
+		Public().
+		Description("Đăng xuất người dùng").
+		Register()
 
 	// Protected auth routes
-	authProtected := auth.Group("", authMiddleware.RequireAuth(), authzMiddleware.Authorize())
-	authProtected.Get("/profile", authHandler.GetProfile)
-	authProtected.Put("/profile", authHandler.UpdateProfile)
-	authProtected.Delete("/profile", authHandler.DeleteProfile)
-	authProtected.Post("/change-password", authHandler.ChangePassword)
+	auth.Get("/profile", authHandler.GetProfile).
+		Allow().
+		Description("Lấy thông tin profile").
+		Register()
+	auth.Put("/profile", authHandler.UpdateProfile).
+		Allow().
+		Description("Cập nhật thông tin profile").
+		Register()
+	auth.Delete("/profile", authHandler.DeleteProfile).
+		Allow().
+		Description("Xóa tài khoản").
+		Register()
+	auth.Post("/change-password", authHandler.ChangePassword).
+		Allow().
+		Description("Đổi mật khẩu").
+		Register()
 
 	// Blog routes
-	blogs := api.Group("/blogs")
-	blogs.Get("/", blogHandler.List) // Public: list blogs
+	blogs := apiRouter.Group("/blogs")
+	blogs.Get("/", blogHandler.List).
+		Public().
+		Description("Danh sách blog công khai").
+		Register()
 
-	blogsProtected := blogs.Group("", authMiddleware.RequireAuth(), authzMiddleware.Authorize())
-	blogsProtected.Get("/:id", blogHandler.GetByID) // Protected: view detail
-	blogsProtected.Post("/", blogHandler.Create)
-	blogsProtected.Put("/:id", blogHandler.Update)
-	blogsProtected.Delete("/:id", blogHandler.Delete)
-	blogsProtected.Get("/my", blogHandler.ListMyBlogs)
+	blogs.Get("/:id", blogHandler.GetByID).
+		Allow("reader", "author", "editor", "admin").
+		Fixed().
+		Description("Xem chi tiết blog").
+		Register()
+	blogs.Post("/", blogHandler.Create).
+		Allow("author", "editor", "admin").
+		Description("Tạo blog mới").
+		Register()
+	blogs.Put("/:id", blogHandler.Update).
+		Allow("author", "editor", "admin").
+		Description("Cập nhật blog").
+		Register()
+	blogs.Delete("/:id", blogHandler.Delete).
+		Allow("author", "editor", "admin").
+		Description("Xóa blog").
+		Register()
+	blogs.Get("/my", blogHandler.ListMyBlogs).
+		Allow().
+		Description("Danh sách blog của tôi").
+		Register()
 
 	// Role routes (admin only)
-	roles := api.Group("/roles", authMiddleware.RequireAuth(), authzMiddleware.Authorize())
-	roles.Get("/", roleHandler.ListRoles)
-	roles.Post("/", roleHandler.AddRole)
-	roles.Delete("/:id", roleHandler.RemoveRole)
-	roles.Get("/:role_name/users", roleHandler.ListUsersHasRole)
+	roles := apiRouter.Group("/roles")
+	roles.Get("/", roleHandler.ListRoles).
+		Allow("admin").
+		Fixed().
+		Description("Danh sách roles").
+		Register()
+	roles.Post("/", roleHandler.AddRole).
+		Allow("admin").
+		Fixed().
+		Description("Tạo role mới").
+		Register()
+	roles.Delete("/:id", roleHandler.RemoveRole).
+		Allow("admin").
+		Fixed().
+		Description("Xóa role").
+		Register()
+	roles.Get("/:role_name/users", roleHandler.ListUsersHasRole).
+		Allow("admin").
+		Fixed().
+		Description("Danh sách users có role").
+		Register()
 
 	// User role routes (admin only)
-	users := api.Group("/users", authMiddleware.RequireAuth(), authzMiddleware.Authorize())
-	users.Get("/:user_id/roles", roleHandler.ListRolesOfUser)
-	users.Post("/:user_id/roles/:role_id", roleHandler.AddRoleToUser)
-	users.Delete("/:user_id/roles/:role_id", roleHandler.RemoveRoleFromUser)
-	users.Get("/:user_id/roles/:role_name/check", roleHandler.CheckUserHasRole)
+	users := apiRouter.Group("/users")
+	users.Get("/:user_id/roles", roleHandler.ListRolesOfUser).
+		Allow("admin").
+		Fixed().
+		Description("Danh sách roles của user").
+		Register()
+	users.Post("/:user_id/roles/:role_id", roleHandler.AddRoleToUser).
+		Allow("admin").
+		Fixed().
+		Description("Thêm role cho user").
+		Register()
+	users.Delete("/:user_id/roles/:role_id", roleHandler.RemoveRoleFromUser).
+		Allow("admin").
+		Fixed().
+		Description("Xóa role của user").
+		Register()
+	users.Get("/:user_id/roles/:role_name/check", roleHandler.CheckUserHasRole).
+		Allow("admin").
+		Fixed().
+		Description("Kiểm tra user có role").
+		Register()
 
 	// Rule routes (admin only)
-	rules := api.Group("/rules", authMiddleware.RequireAuth(), authzMiddleware.Authorize())
-	rules.Get("/", ruleHandler.ListRules)
-	rules.Post("/", ruleHandler.AddRule)
-	rules.Put("/:id", ruleHandler.UpdateRule)
-	rules.Delete("/:id", ruleHandler.RemoveRule)
+	rules := apiRouter.Group("/rules")
+	rules.Get("/", ruleHandler.ListRules).
+		Allow("admin").
+		Fixed().
+		Description("Danh sách rules").
+		Register()
+	rules.Post("/", ruleHandler.AddRule).
+		Allow("admin").
+		Fixed().
+		Description("Tạo rule mới").
+		Register()
+	rules.Put("/:id", ruleHandler.UpdateRule).
+		Allow("admin").
+		Fixed().
+		Description("Cập nhật rule").
+		Register()
+	rules.Delete("/:id", ruleHandler.RemoveRule).
+		Allow("admin").
+		Fixed().
+		Description("Xóa rule").
+		Register()
 }
 
 // getEnv gets environment variable or returns default value
