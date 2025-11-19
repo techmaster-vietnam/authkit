@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/joho/godotenv"
 	"github.com/techmaster-vietnam/authkit"
-	"github.com/techmaster-vietnam/authkit/router"
 	"github.com/techmaster-vietnam/goerrorkit"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -99,42 +98,37 @@ func main() {
 		AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
 	}))
 
-	// 10. Initialize repositories
-	userRepo := authkit.NewUserRepository(db)
-	roleRepo := authkit.NewRoleRepository(db)
-	ruleRepo := authkit.NewRuleRepository(db)
+	// 10. Khởi tạo AuthKit với Generic API - Sử dụng CustomUser với mobile và address
+	// CustomUser embed BaseUser nên vẫn tương thích hoàn toàn với AuthKit
+	// Lưu ý: Phải dùng pointer types cho generics
+	ak, err := authkit.New[*CustomUser, *authkit.BaseRole](app, db).
+		WithConfig(cfg).
+		WithUserModel(&CustomUser{}).
+		WithRoleModel(&authkit.BaseRole{}).
+		Initialize()
 
-	// 11. Initialize services
-	authService := authkit.NewAuthService(userRepo, roleRepo, cfg)
-	roleService := authkit.NewRoleService(roleRepo)
-	ruleService := authkit.NewRuleService(ruleRepo, roleRepo)
+	if err != nil {
+		panic(goerrorkit.WrapWithMessage(err, "Failed to initialize AuthKit").
+			WithData(map[string]interface{}{
+				"operation": "initialize_authkit",
+			}))
+	}
 
-	// 12. Initialize middleware
-	authMiddleware := authkit.NewAuthMiddleware(cfg, userRepo)
-	authzMiddleware := authkit.NewAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
-
-	// 13. Initialize handlers
-	authHandler := authkit.NewAuthHandler(authService)
-	roleHandler := authkit.NewRoleHandler(roleService)
-	ruleHandler := authkit.NewRuleHandler(ruleService, authzMiddleware)
 	blogHandler := NewBlogHandler() // Application-specific handler
 
-	// 14. Create route registry
-	routeRegistry := router.NewRouteRegistry()
+	// 11. Setup routes với fluent API
+	setupRoutes(app, ak, blogHandler)
 
-	// 15. Setup routes với fluent API
-	setupRoutes(app, routeRegistry, authHandler, roleHandler, ruleHandler, blogHandler, authMiddleware, authzMiddleware)
-
-	// 16. Sync routes từ code vào database
-	if err := router.SyncRoutesToDatabase(routeRegistry, ruleRepo, roleRepo); err != nil {
+	// 12. Sync routes từ code vào database
+	if err := ak.SyncRoutes(); err != nil {
 		panic(goerrorkit.WrapWithMessage(err, "Failed to sync routes to database").
 			WithData(map[string]interface{}{
 				"operation": "sync_routes",
 			}))
 	}
 
-	// 16.1. Refresh authorization middleware cache sau khi sync routes
-	authzMiddleware.InvalidateCache()
+	// 13. Refresh authorization middleware cache sau khi sync routes
+	ak.InvalidateCache()
 
 	// 17. Start server
 	if err := app.Listen(":" + cfg.Server.Port); err != nil {

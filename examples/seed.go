@@ -71,41 +71,53 @@ func initRoles(db *gorm.DB) error {
 
 // initUsers initializes default test users with roles using UPSERT
 func initUsers(db *gorm.DB) error {
-	// Define test users
+	// Define test users với custom fields mobile và address
 	testUsers := []struct {
 		email    string
 		password string
 		fullName string
+		mobile   string
+		address  string
 		roles    []string
 	}{
 		{
 			email:    "admin@gmail.com",
 			password: "123456",
 			fullName: "Admin User",
+			mobile:   "0901234567",
+			address:  "123 Admin Street, Ho Chi Minh City",
 			roles:    []string{"admin"},
 		},
 		{
 			email:    "editor@gmail.com",
 			password: "123456",
 			fullName: "Editor User",
+			mobile:   "0902345678",
+			address:  "456 Editor Avenue, Hanoi",
 			roles:    []string{"editor", "author"},
 		},
 		{
 			email:    "author1@gmail.com",
 			password: "123456",
 			fullName: "Author 1",
+			mobile:   "0903456789",
+			address:  "789 Author Road, Da Nang",
 			roles:    []string{"author"},
 		},
 		{
 			email:    "author2@gmail.com",
 			password: "123456",
 			fullName: "Author 2",
+			mobile:   "0904567890",
+			address:  "321 Writer Lane, Can Tho",
 			roles:    []string{"author"},
 		},
 		{
 			email:    "reader@gmail.com",
 			password: "123456",
 			fullName: "Reader User",
+			mobile:   "0905678901",
+			address:  "654 Reader Boulevard, Hai Phong",
 			roles:    []string{"reader"},
 		},
 	}
@@ -120,12 +132,16 @@ func initUsers(db *gorm.DB) error {
 				})
 		}
 
-		// Create or get user
-		user := &authkit.User{
-			Email:    userData.email,
-			Password: hashedPassword,
-			FullName: userData.fullName,
-			Active:   true,
+		// Create or get user với CustomUser (có mobile và address)
+		user := &CustomUser{
+			BaseUser: authkit.BaseUser{
+				Email:    userData.email,
+				Password: hashedPassword,
+				FullName: userData.fullName,
+				Active:   true,
+			},
+			Mobile:  userData.mobile,
+			Address: userData.address,
 		}
 
 		// FirstOrCreate: tìm theo Email, nếu không có thì tạo mới

@@ -7,15 +7,11 @@ import (
 )
 
 // setupRoutes sets up all routes với fluent API
+// Sử dụng AuthKit instance với generic types - CustomUser thay vì BaseUser
 func setupRoutes(
 	app *fiber.App,
-	registry *router.RouteRegistry,
-	authHandler *authkit.AuthHandler,
-	roleHandler *authkit.RoleHandler,
-	ruleHandler *authkit.RuleHandler,
+	ak *authkit.AuthKit[*CustomUser, *authkit.BaseRole],
 	blogHandler *BlogHandler,
-	authMiddleware *authkit.AuthMiddleware,
-	authzMiddleware *authkit.AuthorizationMiddleware,
 ) {
 	// Serve favicon (public, không cần đăng ký vào registry)
 	app.Get("/favicon.ico", func(c *fiber.Ctx) error {
@@ -29,37 +25,37 @@ func setupRoutes(
 
 	// Tạo AuthRouter cho API routes
 	// Sử dụng Group() để tự động tính prefix, không cần truyền prefix thủ công
-	apiRouter := router.NewAuthRouter(app, registry, authMiddleware, authzMiddleware).Group("/api")
+	apiRouter := router.NewAuthRouter(app, ak.RouteRegistry, ak.AuthMiddleware, ak.AuthorizationMiddleware).Group("/api")
 
 	// Auth routes (public)
 	auth := apiRouter.Group("/auth")
-	auth.Post("/login", authHandler.Login).
+	auth.Post("/login", ak.AuthHandler.Login).
 		Public().
 		Description("Đăng nhập người dùng").
 		Register()
-	auth.Post("/register", authHandler.Register).
+	auth.Post("/register", ak.AuthHandler.Register).
 		Public().
 		Description("Đăng ký người dùng mới").
 		Register()
-	auth.Post("/logout", authHandler.Logout).
+	auth.Post("/logout", ak.AuthHandler.Logout).
 		Public().
 		Description("Đăng xuất người dùng").
 		Register()
 
 	// Protected auth routes
-	auth.Get("/profile", authHandler.GetProfile).
+	auth.Get("/profile", ak.AuthHandler.GetProfile).
 		Allow().
 		Description("Lấy thông tin profile").
 		Register()
-	auth.Put("/profile", authHandler.UpdateProfile).
+	auth.Put("/profile", ak.AuthHandler.UpdateProfile).
 		Allow().
 		Description("Cập nhật thông tin profile").
 		Register()
-	auth.Delete("/profile", authHandler.DeleteProfile).
+	auth.Delete("/profile", ak.AuthHandler.DeleteProfile).
 		Allow().
 		Description("Xóa tài khoản").
 		Register()
-	auth.Post("/change-password", authHandler.ChangePassword).
+	auth.Post("/change-password", ak.AuthHandler.ChangePassword).
 		Allow().
 		Description("Đổi mật khẩu").
 		Register()
@@ -95,22 +91,22 @@ func setupRoutes(
 
 	// Role routes (admin only)
 	roles := apiRouter.Group("/roles")
-	roles.Get("/", roleHandler.ListRoles).
+	roles.Get("/", ak.RoleHandler.ListRoles).
 		Allow("admin").
 		Fixed().
 		Description("Danh sách roles").
 		Register()
-	roles.Post("/", roleHandler.AddRole).
+	roles.Post("/", ak.RoleHandler.AddRole).
 		Allow("admin").
 		Fixed().
 		Description("Tạo role mới").
 		Register()
-	roles.Delete("/:id", roleHandler.RemoveRole).
+	roles.Delete("/:id", ak.RoleHandler.RemoveRole).
 		Allow("admin").
 		Fixed().
 		Description("Xóa role").
 		Register()
-	roles.Get("/:role_name/users", roleHandler.ListUsersHasRole).
+	roles.Get("/:role_name/users", ak.RoleHandler.ListUsersHasRole).
 		Allow("admin").
 		Fixed().
 		Description("Danh sách users có role").
@@ -118,22 +114,22 @@ func setupRoutes(
 
 	// User role routes (admin only)
 	users := apiRouter.Group("/users")
-	users.Get("/:user_id/roles", roleHandler.ListRolesOfUser).
+	users.Get("/:user_id/roles", ak.RoleHandler.ListRolesOfUser).
 		Allow("admin").
 		Fixed().
 		Description("Danh sách roles của user").
 		Register()
-	users.Post("/:user_id/roles/:role_id", roleHandler.AddRoleToUser).
+	users.Post("/:user_id/roles/:role_id", ak.RoleHandler.AddRoleToUser).
 		Allow("admin").
 		Fixed().
 		Description("Thêm role cho user").
 		Register()
-	users.Delete("/:user_id/roles/:role_id", roleHandler.RemoveRoleFromUser).
+	users.Delete("/:user_id/roles/:role_id", ak.RoleHandler.RemoveRoleFromUser).
 		Allow("admin").
 		Fixed().
 		Description("Xóa role của user").
 		Register()
-	users.Get("/:user_id/roles/:role_name/check", roleHandler.CheckUserHasRole).
+	users.Get("/:user_id/roles/:role_name/check", ak.RoleHandler.CheckUserHasRole).
 		Allow("admin").
 		Fixed().
 		Description("Kiểm tra user có role").
@@ -141,25 +137,24 @@ func setupRoutes(
 
 	// Rule routes (admin only)
 	rules := apiRouter.Group("/rules")
-	rules.Get("/", ruleHandler.ListRules).
+	rules.Get("/", ak.RuleHandler.ListRules).
 		Allow("admin").
 		Fixed().
 		Description("Danh sách rules").
 		Register()
-	rules.Post("/", ruleHandler.AddRule).
+	rules.Post("/", ak.RuleHandler.AddRule).
 		Allow("admin").
 		Fixed().
 		Description("Tạo rule mới").
 		Register()
-	rules.Put("/:id", ruleHandler.UpdateRule).
+	rules.Put("/:id", ak.RuleHandler.UpdateRule).
 		Allow("admin").
 		Fixed().
 		Description("Cập nhật rule").
 		Register()
-	rules.Delete("/:id", ruleHandler.RemoveRule).
+	rules.Delete("/:id", ak.RuleHandler.RemoveRule).
 		Allow("admin").
 		Fixed().
 		Description("Xóa rule").
 		Register()
 }
-
