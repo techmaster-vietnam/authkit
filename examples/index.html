@@ -457,41 +457,45 @@
         let currentUser = null;
         let roleIdToNameMap = {}; // Map role ID -> role name
 
-        // Define rules from seed.go - Fallback nếu không load được từ API
+        // Define rules từ setupRoutes trong main.go - Fallback nếu không load được từ API
         let rules = [
             // Public endpoints
-            { method: 'POST', path: '/api/auth/login', type: 'Public', roles: [], description: 'Đăng nhập' },
-            { method: 'POST', path: '/api/auth/register', type: 'Public', roles: [], description: 'Đăng ký' },
-            { method: 'GET', path: '/api/blogs', type: 'Public', roles: [], description: 'Xem danh sách blog' },
             { method: 'GET', path: '/', type: 'Public', roles: [], description: 'Trang chủ' },
+            { method: 'POST', path: '/api/auth/login', type: 'Public', roles: [], description: 'Đăng nhập người dùng' },
+            { method: 'POST', path: '/api/auth/register', type: 'Public', roles: [], description: 'Đăng ký người dùng mới' },
+            { method: 'POST', path: '/api/auth/logout', type: 'Public', roles: [], description: 'Đăng xuất người dùng' },
+            { method: 'GET', path: '/api/blogs', type: 'Public', roles: [], description: 'Danh sách blog công khai' },
             
-            // Authenticated endpoints
-            { method: 'GET', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Xem thông tin cá nhân' },
-            { method: 'PUT', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Cập nhật thông tin cá nhân' },
+            // Authenticated endpoints (chỉ cần đăng nhập, không cần role cụ thể)
+            { method: 'GET', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Lấy thông tin profile' },
+            { method: 'PUT', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Cập nhật thông tin profile' },
             { method: 'DELETE', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Xóa tài khoản' },
             { method: 'POST', path: '/api/auth/change-password', type: 'Auth', roles: [], description: 'Đổi mật khẩu' },
-            { method: 'GET', path: '/api/blogs/my', type: 'Auth', roles: [], description: 'Xem blog của tôi' },
+            { method: 'GET', path: '/api/blogs/my', type: 'Auth', roles: [], description: 'Danh sách blog của tôi' },
             
-            // Reader can view blog details
+            // Blog endpoints - Yêu cầu role cụ thể
             { method: 'GET', path: '/api/blogs/1', type: 'Allow', roles: ['reader', 'author', 'editor', 'admin'], description: 'Xem chi tiết blog' },
-            
-            // Author can create, edit, delete blogs
             { method: 'POST', path: '/api/blogs', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Tạo blog mới' },
-            { method: 'PUT', path: '/api/blogs/1', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Sửa blog' },
+            { method: 'PUT', path: '/api/blogs/1', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Cập nhật blog' },
             { method: 'DELETE', path: '/api/blogs/1', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Xóa blog' },
             
-            // Admin endpoints
-            { method: 'GET', path: '/api/roles', type: 'Allow', roles: ['admin'], description: 'Xem danh sách roles' },
+            // Role endpoints (admin only)
+            { method: 'GET', path: '/api/roles', type: 'Allow', roles: ['admin'], description: 'Danh sách roles' },
             { method: 'POST', path: '/api/roles', type: 'Allow', roles: ['admin'], description: 'Tạo role mới' },
             { method: 'DELETE', path: '/api/roles/1', type: 'Allow', roles: ['admin'], description: 'Xóa role' },
-            { method: 'GET', path: '/api/rules', type: 'Allow', roles: ['admin'], description: 'Xem danh sách rules' },
-            { method: 'POST', path: '/api/rules', type: 'Allow', roles: ['admin'], description: 'Tạo rule mới' },
-            { method: 'PUT', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Sửa rule' },
-            { method: 'DELETE', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Xóa rule' },
-            { method: 'GET', path: '/api/users', type: 'Allow', roles: ['admin'], description: 'Xem danh sách users' },
-            { method: 'GET', path: '/api/users/1/roles', type: 'Allow', roles: ['admin'], description: 'Xem roles của user' },
-            { method: 'POST', path: '/api/users/1/roles/1', type: 'Allow', roles: ['admin'], description: 'Gán role cho user' },
+            { method: 'GET', path: '/api/roles/admin/users', type: 'Allow', roles: ['admin'], description: 'Danh sách users có role' },
+            
+            // User role endpoints (admin only)
+            { method: 'GET', path: '/api/users/1/roles', type: 'Allow', roles: ['admin'], description: 'Danh sách roles của user' },
+            { method: 'POST', path: '/api/users/1/roles/1', type: 'Allow', roles: ['admin'], description: 'Thêm role cho user' },
             { method: 'DELETE', path: '/api/users/1/roles/1', type: 'Allow', roles: ['admin'], description: 'Xóa role của user' },
+            { method: 'GET', path: '/api/users/1/roles/admin/check', type: 'Allow', roles: ['admin'], description: 'Kiểm tra user có role' },
+            
+            // Rule endpoints (admin only)
+            { method: 'GET', path: '/api/rules', type: 'Allow', roles: ['admin'], description: 'Danh sách rules' },
+            { method: 'POST', path: '/api/rules', type: 'Allow', roles: ['admin'], description: 'Tạo rule mới' },
+            { method: 'PUT', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Cập nhật rule' },
+            { method: 'DELETE', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Xóa rule' },
         ];
 
         // Đảm bảo actionsSection luôn hiển thị cho mọi user
@@ -770,19 +774,27 @@
             if (path.includes('/auth/register')) {
                 return JSON.stringify({ email: 'test@example.com', password: 'test123', full_name: 'Test' });
             }
+            if (path.includes('/auth/logout')) {
+                // Logout không cần body, nhưng có thể gửi empty object
+                return JSON.stringify({});
+            }
             if (path.includes('/auth/change-password')) {
                 return JSON.stringify({ old_password: 'old', new_password: 'new123' });
             }
             if (path.includes('/auth/profile') && method === 'PUT') {
                 return JSON.stringify({ full_name: 'Updated Name' });
             }
-            if (path.includes('/blogs') && !path.includes('/blogs/my')) {
+            if (path.includes('/blogs') && !path.includes('/blogs/my') && !path.match(/\/blogs\/\d+$/)) {
+                // POST /api/blogs cần body, nhưng GET /api/blogs/:id thì không
                 return JSON.stringify({ title: 'Test Blog', content: 'Test content for authorization check' });
             }
             if (path.includes('/roles') && method === 'POST') {
                 return JSON.stringify({ name: 'test_role' });
             }
             if (path.includes('/rules') && method === 'POST') {
+                return JSON.stringify({ method: 'GET', path: '/test', type: 'Public', roles: [] });
+            }
+            if (path.includes('/rules') && method === 'PUT') {
                 return JSON.stringify({ method: 'GET', path: '/test', type: 'Public', roles: [] });
             }
             return null;

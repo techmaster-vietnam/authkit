@@ -3869,3 +3869,653 @@
   "path": "DELETE /api/roles/1",
   "timestamp": "2025-11-19T16:34:05+07:00"
 }
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T18:13:23+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:192",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-19T18:13:33+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:192",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-19T18:13:34+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/blogs/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:192",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "DELETE /api/blogs/1",
+  "timestamp": "2025-11-19T18:14:17+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:192",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T18:16:03+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T18:26:37+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-19T18:26:56+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-19T18:26:57+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-19T18:26:59+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-19T18:27:00+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T18:27:09+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/blogs/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-19T18:27:13+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-19T18:27:24+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-19T18:27:24+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-19T18:29:58+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/roles",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-19T18:29:59+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-19T18:30:01+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/rules",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "POST /api/rules",
+  "timestamp": "2025-11-19T18:30:03+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/rules/1",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "PUT /api/rules/1",
+  "timestamp": "2025-11-19T18:30:04+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:05+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:09+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/users/1/roles",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/users/1/roles",
+  "timestamp": "2025-11-19T18:30:13+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/users/1/roles/1",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "POST /api/users/1/roles/1",
+  "timestamp": "2025-11-19T18:30:19+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/users/1/roles/1",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "DELETE /api/users/1/roles/1",
+  "timestamp": "2025-11-19T18:30:24+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:29+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:30+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:30+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:30+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:30+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:31+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:31+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:30:52+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:33:09+07:00"
+}
+{
+  "cause": "Cannot GET /api/users",
+  "error_type": "SYSTEM",
+  "level": "error",
+  "message": "Internal server error",
+  "path": "GET /api/users",
+  "timestamp": "2025-11-19T18:33:10+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-19T18:35:03+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-19T18:38:49+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-19T18:38:52+07:00"
+}
+{
+  "cause": "ERROR: column \"gtrxedh6vnwe\" does not exist (SQLSTATE 42703)",
+  "error_type": "SYSTEM",
+  "file": "auth_service.go:209",
+  "function": "service.(*AuthService).DeleteProfile",
+  "level": "error",
+  "message": "Lỗi khi xóa profile",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-19T18:39:09+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:164",
+  "function": "service.(*AuthService).ChangePassword",
+  "level": "error",
+  "message": "Mật khẩu cũ không đúng",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-19T18:39:12+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/rules/1",
+    "user_role_ids": [
+      3
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "DELETE /api/rules/1",
+  "timestamp": "2025-11-19T18:39:28+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-19T18:39:37+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/rules",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/rules",
+  "timestamp": "2025-11-19T18:39:37+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/rules/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "DELETE /api/rules/1",
+  "timestamp": "2025-11-19T18:39:40+07:00"
+}
+{
+  "data": {
+    "method": "DELETE",
+    "path": "/api/blogs/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "DELETE /api/blogs/1",
+  "timestamp": "2025-11-19T18:39:44+07:00"
+}
+{
+  "data": {
+    "method": "PUT",
+    "path": "/api/blogs/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "PUT /api/blogs/1",
+  "timestamp": "2025-11-19T18:39:46+07:00"
+}
+{
+  "data": {
+    "method": "POST",
+    "path": "/api/blogs",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "POST /api/blogs",
+  "timestamp": "2025-11-19T18:39:47+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/blogs/1",
+    "user_role_ids": [
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "authorization_middleware.go:184",
+  "function": "middleware.(*AuthorizationMiddleware).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/blogs/1",
+  "timestamp": "2025-11-19T18:39:49+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:164",
+  "function": "service.(*AuthService).ChangePassword",
+  "level": "error",
+  "message": "Mật khẩu cũ không đúng",
+  "path": "POST /api/auth/change-password",
+  "timestamp": "2025-11-19T18:39:57+07:00"
+}
+{
+  "cause": "ERROR: column \"i2knugifvjg6\" does not exist (SQLSTATE 42703)",
+  "error_type": "SYSTEM",
+  "file": "auth_service.go:209",
+  "function": "service.(*AuthService).DeleteProfile",
+  "level": "error",
+  "message": "Lỗi khi xóa profile",
+  "path": "DELETE /api/auth/profile",
+  "timestamp": "2025-11-19T18:39:59+07:00"
+}
+{
+  "data": {
+    "email": "test@example.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "auth_service.go:115",
+  "function": "service.(*AuthService).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-19T18:40:07+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "auth_service.go:72",
+  "function": "service.(*AuthService).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-19T18:40:09+07:00"
+}

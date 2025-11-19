@@ -14,17 +14,17 @@ import (
 
 // AuthorizationMiddleware handles authorization based on rules
 type AuthorizationMiddleware struct {
-	ruleRepo           *repository.RuleRepository
-	roleRepo           *repository.RoleRepository
-	userRepo           *repository.UserRepository
-	exactRulesMap      map[string][]models.Rule // key = "METHOD|PATH" for O(1) lookup
-	patternRules       []models.Rule            // Rules with wildcard patterns
-	cacheMutex         sync.RWMutex
-	lastRefresh        time.Time
-	cacheTTL           time.Duration
-	superAdminID       *uint           // Cached super_admin role ID (nil if not loaded yet)
-	roleNameToIDMap    map[string]uint // Cached role name -> ID mapping for X-Role-Context
-	roleNameCacheMutex sync.RWMutex    // Mutex for role name cache
+	ruleRepo                    *repository.RuleRepository
+	roleRepo                    *repository.RoleRepository
+	userRepo                    *repository.UserRepository
+	exactRulesMap               map[string][]models.Rule         // key = "METHOD|PATH" for O(1) lookup
+	patternRulesByMethodAndSegs map[string]map[int][]models.Rule // Optimized: key1=method, key2=segmentCount
+	cacheMutex                  sync.RWMutex
+	lastRefresh                 time.Time
+	cacheTTL                    time.Duration
+	superAdminID                *uint           // Cached super_admin role ID (nil if not loaded yet)
+	roleNameToIDMap             map[string]uint // Cached role name -> ID mapping for X-Role-Context
+	roleNameCacheMutex          sync.RWMutex    // Mutex for role name cache
 }
 
 // NewAuthorizationMiddleware creates a new authorization middleware
@@ -34,15 +34,15 @@ func NewAuthorizationMiddleware(
 	userRepo *repository.UserRepository,
 ) *AuthorizationMiddleware {
 	mw := &AuthorizationMiddleware{
-		ruleRepo:           ruleRepo,
-		roleRepo:           roleRepo,
-		userRepo:           userRepo,
-		cacheTTL:           5 * time.Minute, // Cache rules for 5 minutes
-		exactRulesMap:      make(map[string][]models.Rule),
-		patternRules:       []models.Rule{},
-		superAdminID:       nil,
-		roleNameToIDMap:    make(map[string]uint),
-		roleNameCacheMutex: sync.RWMutex{},
+		ruleRepo:                    ruleRepo,
+		roleRepo:                    roleRepo,
+		userRepo:                    userRepo,
+		cacheTTL:                    5 * time.Minute, // Cache rules for 5 minutes
+		exactRulesMap:               make(map[string][]models.Rule),
+		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
+		superAdminID:                nil,
+		roleNameToIDMap:             make(map[string]uint),
+		roleNameCacheMutex:          sync.RWMutex{},
 	}
 
 	// Load initial rules
@@ -73,7 +73,7 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 			})
 		}
 
-		// Check for PUBLIC rule first (allows anonymous)
+		// Check for PUBLIC rule first (allows anonymous) - early exit
 		for _, rule := range matchingRules {
 			if rule.Type == models.AccessPublic {
 				return c.Next()
@@ -138,54 +138,46 @@ func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
 		}
 
 		// Process rules: FORBIDE rules have higher priority than ALLOW rules
-		hasForbidMatch := false
-		hasAllowMatch := false
-
+		// Early exit optimization: check FORBIDE first, if found, reject immediately
 		for _, rule := range matchingRules {
-			switch rule.Type {
-			case models.AccessForbid:
+			if rule.Type == models.AccessForbid {
 				// FORBIDE rules: check if user has forbidden roles
 				if len(rule.Roles) == 0 {
-					// Empty roles array means forbid everyone
-					hasForbidMatch = true
-				} else {
-					// Check if user has any of the forbidden roles (compare IDs directly)
-					for _, roleID := range rule.Roles {
-						if userRoleIDs[roleID] {
-							hasForbidMatch = true
-							break
-						}
-					}
+					// Empty roles array means forbid everyone - reject immediately
+					return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
+						"method":        method,
+						"path":          path,
+						"user_role_ids": roleIDs,
+					})
 				}
-
-			case models.AccessAllow:
-				// ALLOW rules: check if user has allowed roles
-				// Empty roles array means any authenticated user can access
-				if len(rule.Roles) == 0 {
-					hasAllowMatch = true
-				} else {
-					// Check if user has any of the allowed roles (compare IDs directly)
-					for _, roleID := range rule.Roles {
-						if userRoleIDs[roleID] {
-							hasAllowMatch = true
-							break
-						}
+				// Check if user has any of the forbidden roles (compare IDs directly)
+				for _, roleID := range rule.Roles {
+					if userRoleIDs[roleID] {
+						return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
+							"method":        method,
+							"path":          path,
+							"user_role_ids": roleIDs,
+						})
 					}
 				}
 			}
 		}
 
-		// Apply priority: FORBIDE > ALLOW
-		if hasForbidMatch {
-			return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
-				"method":        method,
-				"path":          path,
-				"user_role_ids": roleIDs,
-			})
-		}
-
-		if hasAllowMatch {
-			return c.Next()
+		// Check ALLOW rules only if no FORBIDE match
+		for _, rule := range matchingRules {
+			if rule.Type == models.AccessAllow {
+				// ALLOW rules: check if user has allowed roles
+				// Empty roles array means any authenticated user can access
+				if len(rule.Roles) == 0 {
+					return c.Next()
+				}
+				// Check if user has any of the allowed roles (compare IDs directly)
+				for _, roleID := range rule.Roles {
+					if userRoleIDs[roleID] {
+						return c.Next()
+					}
+				}
+			}
 		}
 
 		// Default deny if no rule matches user's roles
@@ -214,9 +206,23 @@ func (m *AuthorizationMiddleware) findMatchingRules(method, path string) []model
 	}
 
 	// Only check pattern matching if no exact match found
+	// Optimized: only check patterns with same method and segment count
+	pathSegments := m.countSegments(path)
+	methodPatterns, hasMethodPatterns := m.patternRulesByMethodAndSegs[method]
+	if !hasMethodPatterns {
+		return nil
+	}
+
+	// Only check patterns with matching segment count
+	rulesToCheck, hasMatchingSegments := methodPatterns[pathSegments]
+	if !hasMatchingSegments {
+		return nil
+	}
+
+	// Now only check the filtered rules (much smaller set)
 	var patternMatches []models.Rule
-	for _, rule := range m.patternRules {
-		if rule.Method == method && m.matchPath(rule.Path, path) {
+	for _, rule := range rulesToCheck {
+		if m.matchPath(rule.Path, path) {
 			patternMatches = append(patternMatches, rule)
 		}
 	}
@@ -224,27 +230,79 @@ func (m *AuthorizationMiddleware) findMatchingRules(method, path string) []model
 	return patternMatches
 }
 
+// countSegments counts the number of segments in a path (optimized, no allocation)
+// Example: "/api/users/123" -> 3 segments
+func (m *AuthorizationMiddleware) countSegments(path string) int {
+	if len(path) == 0 || path == "/" {
+		return 0
+	}
+	// Count '/' characters (faster than Split)
+	// Skip leading '/' if present
+	start := 0
+	if path[0] == '/' {
+		start = 1
+	}
+	if start >= len(path) {
+		return 0
+	}
+	// Count segments by counting '/' + 1
+	return strings.Count(path[start:], "/") + 1
+}
+
 // matchPath matches path pattern (supports * wildcard)
+// Optimized: assumes pattern and path have same segment count (pre-filtered)
+// Uses manual segment comparison to avoid allocations from strings.Split
 func (m *AuthorizationMiddleware) matchPath(pattern, path string) bool {
 	if pattern == path {
 		return true
 	}
 
-	// Simple wildcard matching: * matches any segment
-	patternParts := strings.Split(pattern, "/")
-	pathParts := strings.Split(path, "/")
+	// Manual segment-by-segment comparison (no allocation)
+	patternLen := len(pattern)
+	pathLen := len(path)
+	patternIdx := 0
+	pathIdx := 0
 
-	if len(patternParts) != len(pathParts) {
-		return false
+	// Skip leading slash if present
+	if patternIdx < patternLen && pattern[patternIdx] == '/' {
+		patternIdx++
+	}
+	if pathIdx < pathLen && path[pathIdx] == '/' {
+		pathIdx++
 	}
 
-	for i := range patternParts {
-		if patternParts[i] != "*" && patternParts[i] != pathParts[i] {
+	// Compare segments one by one
+	for patternIdx < patternLen && pathIdx < pathLen {
+		// Find end of current segment in pattern
+		patternStart := patternIdx
+		for patternIdx < patternLen && pattern[patternIdx] != '/' {
+			patternIdx++
+		}
+		patternSeg := pattern[patternStart:patternIdx]
+
+		// Find end of current segment in path
+		pathStart := pathIdx
+		for pathIdx < pathLen && path[pathIdx] != '/' {
+			pathIdx++
+		}
+		pathSeg := path[pathStart:pathIdx]
+
+		// Compare segments: wildcard matches anything
+		if patternSeg != "*" && patternSeg != pathSeg {
 			return false
+		}
+
+		// Skip trailing slash before next segment
+		if patternIdx < patternLen {
+			patternIdx++
+		}
+		if pathIdx < pathLen {
+			pathIdx++
 		}
 	}
 
-	return true
+	// Both should have reached the end
+	return patternIdx >= patternLen && pathIdx >= pathLen
 }
 
 // refreshCache refreshes the rules cache and rebuilds the map structure
@@ -258,15 +316,23 @@ func (m *AuthorizationMiddleware) refreshCache() {
 	m.cacheMutex.Lock()
 	defer m.cacheMutex.Unlock()
 
-	// Rebuild exact rules map and pattern rules list
+	// Rebuild exact rules map and optimized pattern rules index
 	exactRulesMap := make(map[string][]models.Rule)
-	patternRules := make([]models.Rule, 0)
+	patternRulesByMethodAndSegs := make(map[string]map[int][]models.Rule)
 
 	for _, rule := range rules {
 		// Check if rule contains wildcard pattern
 		// Rules với path parameters đã được convert thành * khi sync vào DB từ auth_router.go
 		if strings.Contains(rule.Path, "*") {
-			patternRules = append(patternRules, rule)
+			// Index by method and segment count for O(1) filtering
+			segmentCount := m.countSegments(rule.Path)
+			if patternRulesByMethodAndSegs[rule.Method] == nil {
+				patternRulesByMethodAndSegs[rule.Method] = make(map[int][]models.Rule)
+			}
+			patternRulesByMethodAndSegs[rule.Method][segmentCount] = append(
+				patternRulesByMethodAndSegs[rule.Method][segmentCount],
+				rule,
+			)
 		} else {
 			// Build key for exact match: "METHOD|PATH"
 			key := fmt.Sprintf("%s|%s", rule.Method, rule.Path)
@@ -274,9 +340,9 @@ func (m *AuthorizationMiddleware) refreshCache() {
 		}
 	}
 
-	// Update cache
+	// Update cache atomically
 	m.exactRulesMap = exactRulesMap
-	m.patternRules = patternRules
+	m.patternRulesByMethodAndSegs = patternRulesByMethodAndSegs
 	m.lastRefresh = time.Now()
 }
 
