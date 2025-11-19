@@ -4,25 +4,35 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/techmaster-vietnam/authkit/middleware"
 	"github.com/techmaster-vietnam/authkit/models"
 )
+
+// AuthMiddlewareInterface định nghĩa interface cho auth middleware
+type AuthMiddlewareInterface interface {
+	RequireAuth() fiber.Handler
+}
+
+// AuthorizationMiddlewareInterface định nghĩa interface cho authorization middleware
+type AuthorizationMiddlewareInterface interface {
+	Authorize() fiber.Handler
+	InvalidateCache()
+}
 
 // AuthRouter wrapper cho fiber.Router với fluent API để cấu hình routes và phân quyền
 type AuthRouter struct {
 	router      fiber.Router
 	registry    *RouteRegistry
-	authMw      *middleware.AuthMiddleware
-	authzMw     *middleware.AuthorizationMiddleware
+	authMw      AuthMiddlewareInterface
+	authzMw     AuthorizationMiddlewareInterface
 	prefix      string // Prefix path của group (để build full path)
 }
 
-// NewAuthRouter tạo mới AuthRouter
+// NewAuthRouter tạo mới AuthRouter với interface (hỗ trợ cả generic và non-generic middleware)
 func NewAuthRouter(
 	router fiber.Router,
 	registry *RouteRegistry,
-	authMw *middleware.AuthMiddleware,
-	authzMw *middleware.AuthorizationMiddleware,
+	authMw AuthMiddlewareInterface,
+	authzMw AuthorizationMiddlewareInterface,
 ) *AuthRouter {
 	return &AuthRouter{
 		router:   router,

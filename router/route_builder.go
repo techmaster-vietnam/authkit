@@ -3,7 +3,6 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/techmaster-vietnam/authkit/models"
-	"github.com/techmaster-vietnam/authkit/middleware"
 )
 
 // RouteBuilder cung cấp fluent API để cấu hình route và phân quyền
@@ -11,8 +10,8 @@ type RouteBuilder struct {
 	metadata    *RouteMetadata
 	router      fiber.Router
 	registry    *RouteRegistry
-	authMw      *middleware.AuthMiddleware
-	authzMw     *middleware.AuthorizationMiddleware
+	authMw      AuthMiddlewareInterface
+	authzMw     AuthorizationMiddlewareInterface
 }
 
 // Public đánh dấu route là public (không cần authentication)
