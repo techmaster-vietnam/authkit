@@ -249,12 +249,12 @@ Authorization Middleware sử dụng caching để tối ưu hiệu suất, trá
 ```mermaid
 graph TB
     subgraph "Rules Cache"
-        ERM[exactRulesMap<br/>METHOD|PATH → Rules<br/>O(1) lookup]
+        ERM[exactRulesMap<br/>METHOD#124;PATH → Rules<br/>O#40;1#41; lookup]
         PRM[patternRulesByMethodAndSegs<br/>method → segmentCount → Rules<br/>Optimized pattern matching]
     end
     
     subgraph "Role Cache"
-        SAID[superAdminID<br/>Cached super_admin ID<br/>O(1) check]
+        SAID[superAdminID<br/>Cached super_admin ID<br/>O#40;1#41; check]
         RNID[roleNameToIDMap<br/>role name → ID<br/>For X-Role-Context]
     end
     
