@@ -67,6 +67,13 @@ func (s *BaseRoleService[TRole]) AddRole(req BaseAddRoleRequest) (TRole, error) 
 		return zero, goerrorkit.WrapWithMessage(err, "Lỗi khi kiểm tra role")
 	}
 
+	// Bảo vệ: Không cho phép tạo role "super_admin" qua API
+	if req.Name == "super_admin" {
+		return zero, goerrorkit.NewBusinessError(403, "Không được phép tạo role 'super_admin' qua API. Role này chỉ có thể được tạo trong database").WithData(map[string]interface{}{
+			"role_name": req.Name,
+		})
+	}
+
 	// Create role - cần type assertion hoặc helper function
 	// Với embedded structs, ta cần tạo TRole từ zero value và set fields
 	// Tạm thời return error để lập trình viên override
@@ -75,12 +82,26 @@ func (s *BaseRoleService[TRole]) AddRole(req BaseAddRoleRequest) (TRole, error) 
 
 // RemoveRole removes a role
 func (s *BaseRoleService[TRole]) RemoveRole(roleID uint) error {
-	if err := s.roleRepo.Delete(roleID); err != nil {
+	// Kiểm tra role trước khi xóa để có error message rõ ràng hơn
+	role, err := s.roleRepo.GetByID(roleID)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return goerrorkit.NewBusinessError(404, "Không tìm thấy role").WithData(map[string]interface{}{
 				"role_id": roleID,
 			})
 		}
+		return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin role")
+	}
+
+	// Bảo vệ: Không cho phép xóa system role (bao gồm super_admin)
+	if role.IsSystem() {
+		return goerrorkit.NewBusinessError(403, "Không được phép xóa system role").WithData(map[string]interface{}{
+			"role_id":   roleID,
+			"role_name": role.GetName(),
+		})
+	}
+
+	if err := s.roleRepo.Delete(roleID); err != nil {
 		return goerrorkit.WrapWithMessage(err, "Lỗi khi xóa role")
 	}
 	return nil
@@ -97,6 +118,26 @@ func (s *BaseRoleService[TRole]) ListRoles() ([]TRole, error) {
 
 // AddRoleToUser adds a role to a user
 func (s *BaseRoleService[TRole]) AddRoleToUser(userID string, roleID uint) error {
+	// Kiểm tra role trước khi gán
+	role, err := s.roleRepo.GetByID(roleID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return goerrorkit.NewBusinessError(404, "Không tìm thấy role").WithData(map[string]interface{}{
+				"role_id": roleID,
+			})
+		}
+		return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin role")
+	}
+
+	// Bảo vệ: Không cho phép gán role "super_admin" qua REST API
+	if role.GetName() == "super_admin" {
+		return goerrorkit.NewBusinessError(403, "Không được phép gán role 'super_admin' qua REST API. Role này chỉ có thể được gán trực tiếp trong database").WithData(map[string]interface{}{
+			"role_id":   roleID,
+			"role_name": role.GetName(),
+			"user_id":   userID,
+		})
+	}
+
 	if err := s.roleRepo.AddRoleToUser(userID, roleID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return goerrorkit.NewBusinessError(404, "Không tìm thấy user hoặc role").WithData(map[string]interface{}{
@@ -111,6 +152,26 @@ func (s *BaseRoleService[TRole]) AddRoleToUser(userID string, roleID uint) error
 
 // RemoveRoleFromUser removes a role from a user
 func (s *BaseRoleService[TRole]) RemoveRoleFromUser(userID string, roleID uint) error {
+	// Kiểm tra role trước khi gỡ
+	role, err := s.roleRepo.GetByID(roleID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return goerrorkit.NewBusinessError(404, "Không tìm thấy role").WithData(map[string]interface{}{
+				"role_id": roleID,
+			})
+		}
+		return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin role")
+	}
+
+	// Bảo vệ: Không cho phép gỡ role "super_admin" qua REST API
+	if role.GetName() == "super_admin" {
+		return goerrorkit.NewBusinessError(403, "Không được phép gỡ role 'super_admin' qua REST API. Role này chỉ có thể được gỡ trực tiếp trong database").WithData(map[string]interface{}{
+			"role_id":   roleID,
+			"role_name": role.GetName(),
+			"user_id":   userID,
+		})
+	}
+
 	if err := s.roleRepo.RemoveRoleFromUser(userID, roleID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return goerrorkit.NewBusinessError(404, "Không tìm thấy user hoặc role").WithData(map[string]interface{}{

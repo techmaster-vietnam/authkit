@@ -18,11 +18,11 @@ type Config = config.Config
 
 // Models - Export các models
 type (
-	User    = models.User
+	User     = models.User
 	BaseUser = models.BaseUser
-	Role    = models.Role
+	Role     = models.Role
 	BaseRole = models.BaseRole
-	Rule    = models.Rule
+	Rule     = models.Rule
 )
 
 // Interfaces - Export interfaces
@@ -116,37 +116,37 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 	ruleRepo := repository.NewRuleRepository(b.db)
 
 	// Initialize services
-	authService := service.NewBaseAuthService[TUser, TRole](userRepo, roleRepo, b.config)
-	roleService := service.NewBaseRoleService[TRole](roleRepo)
+	authService := service.NewBaseAuthService(userRepo, roleRepo, b.config)
+	roleService := service.NewBaseRoleService(roleRepo)
 	ruleService := service.NewRuleService(ruleRepo, repository.NewRoleRepository(b.db))
 
 	// Initialize middleware với generic types
-	authMiddleware := middleware.NewBaseAuthMiddleware[TUser](b.config, userRepo)
-	authzMiddleware := middleware.NewBaseAuthorizationMiddleware[TUser, TRole](ruleRepo, roleRepo, userRepo)
+	authMiddleware := middleware.NewBaseAuthMiddleware(b.config, userRepo)
+	authzMiddleware := middleware.NewBaseAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
 
 	// Initialize handlers với generic types
-	authHandler := handlers.NewBaseAuthHandler[TUser, TRole](authService)
-	roleHandler := handlers.NewBaseRoleHandler[TRole](roleService)
-	ruleHandler := handlers.NewBaseRuleHandler[TUser, TRole](ruleService, authzMiddleware)
+	authHandler := handlers.NewBaseAuthHandler(authService)
+	roleHandler := handlers.NewBaseRoleHandler(roleService)
+	ruleHandler := handlers.NewBaseRuleHandler(ruleService, authzMiddleware)
 
 	// Create route registry
 	routeRegistry := router.NewRouteRegistry()
 
 	return &AuthKit[TUser, TRole]{
-		DB:                     b.db,
-		Config:                 b.config,
-		UserRepo:               userRepo,
-		RoleRepo:               roleRepo,
-		RuleRepo:               ruleRepo,
-		AuthService:            authService,
-		RoleService:            roleService,
-		RuleService:            ruleService,
-		AuthMiddleware:         authMiddleware,
+		DB:                      b.db,
+		Config:                  b.config,
+		UserRepo:                userRepo,
+		RoleRepo:                roleRepo,
+		RuleRepo:                ruleRepo,
+		AuthService:             authService,
+		RoleService:             roleService,
+		RuleService:             ruleService,
+		AuthMiddleware:          authMiddleware,
 		AuthorizationMiddleware: authzMiddleware,
-		AuthHandler:            authHandler,
-		RoleHandler:            roleHandler,
-		RuleHandler:            ruleHandler,
-		RouteRegistry:          routeRegistry,
+		AuthHandler:             authHandler,
+		RoleHandler:             roleHandler,
+		RuleHandler:             ruleHandler,
+		RouteRegistry:           routeRegistry,
 	}, nil
 }
 
@@ -169,9 +169,9 @@ const (
 
 // Repositories - Export repository types và constructors
 type (
-	UserRepository         = repository.UserRepository
-	RoleRepository         = repository.RoleRepository
-	RuleRepository         = repository.RuleRepository
+	UserRepository                           = repository.UserRepository
+	RoleRepository                           = repository.RoleRepository
+	RuleRepository                           = repository.RuleRepository
 	BaseUserRepository[T core.UserInterface] = repository.BaseUserRepository[T]
 	BaseRoleRepository[T core.RoleInterface] = repository.BaseRoleRepository[T]
 )
@@ -203,23 +203,23 @@ func NewBaseRoleRepository[TRole RoleInterface](db *gorm.DB) *BaseRoleRepository
 
 // Services - Export service types và constructors
 type (
-	AuthService = service.AuthService
-	RoleService = service.RoleService
-	RuleService = service.RuleService
+	AuthService                                                         = service.AuthService
+	RoleService                                                         = service.RoleService
+	RuleService                                                         = service.RuleService
 	BaseAuthService[TUser core.UserInterface, TRole core.RoleInterface] = service.BaseAuthService[TUser, TRole]
-	BaseRoleService[TRole core.RoleInterface] = service.BaseRoleService[TRole]
+	BaseRoleService[TRole core.RoleInterface]                           = service.BaseRoleService[TRole]
 )
 
 // Middleware - Export generic middleware types
 type (
-	BaseAuthMiddleware[TUser core.UserInterface] = middleware.BaseAuthMiddleware[TUser]
+	BaseAuthMiddleware[TUser core.UserInterface]                                    = middleware.BaseAuthMiddleware[TUser]
 	BaseAuthorizationMiddleware[TUser core.UserInterface, TRole core.RoleInterface] = middleware.BaseAuthorizationMiddleware[TUser, TRole]
 )
 
 // Handlers - Export generic handler types
 type (
 	BaseAuthHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseAuthHandler[TUser, TRole]
-	BaseRoleHandler[TRole core.RoleInterface] = handlers.BaseRoleHandler[TRole]
+	BaseRoleHandler[TRole core.RoleInterface]                           = handlers.BaseRoleHandler[TRole]
 	BaseRuleHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseRuleHandler[TUser, TRole]
 )
 

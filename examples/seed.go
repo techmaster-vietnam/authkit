@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/techmaster-vietnam/authkit"
 	"github.com/techmaster-vietnam/authkit/utils"
@@ -35,23 +36,32 @@ func SeedData(db *gorm.DB) error {
 // initRoles initializes default roles using UPSERT
 func initRoles(db *gorm.DB) error {
 	roles := []struct {
-		id   uint
-		name string
+		id     uint
+		name   string
+		system bool // Thêm field này
 	}{
-		{id: 1, name: "admin"},
-		{id: 2, name: "editor"},
-		{id: 3, name: "author"},
-		{id: 4, name: "reader"},
+		{id: 1, name: "super_admin", system: true},
+		{id: 2, name: "admin"},
+		{id: 3, name: "editor"},
+		{id: 4, name: "author"},
+		{id: 5, name: "reader"},
 	}
 
 	for _, roleData := range roles {
 		role := &authkit.Role{
-			ID:   roleData.id,
-			Name: roleData.name,
+			ID:     roleData.id,
+			Name:   roleData.name,
+			System: roleData.system, // Set system flag
 		}
 
 		// FirstOrCreate: tìm theo Name, nếu không có thì tạo mới với ID cụ thể
+		// Nếu role đã tồn tại, cập nhật System flag để đảm bảo consistency
 		result := db.Where("name = ?", roleData.name).FirstOrCreate(role)
+		if result.Error == nil && result.RowsAffected == 0 {
+			// Role đã tồn tại, cập nhật System flag
+			role.System = roleData.system
+			db.Save(role)
+		}
 		if result.Error != nil {
 			return goerrorkit.WrapWithMessage(result.Error, fmt.Sprintf("Failed to initialize role %s", roleData.name)).
 				WithData(map[string]interface{}{
@@ -62,7 +72,7 @@ func initRoles(db *gorm.DB) error {
 
 		// result.RowsAffected > 0 nghĩa là đã tạo mới
 		if result.RowsAffected > 0 {
-			fmt.Printf("Created role: %s (ID: %d)\n", roleData.name, roleData.id)
+			fmt.Printf("Created role: %s (ID: %d, System: %v)\n", roleData.name, roleData.id, roleData.system)
 		}
 	}
 
@@ -71,6 +81,13 @@ func initRoles(db *gorm.DB) error {
 
 // initUsers initializes default test users with roles using UPSERT
 func initUsers(db *gorm.DB) error {
+	// Đọc password từ environment variable
+	superAdminPassword := os.Getenv("SUPER_ADMIN_PASSWORD")
+	if superAdminPassword == "" {
+		// Nếu không có env var, bỏ qua việc tạo super_admin
+		fmt.Println("Warning: SUPER_ADMIN_PASSWORD not set, skipping super_admin user creation")
+	}
+
 	// Define test users với custom fields mobile và address
 	testUsers := []struct {
 		email    string
@@ -80,6 +97,14 @@ func initUsers(db *gorm.DB) error {
 		address  string
 		roles    []string
 	}{
+		{
+			email:    "cuong@techmaster.vn",
+			password: superAdminPassword,
+			fullName: "Super Admin User",
+			mobile:   "0902209011",
+			address:  "14 ngõ 4 Nguyễn Đình Chiểu, Hà nội",
+			roles:    []string{"super_admin"},
+		},
 		{
 			email:    "admin@gmail.com",
 			password: "123456",
@@ -123,6 +148,12 @@ func initUsers(db *gorm.DB) error {
 	}
 
 	for _, userData := range testUsers {
+		// Skip super_admin user nếu không có password
+		if userData.password == "" && contains(userData.roles, "super_admin") {
+			fmt.Printf("Skipping user %s: password not provided\n", userData.email)
+			continue
+		}
+
 		// Hash password
 		hashedPassword, err := utils.HashPassword(userData.password)
 		if err != nil {
@@ -191,4 +222,14 @@ func initUsers(db *gorm.DB) error {
 	}
 
 	return nil
+}
+
+// contains checks if a string slice contains a specific string
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
