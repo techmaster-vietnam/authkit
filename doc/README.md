@@ -165,6 +165,25 @@ Tài liệu về tối ưu hóa performance và best practices:
   - Throughput impact (optimized vs unoptimized)
 - **Best Practices Summary**: Do's và Don'ts
 
+### 10. [Kiến trúc Microservice với AuthKit](./10-microservice_auth.md)
+So sánh chi tiết hai phương án triển khai authentication và authorization trong kiến trúc microservice:
+- **Tổng quan**: Bài toán và hai phương án (Direct DB Connection vs Auth Service API)
+- **Phương án 1 - Direct DB Connection**: 
+  - Kiến trúc chi tiết với sơ đồ
+  - Luồng xử lý login và request
+  - Implementation code đầy đủ
+- **Phương án 2 - Auth Service API**: 
+  - Kiến trúc tập trung với sơ đồ
+  - Luồng xử lý qua HTTP API
+  - Implementation với HTTP client và custom middleware
+- **So sánh chi tiết**: 
+  - Tốc độ xử lý (latency)
+  - Throughput (số lượng request lớn)
+  - Dễ code và dễ bảo trì
+  - Bảo mật
+- **Khuyến nghị**: Khi nào nên dùng phương án nào
+- **Với codebase hiện tại**: Phương án nào dễ triển khai hơn
+
 ---
 
 ## Cách đọc tài liệu
@@ -190,6 +209,9 @@ Tài liệu về tối ưu hóa performance và best practices:
 ### Tối ưu hóa
 - **[Tối ưu hóa và Best Practices](./09-toi-uu-hoa-best-practices.md)**: Performance optimizations và benchmarks
 
+### Kiến trúc Microservice
+- **[Kiến trúc Microservice với AuthKit](./10-microservice_auth.md)**: So sánh hai phương án triển khai SSO trong microservice
+
 ---
 
 ## Đặc điểm tài liệu
@@ -206,4 +228,6 @@ Mỗi tài liệu bao gồm:
 ## File gốc
 
 File gốc `Architect.md` đã được chia thành 9 file riêng biệt để dễ đọc và quản lý. Mỗi file tập trung vào một chủ đề cụ thể với nội dung chi tiết, sơ đồ và ví dụ code đầy đủ.
+
+File `microservice_auth.md` được thêm vào để hướng dẫn triển khai AuthKit trong kiến trúc microservice với so sánh chi tiết giữa các phương án.
 
