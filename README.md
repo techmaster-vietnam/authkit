@@ -9,6 +9,8 @@ Module Go tái sử dụng cao cho ứng dụng Fiber REST API với authenticat
 3. [Viết Route-Handler với Phân quyền](#3-viết-route-handler-với-phân-quyền)
 4. [Custom User Model](#4-custom-user-model)
 5. [Kỹ thuật Nâng cao](#5-kỹ-thuật-nâng-cao)
+6. [System Roles và Role "super_admin"](#6-system-roles-và-role-super_admin)
+7. [Tài liệu tham khảo](#7-tài-liệu-tham-khảo)
 
 ---
 
@@ -256,21 +258,6 @@ func assignRolesToUser(db *gorm.DB, userEmail string, roleNames []string) error 
     return db.Model(&user).Association("Roles").Replace(roles)
 }
 ```
-
-### 2.3. System Roles
-
-AuthKit hỗ trợ **system roles** - các roles không thể xóa. Để tạo system role:
-
-```go
-role := &authkit.Role{
-    ID:   1,
-    Name: "super_admin",
-    // System role được đánh dấu trong database
-}
-// System role sẽ được xử lý tự động bởi AuthKit
-```
-
-**Lưu ý:** Role `super_admin` có quyền bypass mọi rule authorization.
 
 ---
 
@@ -931,6 +918,236 @@ func main() {
 - Kiểm tra database connection
 - Kiểm tra quyền của database user
 - Kiểm tra các trường custom có conflict với BaseUser không
+
+---
+
+## 6. System Roles và Role "super_admin"
+
+AuthKit hỗ trợ **system roles** - các roles không thể xóa. Role đặc biệt nhất là `super_admin`.
+
+### 6.1. Role "super_admin" - Mục đích sử dụng
+
+Role `super_admin` là role quản trị cao cấp nhất trong hệ thống với các đặc điểm:
+
+- **Bypass hoàn toàn**: User có role `super_admin` có thể truy cập **mọi endpoint** mà không cần kiểm tra rules
+- **Quyền tối cao**: Không bị ảnh hưởng bởi các rule `Allow()`, `Forbid()`, hay `Fixed()`
+- **Dùng cho quản trị hệ thống**: Phù hợp cho các tài khoản quản trị viên cấp cao, cần quyền truy cập toàn hệ thống
+
+**Khi nào sử dụng:**
+- Tài khoản quản trị hệ thống (system administrator)
+- Tài khoản khẩn cấp để khôi phục hệ thống
+- Tài khoản audit hoặc monitoring cần truy cập toàn bộ API
+
+### 6.2. Cơ chế Bảo mật của "super_admin"
+
+AuthKit áp dụng nhiều lớp bảo vệ để đảm bảo role `super_admin` không bị lạm dụng:
+
+**1. Không thể tạo qua API:**
+```go
+// ❌ Sẽ bị từ chối với lỗi 403
+POST /api/roles
+{
+  "id": 1,
+  "name": "super_admin"
+}
+// Response: "Không được phép tạo role 'super_admin' qua API"
+```
+
+**2. Không thể xóa:**
+- Role `super_admin` phải được đánh dấu là `System = true` trong database
+- System roles không thể xóa qua API hoặc code
+
+**3. Không thể gán/gỡ qua REST API:**
+```go
+// ❌ Sẽ bị từ chối với lỗi 403
+POST /api/users/{user_id}/roles
+{
+  "role_id": 1  // ID của super_admin
+}
+// Response: "Không được phép gán role 'super_admin' qua REST API"
+
+// ❌ Cũng không thể gỡ
+DELETE /api/users/{user_id}/roles/{role_id}
+// Response: "Không được phép gỡ role 'super_admin' qua REST API"
+```
+
+**4. Chỉ có thể quản lý trực tiếp trong database:**
+- Tạo role: INSERT trực tiếp vào bảng `roles`
+- Gán role: INSERT trực tiếp vào bảng `user_roles`
+- Gỡ role: DELETE trực tiếp từ bảng `user_roles`
+
+**5. Cache ID để tối ưu hiệu suất:**
+- ID của role `super_admin` được cache khi khởi động
+- Kiểm tra authorization chỉ cần so sánh ID (O(1)) thay vì query database
+
+**6. Early exit trong Authorization Middleware:**
+- Kiểm tra `super_admin` được thực hiện **trước** khi kiểm tra các rules khác
+- Nếu user có `super_admin`, middleware sẽ bypass tất cả logic authorization và cho phép truy cập ngay lập tức
+
+### 6.3. Cách tạo Role "super_admin"
+
+**Cách 1: Tạo trực tiếp trong database**
+
+```sql
+INSERT INTO roles (id, name, system, created_at, updated_at) 
+VALUES (1, 'super_admin', true, NOW(), NOW());
+```
+
+**Cách 2: Tạo bằng code trong seed**
+
+```go
+role := &authkit.Role{
+    ID:     1,
+    Name:   "super_admin",
+    System: true,  // Quan trọng: phải set System = true
+}
+db.Where("name = ?", "super_admin").FirstOrCreate(role)
+```
+
+### 6.4. Cách gán Role "super_admin" cho User
+
+**Cách 1: Gán trực tiếp trong database**
+
+```sql
+INSERT INTO user_roles (user_id, role_id, created_at, updated_at)
+VALUES ('user-123', 1, NOW(), NOW());
+```
+
+**Cách 2: Gán bằng code trong seed**
+
+```go
+var user authkit.BaseUser
+var role authkit.Role
+db.Where("email = ?", "user@example.com").First(&user)
+db.Where("name = ?", "super_admin").First(&role)
+db.Model(&user).Association("Roles").Append(&role)
+```
+
+### 6.5. Cách hoạt động trong Authorization Middleware
+
+Khi một request đến, authorization middleware sẽ:
+
+1. **Kiểm tra authentication** (user phải đã đăng nhập)
+2. **Lấy role IDs từ JWT token** (đã được validate)
+3. **Kiểm tra super_admin sớm nhất** (early exit):
+   ```go
+   // Nếu user có super_admin role → cho phép ngay, không kiểm tra rules
+   if userRoleIDs[superAdminID] {
+       return c.Next()  // Bypass tất cả rules
+   }
+   ```
+4. **Nếu không phải super_admin**, tiếp tục kiểm tra các rules như bình thường
+
+**Lưu ý quan trọng:**
+- `super_admin` bypass **mọi rule**, kể cả `Fixed()` rules
+- `super_admin` không bị ảnh hưởng bởi `Forbid()` rules
+- `super_admin` không cần có trong danh sách `Allow()` roles để truy cập endpoint
+
+### 6.6. Ví dụ sử dụng trong Seed Data
+
+```go
+func initUsers(db *gorm.DB) error {
+    // Đọc password từ environment variable (bảo mật)
+    superAdminPassword := os.Getenv("SUPER_ADMIN_PASSWORD")
+    if superAdminPassword == "" {
+        fmt.Println("Warning: SUPER_ADMIN_PASSWORD not set, skipping super_admin user")
+        return nil
+    }
+    
+    // Hash password
+    hashedPassword, _ := utils.HashPassword(superAdminPassword)
+    
+    // Tạo super_admin user
+    superAdmin := &authkit.BaseUser{
+        Email:    "superadmin@example.com",
+        Password: hashedPassword,
+        FullName: "Super Administrator",
+        Active:   true,
+    }
+    
+    if err := db.Where("email = ?", superAdmin.Email).FirstOrCreate(superAdmin).Error; err != nil {
+        return err
+    }
+    
+    // Gán role super_admin (trực tiếp trong database)
+    var superAdminRole authkit.Role
+    db.Where("name = ?", "super_admin").First(&superAdminRole)
+    
+    db.Exec(
+        "INSERT INTO user_roles (user_id, role_id, created_at, updated_at) VALUES (?, ?, NOW(), NOW()) ON CONFLICT DO NOTHING",
+        superAdmin.ID,
+        superAdminRole.ID,
+    )
+    
+    return nil
+}
+```
+
+**Best Practices:**
+- ✅ Chỉ gán `super_admin` cho ít user (1-2 user)
+- ✅ Sử dụng password mạnh và lưu trong environment variable
+- ✅ Log mọi hành động của user có `super_admin`
+- ✅ Thường xuyên audit danh sách user có `super_admin`
+- ✅ Không sử dụng `super_admin` cho các tác vụ hàng ngày, chỉ dùng khi cần thiết
+
+### 6.7. Troubleshooting super_admin
+
+**Vấn đề: super_admin không hoạt động**
+
+- Kiểm tra role `super_admin` đã được tạo trong database chưa:
+  ```sql
+  SELECT * FROM roles WHERE name = 'super_admin';
+  ```
+- Kiểm tra role có `system = true` không:
+  ```sql
+  SELECT id, name, system FROM roles WHERE name = 'super_admin';
+  ```
+- Kiểm tra user đã được gán role `super_admin` chưa:
+  ```sql
+  SELECT ur.* FROM user_roles ur
+  JOIN roles r ON ur.role_id = r.id
+  WHERE r.name = 'super_admin' AND ur.user_id = 'your-user-id';
+  ```
+- Kiểm tra JWT token có chứa role ID của `super_admin` không (role ID phải nằm trong `role_ids` array)
+- Kiểm tra cache đã được refresh chưa: gọi `ak.InvalidateCache()` sau khi thay đổi roles
+- **Lưu ý**: Không thể gán `super_admin` qua API, phải gán trực tiếp trong database
+
+**Vấn đề: Không thể tạo/gán/gỡ super_admin qua API**
+
+- Đây là **hành vi đúng** của AuthKit để bảo mật
+- `super_admin` chỉ có thể được quản lý trực tiếp trong database
+- Xem phần [6.4. Cách gán Role "super_admin" cho User](#64-cách-gán-role-super_admin-cho-user) để biết cách gán đúng
+
+---
+
+## 7. Tài liệu tham khảo
+
+Để tìm hiểu sâu hơn về kiến trúc, cơ chế hoạt động và các kỹ thuật nâng cao của AuthKit, bạn có thể tham khảo các tài liệu chi tiết sau:
+
+### Tài liệu Kiến trúc và Thiết kế
+
+- **[Tổng quan về AuthKit](./doc/01-tong-quan.md)**: Giới thiệu tổng quan về AuthKit, các tính năng chính, và sơ đồ kiến trúc high-level
+- **[Kiến trúc tổng thể](./doc/02-kien-truc-tong-the.md)**: Mô hình kiến trúc layered, luồng xử lý request, và các thành phần chính
+- **[Middleware và Security](./doc/03-middleware-security.md)**: Chi tiết về Authentication Middleware, Authorization Middleware, và cơ chế cache
+- **[Hệ thống phân quyền](./doc/04-he-thong-phan-quyen.md)**: Rule-based authorization, các loại Access Type (PUBLIC, ALLOW, FORBID), và role management
+
+### Tài liệu Database và Models
+
+- **[Database Schema và Models](./doc/05-database-schema-models.md)**: ER diagram, migrations, seeding, và upsert patterns
+
+### Tài liệu Kỹ thuật Nâng cao
+
+- **[Generic Types và Extensibility](./doc/06-generic-types-extensibility.md)**: Cách sử dụng Generic Types, Custom User/Role models với type safety
+- **[Cơ chế hoạt động chi tiết](./doc/07-co-che-hoat-dong-chi-tiet.md)**: Implementation details về JWT, password hashing, rule matching algorithm, và cache refresh
+
+### Tài liệu Thực hành
+
+- **[Tích hợp và Sử dụng](./doc/08-tich-hop-su-dung.md)**: Quick start guide, common use cases, error handling, và troubleshooting
+- **[Tối ưu hóa và Best Practices](./doc/09-toi-uu-hoa-best-practices.md)**: Performance optimizations, benchmarks, và best practices
+
+### Tài liệu tổng hợp
+
+- **[README - Tài liệu Kiến trúc AuthKit](./doc/README.md)**: Mục lục đầy đủ và hướng dẫn cách đọc tài liệu
 
 ---
 
