@@ -4,15 +4,63 @@ Module Go tái sử dụng cao cho ứng dụng Fiber REST API với authenticat
 
 ## Mục lục
 
-1. [Cài đặt và Tích hợp](#1-cài-đặt-và-tích-hợp)
-2. [Định nghĩa Roles](#2-định-nghĩa-roles)
-3. [Viết Route-Handler với Phân quyền](#3-viết-route-handler-với-phân-quyền)
-4. [Custom User Model](#4-custom-user-model)
-5. [Kỹ thuật Nâng cao](#5-kỹ-thuật-nâng-cao)
-6. [System Roles và Role "super_admin"](#6-system-roles-và-role-super_admin)
-7. [Tài liệu tham khảo](#7-tài-liệu-tham-khảo)
+- [1. Cài đặt và Tích hợp](#1-cài-đặt-và-tích-hợp)
+  - [1.1. Tải về AuthKit](#11-tải-về-authkit)
+  - [1.2. Cấu hình Environment Variables](#12-cấu-hình-environment-variables)
+  - [1.3. Tích hợp vào Ứng dụng (Bước đơn giản nhất)](#13-tích-hợp-vào-ứng-dụng-bước-đơn-giản-nhất)
+- [2. Định nghĩa Roles](#2-định-nghĩa-roles)
+  - [2.1. Tạo Roles trong Database](#21-tạo-roles-trong-database)
+  - [2.2. Gán Roles cho User](#22-gán-roles-cho-user)
+- [3. Viết Route-Handler với Phân quyền](#3-viết-route-handler-với-phân-quyền)
+  - [3.1. Import cần thiết](#31-import-cần-thiết)
+  - [3.2. Tạo AuthRouter](#32-tạo-authrouter)
+  - [3.3. Các loại Phân quyền](#33-các-loại-phân-quyền)
+  - [3.4. Cú pháp đầy đủ](#34-cú-pháp-đầy-đủ)
+  - [3.5. Ví dụ đầy đủ](#35-ví-dụ-đầy-đủ)
+  - [3.6. Viết Handler](#36-viết-handler)
+  - [3.7. Lấy User từ Context](#37-lấy-user-từ-context)
+- [4. Custom User Model](#4-custom-user-model)
+  - [4.1. Tạo Custom User Model](#41-tạo-custom-user-model)
+  - [4.2. Sử dụng Custom User trong AuthKit](#42-sử-dụng-custom-user-trong-authkit)
+  - [4.3. Sử dụng Custom User trong Handler](#43-sử-dụng-custom-user-trong-handler)
+  - [4.4. Tạo User với Custom Fields](#44-tạo-user-với-custom-fields)
+- [5. Kỹ thuật Nâng cao](#5-kỹ-thuật-nâng-cao)
+  - [5.1. Sync Routes vào Database](#51-sync-routes-vào-database)
+  - [5.2. Quản lý Rules từ API](#52-quản-lý-rules-từ-api)
+  - [5.3. Refresh Cache](#53-refresh-cache)
+  - [5.4. Sử dụng với Database Connection có sẵn](#54-sử-dụng-với-database-connection-có-sẵn)
+  - [5.5. Xử lý Lỗi với goerrorkit](#55-xử-lý-lỗi-với-goerrorkit)
+  - [5.6. Best Practices](#56-best-practices)
+  - [5.7. Troubleshooting](#57-troubleshooting)
+- [6. System Roles và Role "super_admin"](#6-system-roles-và-role-super_admin)
+  - [6.1. Role "super_admin" - Mục đích sử dụng](#61-role-super_admin---mục-đích-sử-dụng)
+  - [6.2. Cơ chế Bảo mật của "super_admin"](#62-cơ-chế-bảo-mật-của-super_admin)
+  - [6.3. Cách tạo Role "super_admin"](#63-cách-tạo-role-super_admin)
+  - [6.4. Cách gán Role "super_admin" cho User](#64-cách-gán-role-super_admin-cho-user)
+  - [6.5. Cách hoạt động trong Authorization Middleware](#65-cách-hoạt-động-trong-authorization-middleware)
+  - [6.6. Ví dụ sử dụng trong Seed Data](#66-ví-dụ-sử-dụng-trong-seed-data)
+  - [6.7. Troubleshooting super_admin](#67-troubleshooting-super_admin)
+- [7. Tài liệu tham khảo](#7-tài-liệu-tham-khảo)
 
 ---
+
+## Bắt đầu nhanh
+
+### 🚀 Chạy ứng dụng Demo
+
+Để nhanh chóng trải nghiệm các tính năng của AuthKit, bạn có thể chạy ứng dụng mẫu đầy đủ trong thư mục `examples`:
+
+👉 **[Xem hướng dẫn chạy ứng dụng demo](./examples/README.md)**
+
+
+### 📚 Tìm hiểu chi tiết về Kiến trúc và Cơ chế hoạt động
+
+Để hiểu sâu hơn về cách AuthKit được thiết kế và vận hành, bạn có thể tham khảo các tài liệu chi tiết trong thư mục `doc`:
+
+👉 **[Xem tài liệu kiến trúc AuthKit](./doc/README.md)**
+
+---
+
 
 ## 1. Cài đặt và Tích hợp
 
@@ -1149,16 +1197,6 @@ func initUsers(db *gorm.DB) error {
 
 - **[README - Tài liệu Kiến trúc AuthKit](./doc/README.md)**: Mục lục đầy đủ và hướng dẫn cách đọc tài liệu
 
----
 
-## Tổng kết
 
-AuthKit cung cấp một cách đơn giản và mạnh mẽ để tích hợp authentication và authorization vào ứng dụng Fiber của bạn:
 
-1. ✅ **Dễ tích hợp**: Chỉ cần vài dòng code
-2. ✅ **Fluent API**: Định nghĩa routes với phân quyền dễ dàng
-3. ✅ **Linh hoạt**: Hỗ trợ Custom User model
-4. ✅ **Mạnh mẽ**: Hỗ trợ Public, Allow, Forbid, Fixed rules
-5. ✅ **Tự động**: Tự động migrate database và sync routes
-
-Chúc bạn code vui vẻ! 🚀
