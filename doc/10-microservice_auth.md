@@ -250,6 +250,8 @@ func main() {
 - ✅ Không cần viết code mới
 - ✅ Sử dụng middleware có sẵn: `ak.AuthMiddleware.RequireAuth()` và `ak.AuthorizationMiddleware.Authorize()`
 - ✅ Tất cả services dùng chung `JWT_SECRET` và database
+- ✅ Mỗi service set `SERVICE_NAME` khác nhau trong `.env` để tách biệt rules
+- ✅ Repository tự động filter rules theo `service_name` khi load cache
 
 ### 10.2.4. Configuration
 
@@ -261,6 +263,7 @@ DB_HOST=postgres-host
 DB_NAME=authkit
 DB_USER=postgres
 DB_PASSWORD=postgres
+SERVICE_NAME=A  # Service name cho microservice isolation
 ```
 
 #### Service B/C/D (.env)
@@ -270,6 +273,7 @@ DB_HOST=postgres-host                          # CÙNG database
 DB_NAME=authkit
 DB_USER=postgres
 DB_PASSWORD=postgres
+SERVICE_NAME=B  # Service name khác nhau cho mỗi service (B, C, D)
 ```
 
 ---

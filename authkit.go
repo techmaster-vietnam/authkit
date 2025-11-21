@@ -110,10 +110,10 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 		return nil, err
 	}
 
-	// Initialize repositories
-	userRepo := repository.NewBaseUserRepository[TUser](b.db)
-	roleRepo := repository.NewBaseRoleRepository[TRole](b.db)
-	ruleRepo := repository.NewRuleRepository(b.db)
+		// Initialize repositories
+		userRepo := repository.NewBaseUserRepository[TUser](b.db)
+		roleRepo := repository.NewBaseRoleRepository[TRole](b.db)
+		ruleRepo := repository.NewRuleRepository(b.db, b.config.ServiceName)
 
 	// Initialize services
 	authService := service.NewBaseAuthService(userRepo, roleRepo, b.config)
@@ -152,7 +152,7 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 
 // SyncRoutes sync routes từ registry vào database
 func (ak *AuthKit[TUser, TRole]) SyncRoutes() error {
-	return router.SyncRoutesToDatabase(ak.RouteRegistry, ak.RuleRepo, repository.NewRoleRepository(ak.DB))
+	return router.SyncRoutesToDatabase(ak.RouteRegistry, ak.RuleRepo, repository.NewRoleRepository(ak.DB), ak.Config.ServiceName)
 }
 
 // InvalidateCache invalidates authorization middleware cache
@@ -187,8 +187,9 @@ func NewRoleRepository(db *gorm.DB) *RoleRepository {
 }
 
 // NewRuleRepository creates a new rule repository
-func NewRuleRepository(db *gorm.DB) *RuleRepository {
-	return repository.NewRuleRepository(db)
+// If serviceName is empty, works in single-app mode (backward compatible)
+func NewRuleRepository(db *gorm.DB, serviceName string) *RuleRepository {
+	return repository.NewRuleRepository(db, serviceName)
 }
 
 // NewBaseUserRepository creates a new base user repository with generic type

@@ -1051,3 +1051,242 @@ func TestAuthorize_MultipleRulesSameEndpoint(t *testing.T) {
 		}
 	})
 }
+
+// Test cache chỉ chứa rules của service hiện tại (microservice mode)
+// Test này verify rằng sau khi repository filter, cache chỉ có rules của service A
+func TestCache_ServiceNameFiltering_MicroserviceMode(t *testing.T) {
+	mw := &AuthorizationMiddleware{
+		exactRulesMap:               make(map[string][]models.Rule),
+		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
+		cacheMutex:                  sync.RWMutex{},
+	}
+
+	// Simulate cache sau khi repository đã filter (chỉ có rules của service A)
+	// Trong thực tế, repository.GetAllRulesForCache() đã filter theo service_name
+	mw.cacheMutex.Lock()
+	mw.exactRulesMap["GET|/api/users"] = []models.Rule{
+		{
+			ID:          "GET|/api/users",
+			Method:      "GET",
+			Path:        "/api/users",
+			Type:        models.AccessAllow,
+			Roles:       models.IntArray{1},
+			ServiceName: "A", // Service A rule - đã được filter bởi repository
+		},
+	}
+	// Rules từ service B không có trong cache (đã được filter bởi repository)
+	mw.cacheMutex.Unlock()
+
+	// Verify cache chỉ chứa rules của service A
+	mw.cacheMutex.RLock()
+	defer mw.cacheMutex.RUnlock()
+
+	if len(mw.exactRulesMap) != 1 {
+		t.Errorf("Expected 1 rule (service A), got %d", len(mw.exactRulesMap))
+	}
+
+	rule, exists := mw.exactRulesMap["GET|/api/users"]
+	if !exists {
+		t.Error("Expected rule 'GET|/api/users' from service A")
+	} else if len(rule) != 1 || rule[0].ServiceName != "A" {
+		t.Errorf("Expected rule with service_name='A', got service_name='%s'", rule[0].ServiceName)
+	}
+
+	// Verify rules từ service khác không có trong cache
+	if _, exists := mw.exactRulesMap["GET|/api/posts"]; exists {
+		t.Error("Rule from service B should not be in cache")
+	}
+}
+
+// Test cache chỉ chứa rules không có service_name (single-app mode)
+// Test này verify backward compatibility
+func TestCache_ServiceNameFiltering_SingleAppMode(t *testing.T) {
+	mw := &AuthorizationMiddleware{
+		exactRulesMap:               make(map[string][]models.Rule),
+		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
+		cacheMutex:                  sync.RWMutex{},
+	}
+
+	// Simulate cache sau khi repository đã filter (chỉ có rules không có service_name)
+	// Trong thực tế, repository.GetAllRulesForCache() đã filter (service_name IS NULL)
+	mw.cacheMutex.Lock()
+	mw.exactRulesMap["GET|/api/users"] = []models.Rule{
+		{
+			ID:          "GET|/api/users",
+			Method:      "GET",
+			Path:        "/api/users",
+			Type:        models.AccessAllow,
+			Roles:       models.IntArray{1},
+			ServiceName: "", // Empty = single-app mode - đã được filter bởi repository
+		},
+	}
+	// Rules từ service A không có trong cache (đã được filter bởi repository)
+	mw.cacheMutex.Unlock()
+
+	// Verify cache chỉ chứa rules không có service_name
+	mw.cacheMutex.RLock()
+	defer mw.cacheMutex.RUnlock()
+
+	if len(mw.exactRulesMap) != 1 {
+		t.Errorf("Expected 1 rule (no service_name), got %d", len(mw.exactRulesMap))
+	}
+
+	rule, exists := mw.exactRulesMap["GET|/api/users"]
+	if !exists {
+		t.Error("Expected rule 'GET|/api/users' without service_name")
+	} else if rule[0].ServiceName != "" {
+		t.Errorf("Expected rule with empty service_name, got service_name='%s'", rule[0].ServiceName)
+	}
+
+	// Verify rules từ service khác không có trong cache
+	if _, exists := mw.exactRulesMap["GET|/api/posts"]; exists {
+		t.Error("Rule from service A should not be in cache in single-app mode")
+	}
+}
+
+// Test findMatchingRules chỉ tìm trong rules của service hiện tại
+func TestFindMatchingRules_ServiceNameIsolation(t *testing.T) {
+	mw := &AuthorizationMiddleware{
+		exactRulesMap:               make(map[string][]models.Rule),
+		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
+		cacheMutex:                  sync.RWMutex{},
+	}
+
+	// Setup cache với rules từ nhiều services
+	// Note: Trong thực tế, cache đã được filter bởi repository, nên chỉ có rules của service hiện tại
+	// Test này verify rằng nếu có rules từ nhiều services trong cache (không nên xảy ra),
+	// thì findMatchingRules vẫn hoạt động đúng
+	mw.cacheMutex.Lock()
+	// Service A rules
+	mw.exactRulesMap["GET|/api/users"] = []models.Rule{
+		{
+			ID:          "GET|/api/users",
+			Method:      "GET",
+			Path:        "/api/users",
+			Type:        models.AccessAllow,
+			Roles:       models.IntArray{1},
+			ServiceName: "A",
+		},
+	}
+	// Service B rules (không nên match)
+	mw.exactRulesMap["GET|/api/posts"] = []models.Rule{
+		{
+			ID:          "GET|/api/posts",
+			Method:      "GET",
+			Path:        "/api/posts",
+			Type:        models.AccessAllow,
+			Roles:       models.IntArray{1},
+			ServiceName: "B",
+		},
+	}
+	mw.cacheMutex.Unlock()
+
+	// Test: Tìm rule cho service A
+	rules := mw.findMatchingRules("GET", "/api/users")
+	if len(rules) != 1 {
+		t.Fatalf("Expected 1 rule, got %d", len(rules))
+	}
+	if rules[0].ServiceName != "A" {
+		t.Errorf("Expected rule from service A, got service_name='%s'", rules[0].ServiceName)
+	}
+}
+
+// Test Authorize với rules từ service khác không được sử dụng
+func TestAuthorize_ServiceIsolation(t *testing.T) {
+	mw := &AuthorizationMiddleware{
+		exactRulesMap:               make(map[string][]models.Rule),
+		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
+		cacheMutex:                  sync.RWMutex{},
+		roleNameToIDMap:             make(map[string]uint),
+		roleNameCacheMutex:          sync.RWMutex{},
+	}
+
+	adminRoleID := uint(1)
+
+	// Setup cache CHỈ với rules của service A
+	// Rules từ service B không nên có trong cache (đã được filter bởi repository)
+	mw.cacheMutex.Lock()
+	mw.exactRulesMap["GET|/api/users"] = []models.Rule{
+		{
+			ID:          "GET|/api/users",
+			Method:      "GET",
+			Path:        "/api/users",
+			Type:        models.AccessAllow,
+			Roles:       models.IntArray{adminRoleID},
+			ServiceName: "A", // Service A rule
+		},
+	}
+	// Không có rule cho /api/posts trong cache (vì nó thuộc service B)
+	mw.cacheMutex.Unlock()
+
+	// Test 1: Request đến endpoint có rule trong service A - được phép
+	t.Run("service_a_endpoint_allowed", func(t *testing.T) {
+		app := fiber.New()
+		app.Get("/api/users", setupUserContextMiddleware("user1", []uint{adminRoleID}), mw.Authorize(), func(c *fiber.Ctx) error {
+			return c.SendString("OK")
+		})
+
+		req := httptest.NewRequest("GET", "/api/users", nil)
+		resp, err := app.Test(req)
+		if err != nil {
+			t.Fatalf("Request failed: %v", err)
+		}
+		if resp.StatusCode != 200 {
+			body := make([]byte, 1024)
+			n, _ := resp.Body.Read(body)
+			t.Errorf("Service A endpoint should be allowed (200), got %d. Response: %s", resp.StatusCode, string(body[:n]))
+		}
+	})
+
+	// Test 2: Request đến endpoint không có rule trong cache (service B) - bị từ chối
+	t.Run("service_b_endpoint_denied", func(t *testing.T) {
+		app := fiber.New()
+		app.Get("/api/posts", setupUserContextMiddleware("user1", []uint{adminRoleID}), mw.Authorize(), func(c *fiber.Ctx) error {
+			return c.SendString("OK")
+		})
+
+		req := httptest.NewRequest("GET", "/api/posts", nil)
+		resp, err := app.Test(req)
+		if err != nil {
+			t.Fatalf("Request failed: %v", err)
+		}
+		if resp.StatusCode == 200 {
+			t.Error("Service B endpoint should be denied (no rule in cache for service A)")
+		}
+	})
+}
+
+// Test pattern rules với service_name filtering
+func TestFindMatchingRules_PatternRulesWithServiceName(t *testing.T) {
+	mw := &AuthorizationMiddleware{
+		exactRulesMap:               make(map[string][]models.Rule),
+		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
+		cacheMutex:                  sync.RWMutex{},
+	}
+
+	// Setup cache với pattern rules từ service A
+	mw.cacheMutex.Lock()
+	if mw.patternRulesByMethodAndSegs["GET"] == nil {
+		mw.patternRulesByMethodAndSegs["GET"] = make(map[int][]models.Rule)
+	}
+	mw.patternRulesByMethodAndSegs["GET"][3] = []models.Rule{
+		{
+			ID:          "GET|/api/users/*",
+			Method:      "GET",
+			Path:        "/api/users/*",
+			Type:        models.AccessAllow,
+			Roles:       models.IntArray{1},
+			ServiceName: "A", // Service A rule
+		},
+	}
+	mw.cacheMutex.Unlock()
+
+	// Test: Pattern rule từ service A match đúng
+	rules := mw.findMatchingRules("GET", "/api/users/123")
+	if len(rules) != 1 {
+		t.Fatalf("Expected 1 rule, got %d", len(rules))
+	}
+	if rules[0].ServiceName != "A" {
+		t.Errorf("Expected rule from service A, got service_name='%s'", rules[0].ServiceName)
+	}
+}

@@ -8,8 +8,9 @@ import (
 
 // Config holds application configuration
 type Config struct {
-	JWT    JWTConfig
-	Server ServerConfig
+	JWT         JWTConfig
+	Server      ServerConfig
+	ServiceName string // Service name for microservice architecture (max 20 chars, empty = single app mode)
 }
 
 // JWTConfig holds JWT configuration
@@ -31,6 +32,12 @@ func LoadConfig() *Config {
 	readTimeout, _ := strconv.Atoi(getEnv("READ_TIMEOUT_SECONDS", "10"))
 	writeTimeout, _ := strconv.Atoi(getEnv("WRITE_TIMEOUT_SECONDS", "10"))
 
+	serviceName := getEnv("SERVICE_NAME", "")
+	// Truncate to max 20 characters if longer
+	if len(serviceName) > 20 {
+		serviceName = serviceName[:20]
+	}
+
 	return &Config{
 		JWT: JWTConfig{
 			Secret:     getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
@@ -41,6 +48,7 @@ func LoadConfig() *Config {
 			ReadTimeout:  time.Duration(readTimeout) * time.Second,
 			WriteTimeout: time.Duration(writeTimeout) * time.Second,
 		},
+		ServiceName: serviceName,
 	}
 }
 

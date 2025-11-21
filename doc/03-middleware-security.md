@@ -273,13 +273,18 @@ graph TB
 
 **Khi nào cache được refresh?**
 
-1. **Khởi động**: Load tất cả rules và roles khi middleware được khởi tạo
+1. **Khởi động**: Load rules và roles khi middleware được khởi tạo
+   - Repository tự động filter rules theo `service_name` từ config
+   - Single-app mode: chỉ load rules có `service_name IS NULL`
+   - Microservice mode: chỉ load rules có `service_name` matching
 2. **Manual refresh**: Gọi `InvalidateCache()` sau khi:
    - Sync routes (`ak.SyncRoutes()`)
    - Update rules từ API
    - Thay đổi roles
 
 **Cache TTL**: 5 minutes (có thể refresh manual bất cứ lúc nào)
+
+**Service Isolation**: Mỗi service chỉ cache rules của chính nó, đảm bảo isolation trong microservice architecture.
 
 ### 3.3.3. Tối ưu hiệu suất
 
