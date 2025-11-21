@@ -184,6 +184,24 @@ So sánh chi tiết hai phương án triển khai authentication và authorizati
 - **Khuyến nghị**: Khi nào nên dùng phương án nào
 - **Với codebase hiện tại**: Phương án nào dễ triển khai hơn
 
+### 11. [Unit Tests cho Authorization Middleware](./11_authorization_unittest.md)
+Tài liệu về unit tests cho authorization middleware không cần kết nối PostgreSQL:
+- **Cách chạy tests**: Các lệnh test và coverage
+- **Các hàm đã được test**: 
+  - Pure Functions (countSegments, matchPath)
+  - Cache và Rule Matching (findMatchingRules, refreshCache)
+  - Authorization Logic với Roles (Authorize middleware)
+- **Cách test hoạt động**: Kỹ thuật test không cần database
+- **Test Coverage**: Coverage hiện tại và lý do
+- **Mở rộng Tests**: Hướng dẫn tạo integration tests với database
+
+### 12. [Unit Tests cho Authorization Middleware Integration](./12_authorization_integration_test.md)
+Tài liệu về integration tests cho authorization middleware với kết nối PostgreSQL:
+- **Integration Tests**: Test với database thực sự
+- **Test Scenarios**: Các test cases với real repositories và database
+- **Setup và Teardown**: Cách setup test database và cleanup
+- **Best Practices**: Do's và Don'ts cho integration tests
+
 ---
 
 ## Cách đọc tài liệu
@@ -211,6 +229,9 @@ So sánh chi tiết hai phương án triển khai authentication và authorizati
 
 ### Kiến trúc Microservice
 - **[Kiến trúc Microservice với AuthKit](./10-microservice_auth.md)**: So sánh hai phương án triển khai SSO trong microservice
+
+### Testing
+- **[Unit Tests cho Authorization Middleware](./11_authorization_unittest.md)**: Unit tests không cần database
 
 ---
 
