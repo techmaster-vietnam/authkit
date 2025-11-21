@@ -14,7 +14,9 @@ import (
 //   - Nếu Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
 //     (giữ nguyên Type và Roles từ database vì đó là mong muốn của người dùng)
 //   - Convert role names (string) từ routes → role IDs (uint) khi lưu vào DB
-func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepository, roleRepo *repository.RoleRepository) error {
+//   - serviceName: nếu empty, rule sẽ có service_name = NULL (single-app mode)
+//                  nếu set, rule sẽ có service_name = serviceName (microservice mode)
+func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepository, roleRepo *repository.RoleRepository, serviceName string) error {
 	routes := registry.GetAllRoutes()
 
 	// Collect all unique role names from all routes for batch conversion
@@ -54,6 +56,12 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 			}
 		}
 
+		// Truncate serviceName to max 20 characters if longer
+		ruleServiceName := serviceName
+		if len(ruleServiceName) > 20 {
+			ruleServiceName = ruleServiceName[:20]
+		}
+
 		rule := &models.Rule{
 			ID:          ruleID,
 			Method:      route.Method,
@@ -62,6 +70,7 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 			Roles:       models.FromUintSlice(roleIDs), // Store role IDs instead of names
 			Fixed:       route.Fixed,
 			Description: route.Description,
+			ServiceName: ruleServiceName, // Empty string will be stored as NULL in DB
 		}
 
 		if route.Fixed {

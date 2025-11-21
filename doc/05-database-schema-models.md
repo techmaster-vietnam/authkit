@@ -52,6 +52,7 @@ erDiagram
         integer_array roles "PostgreSQL integer[]"
         boolean fixed "default false"
         text description
+        varchar_20 service_name "microservice isolation, max 20 chars"
     }
 ```
 
@@ -252,11 +253,23 @@ CREATE TABLE rules (
     roles INTEGER[] DEFAULT '{}',
     fixed BOOLEAN DEFAULT FALSE,
     description TEXT,
-    CONSTRAINT idx_method_path UNIQUE (method, path)
+    service_name VARCHAR(20)  -- For microservice isolation (NULL = single-app mode)
 );
 
--- Index for faster lookups
+-- Indexes for faster lookups
 CREATE INDEX idx_rules_method_path ON rules(method, path);
+CREATE INDEX idx_rules_service_name ON rules(service_name);
+
+-- Partial unique indexes for microservice support
+-- Single-app mode: unique (method, path) when service_name IS NULL
+CREATE UNIQUE INDEX idx_method_path_null_service 
+    ON rules(method, path) 
+    WHERE service_name IS NULL;
+
+-- Microservice mode: unique (service_name, method, path) when service_name IS NOT NULL
+CREATE UNIQUE INDEX idx_service_method_path 
+    ON rules(service_name, method, path) 
+    WHERE service_name IS NOT NULL;
 ```
 
 **Fields chi tiết:**
@@ -270,25 +283,30 @@ CREATE INDEX idx_rules_method_path ON rules(method, path);
 | `roles` | INTEGER[] | DEFAULT '{}' | PostgreSQL array of role IDs |
 | `fixed` | BOOLEAN | DEFAULT FALSE | Fixed rules không thể sửa từ DB |
 | `description` | TEXT | NULL | Mô tả rule |
+| `service_name` | VARCHAR(20) | NULL, INDEXED | Service name cho microservice isolation (NULL = single-app mode) |
 
 **Đặc điểm:**
 
 - ✅ **ID Format**: `"METHOD|PATH"` (ví dụ: `"GET|/api/users"`, `"POST|/api/blogs/*"`)
 - ✅ **PostgreSQL Array**: `roles` là PostgreSQL `integer[]` array, không phải foreign key
-- ✅ **Unique Constraint**: `(method, path)` phải unique
+- ✅ **Unique Constraints**: 
+  - Single-app mode: `(method, path)` unique khi `service_name IS NULL`
+  - Microservice mode: `(service_name, method, path)` unique khi `service_name IS NOT NULL`
 - ✅ **Fixed Rules**: `fixed = true` → không thể update/delete qua API
+- ✅ **Service Name**: Tối đa 20 ký tự, dùng để tách biệt rules giữa các services trong microservice architecture
 
 **Model trong Go:**
 
 ```go
 type Rule struct {
     ID          string     `gorm:"primaryKey"` // Format: "METHOD|PATH"
-    Method      string     `gorm:"not null;uniqueIndex:idx_method_path"`
-    Path        string     `gorm:"not null;uniqueIndex:idx_method_path"`
+    Method      string     `gorm:"not null"`
+    Path        string     `gorm:"not null"`
     Type        AccessType `gorm:"type:varchar(20);not null"` // PUBLIC, ALLOW, FORBIDE
     Roles       IntArray   `gorm:"type:integer[]"` // PostgreSQL integer[]
     Fixed       bool       `gorm:"default:false"`
     Description string     `gorm:"type:text"`
+    ServiceName string     `gorm:"type:varchar(20);index"` // Microservice isolation (empty = single-app mode)
 }
 
 // IntArray là custom type để handle PostgreSQL integer[]
@@ -297,13 +315,21 @@ type IntArray []uint
 
 **Ví dụ dữ liệu:**
 
+**Single-app mode** (service_name = NULL):
 ```
-id                    | method | path              | type   | roles    | fixed | description
-----------------------|--------|-------------------|--------|----------|-------|------------
-GET|/api/auth/login   | GET    | /api/auth/login   | PUBLIC | {}       | true  | Login endpoint
-GET|/api/users        | GET    | /api/users        | ALLOW  | {2,3}    | false | List users
-POST|/api/blogs       | POST   | /api/blogs        | ALLOW  | {3,4}    | false | Create blog
-DELETE|/api/blogs/*   | DELETE | /api/blogs/*      | FORBIDE| {5}      | true  | Delete blog (forbid reader)
+id                    | method | path              | type   | roles    | fixed | description | service_name
+----------------------|--------|-------------------|--------|----------|-------|-------------|-------------
+GET|/api/auth/login   | GET    | /api/auth/login   | PUBLIC | {}       | true  | Login endpoint | NULL
+GET|/api/users        | GET    | /api/users        | ALLOW  | {2,3}    | false | List users     | NULL
+```
+
+**Microservice mode** (service_name set):
+```
+id                    | method | path              | type   | roles    | fixed | description | service_name
+----------------------|--------|-------------------|--------|----------|-------|-------------|-------------
+GET|/api/admin/users  | GET    | /api/admin/users  | ALLOW  | {1}      | false | Admin users   | A
+POST|/api/products    | POST   | /api/products     | ALLOW  | {2,3}    | false | Create product| B
+GET|/api/tasks        | GET    | /api/tasks        | ALLOW  | {4}      | false | List tasks    | C
 ```
 
 ---

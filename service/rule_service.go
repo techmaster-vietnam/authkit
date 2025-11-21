@@ -94,12 +94,21 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 
 	// Generate ID from Method and Path
 	ruleID := fmt.Sprintf("%s|%s", req.Method, req.Path)
+	
+	// Get service name from repository (empty in single-app mode)
+	serviceName := s.ruleRepo.GetServiceName()
+	// Truncate to max 20 characters if longer
+	if len(serviceName) > 20 {
+		serviceName = serviceName[:20]
+	}
+	
 	rule := &models.Rule{
-		ID:     ruleID,
-		Method: req.Method,
-		Path:   req.Path,
-		Type:   ruleType,
-		Roles:  models.FromUintSlice(roleIDs), // Store role IDs instead of names
+		ID:          ruleID,
+		Method:      req.Method,
+		Path:        req.Path,
+		Type:        ruleType,
+		Roles:       models.FromUintSlice(roleIDs), // Store role IDs instead of names
+		ServiceName: serviceName,                   // Auto-set from repository (empty = NULL in DB)
 	}
 
 	if err := s.ruleRepo.Create(rule); err != nil {

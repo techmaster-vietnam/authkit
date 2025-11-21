@@ -15,7 +15,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) error {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
-	ruleRepo := repository.NewRuleRepository(db)
+	ruleRepo := repository.NewRuleRepository(db, cfg.ServiceName)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, roleRepo, cfg)

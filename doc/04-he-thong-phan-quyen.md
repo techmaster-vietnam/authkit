@@ -23,6 +23,7 @@ type Rule struct {
     Roles       IntArray   // Array of role IDs (PostgreSQL integer[])
     Fixed       bool       // Fixed=true: rule từ code, không thể sửa từ DB
     Description string     // Mô tả rule
+    ServiceName string     // Service name cho microservice isolation (empty = single-app mode)
 }
 ```
 
@@ -39,6 +40,11 @@ type Rule struct {
 3. **Roles Storage**: Lưu dưới dạng PostgreSQL `integer[]` (array of role IDs)
    - Role names (string) được convert thành role IDs (uint) khi sync vào DB
    - Tối ưu hiệu suất: so sánh IDs thay vì names
+
+4. **Service Name**: Tối đa 20 ký tự, dùng để tách biệt rules giữa các services
+   - Single-app mode: `service_name = NULL` hoặc empty → load tất cả rules
+   - Microservice mode: `service_name = "A"` → chỉ load rules có `service_name = "A"`
+   - Repository tự động filter theo `service_name` khi load cache
 
 ### 4.1.2. Rule Matching Algorithm
 

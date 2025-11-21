@@ -7,7 +7,10 @@ Module Go tái sử dụng cao cho ứng dụng Fiber REST API với authenticat
 - [1. Cài đặt và Tích hợp](#1-cài-đặt-và-tích-hợp)
   - [1.1. Tải về AuthKit](#11-tải-về-authkit)
   - [1.2. Cấu hình Environment Variables](#12-cấu-hình-environment-variables)
-  - [1.3. Tích hợp vào Ứng dụng (Bước đơn giản nhất)](#13-tích-hợp-vào-ứng-dụng-bước-đơn-giản-nhất)
+  - [1.3. Cấu hình Service Name (Microservice Architecture)](#13-cấu-hình-service-name-microservice-architecture)
+    - [1.3.1. Monolithic App (Single Application)](#131-monolithic-app-single-application)
+    - [1.3.2. Microservice App (Multiple Services)](#132-microservice-app-multiple-services)
+  - [1.4. Tích hợp vào Ứng dụng (Bước đơn giản nhất)](#14-tích-hợp-vào-ứng-dụng-bước-đơn-giản-nhất)
 - [2. Định nghĩa Roles](#2-định-nghĩa-roles)
   - [2.1. Tạo Roles trong Database](#21-tạo-roles-trong-database)
   - [2.2. Gán Roles cho User](#22-gán-roles-cho-user)
@@ -91,9 +94,192 @@ JWT_EXPIRATION_HOURS=24
 PORT=3000
 READ_TIMEOUT_SECONDS=10
 WRITE_TIMEOUT_SECONDS=10
+
+# Service Name (Optional - chỉ cần set trong microservice architecture)
+# SERVICE_NAME=  # Để trống hoặc không set = single-app mode
 ```
 
-### 1.3. Tích hợp vào Ứng dụng (Bước đơn giản nhất)
+### 1.3. Cấu hình Service Name (Microservice Architecture)
+
+AuthKit hỗ trợ cả **monolithic** (single-app) và **microservice** architecture. Trường `service_name` trong bảng `rules` cho phép mỗi service chỉ load và sử dụng rules của chính nó.
+
+#### 1.3.1. Monolithic App (Single Application)
+
+**Kiến trúc:**
+```
+┌─────────────────────────────────┐
+│     Single Application          │
+│                                 │
+│  ┌───────────────────────────┐  │
+│  │   AuthKit                 │  │
+│  │   - All routes            │  │
+│  │   - All rules             │  │
+│  └───────────┬───────────────┘  │
+│              │                  │
+└──────────────┼──────────────────┘
+               │
+               ▼
+        ┌──────────────┐
+        │  PostgreSQL  │
+        │  (Shared DB) │
+        └──────────────┘
+```
+
+**Cấu hình:**
+
+Không set `SERVICE_NAME` hoặc để trống trong file `.env`:
+
+```env
+# Không set SERVICE_NAME hoặc để trống
+# SERVICE_NAME=
+```
+
+**Đặc điểm:**
+- ✅ Tất cả rules được lưu với `service_name = NULL`
+- ✅ Application load tất cả rules (không filter theo service)
+- ✅ Đơn giản, phù hợp cho ứng dụng nhỏ/trung bình
+- ✅ Backward compatible - hoạt động như trước khi có `service_name`
+
+**Ví dụ `.env`:**
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=authkit
+JWT_SECRET=your-secret-key
+# SERVICE_NAME không được set = single-app mode
+```
+
+#### 1.3.2. Microservice App (Multiple Services)
+
+**Kiến trúc:**
+```
+┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐
+│Service A│     │Service B│     │Service C│     │Service D│
+│(Admin)  │     │(API)    │     │(Worker) │     │(Gateway)│
+└────┬────┘     └────┬────┘     └────┬────┘     └────┬────┘
+     │               │               │               │
+     └───────────────┴───────────────┴───────────────┘
+                     │
+                     ▼
+              ┌────────────────┐
+              │PostgreSQL      │
+              │ (Shared DB)    │
+              │                │
+              │Rules table:    │
+              │ - service_name │
+              │ - method       │
+              │ - path         │
+              └────────────────┘
+```
+
+**Cấu hình:**
+
+Mỗi service cần set `SERVICE_NAME` riêng trong file `.env`:
+
+**Service A (Admin Portal) - `.env`:**
+```env
+DB_HOST=postgres-host
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=authkit
+JWT_SECRET=shared-secret-key-for-all-services
+SERVICE_NAME=A
+PORT=3000
+```
+
+**Service B (Business API) - `.env`:**
+```env
+DB_HOST=postgres-host
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=authkit
+JWT_SECRET=shared-secret-key-for-all-services  # CÙNG với Service A
+SERVICE_NAME=B
+PORT=3001
+```
+
+**Service C (Worker Service) - `.env`:**
+```env
+DB_HOST=postgres-host
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=authkit
+JWT_SECRET=shared-secret-key-for-all-services  # CÙNG với Service A
+SERVICE_NAME=C
+PORT=3002
+```
+
+**Service D (Gateway) - `.env`:**
+```env
+DB_HOST=postgres-host
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=authkit
+JWT_SECRET=shared-secret-key-for-all-services  # CÙNG với Service A
+SERVICE_NAME=D
+PORT=3003
+```
+
+**Đặc điểm:**
+- ✅ Mỗi service chỉ load rules có `service_name` matching
+- ✅ Rules được tách biệt giữa các services
+- ✅ Cùng một `(method, path)` có thể có rules khác nhau cho mỗi service
+- ✅ Tất cả services dùng chung `JWT_SECRET` để validate tokens
+- ✅ Tất cả services kết nối vào cùng database
+
+**Lưu ý quan trọng:**
+- `SERVICE_NAME` tối đa **20 ký tự** (tự động truncate nếu dài hơn)
+- Tất cả services **phải** dùng cùng `JWT_SECRET` để SSO hoạt động
+- Khi sync routes, rules sẽ tự động được gán `service_name` từ config
+- Rules được tạo qua API cũng tự động được gán `service_name` từ config
+
+**Ví dụ Rules trong Database:**
+
+```sql
+-- Service A rules
+INSERT INTO rules (id, method, path, type, roles, service_name) VALUES
+('GET|/api/admin/users', 'GET', '/api/admin/users', 'ALLOW', '{1}', 'A'),
+('POST|/api/admin/users', 'POST', '/api/admin/users', 'ALLOW', '{1}', 'A');
+
+-- Service B rules
+INSERT INTO rules (id, method, path, type, roles, service_name) VALUES
+('GET|/api/products', 'GET', '/api/products', 'ALLOW', '{2,3}', 'B'),
+('POST|/api/products', 'POST', '/api/products', 'ALLOW', '{2}', 'B');
+
+-- Service C rules
+INSERT INTO rules (id, method, path, type, roles, service_name) VALUES
+('POST|/api/tasks', 'POST', '/api/tasks', 'ALLOW', '{4}', 'C');
+```
+
+**Luồng hoạt động:**
+
+1. **Service A** sync routes → Rules được lưu với `service_name = 'A'`
+2. **Service B** sync routes → Rules được lưu với `service_name = 'B'`
+3. **Service C** sync routes → Rules được lưu với `service_name = 'C'`
+4. Khi request đến **Service B**:
+   - Repository chỉ load rules có `service_name = 'B'`
+   - Middleware chỉ kiểm tra rules của Service B
+   - Rules từ Service A, C, D không được sử dụng
+
+**Migration từ Single-App sang Microservice:**
+
+Nếu bạn đã có rules với `service_name = NULL` và muốn migrate:
+
+```sql
+-- Option 1: Giữ nguyên rules cũ (backward compatible)
+-- Rules với service_name = NULL vẫn hoạt động trong single-app mode
+
+-- Option 2: Gán service_name cho rules cũ
+UPDATE rules SET service_name = 'A' WHERE service_name IS NULL;
+```
+
+### 1.4. Tích hợp vào Ứng dụng (Bước đơn giản nhất)
 
 Đây là cách tích hợp AuthKit vào ứng dụng Fiber của bạn với các bước tối thiểu:
 

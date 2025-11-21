@@ -98,6 +98,7 @@ AuthKit cung cấp các tính năng sau:
 
 - **JWT-based authentication**: Login, Register, Token validation
 - **Rule-based authorization**: Public, Allow, Forbid rules
+- **Microservice architecture support**: Service name isolation cho multi-service deployments
 - **Role-based access control (RBAC)**: User-Role relationships, System roles
 - **Route management**: Fluent API để định nghĩa routes, tự động sync vào database
 - **Generic Types**: Hỗ trợ Custom User/Role models với type safety
