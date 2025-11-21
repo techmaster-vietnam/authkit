@@ -14,7 +14,7 @@ go test ./middleware -v -run TestCountSegments
 # Xem coverage
 go test ./middleware -cover
 ```
-
+![](TestScreen.png)
 ## Các hàm đã được test
 
 ### 1. Pure Functions (không cần DB)
@@ -99,12 +99,10 @@ Tests sử dụng các kỹ thuật sau để tránh cần database:
 
 ### Test Coverage
 
-Hiện tại coverage khoảng **28.0%** (tăng từ 18.5%) vì:
+Hiện tại coverage khoảng **28.0%** vì:
 - Test các pure functions và logic quan trọng
 - Test role-based authorization với các scenarios khác nhau
 - Test super admin bypass và X-Role-Context header
-- Không test integration với database (xem [Integration Tests](./12_authorization_integration_test.md))
-- Không test toàn bộ flow với real repositories
 
 ## Test Cases mới - Role-based Authorization
 
@@ -123,15 +121,7 @@ Hiện tại coverage khoảng **28.0%** (tăng từ 18.5%) vì:
 6. **X-Role-Context Header**: Test user có multiple roles, chọn role context cụ thể
 7. **Multiple Rules Same Endpoint**: Test FORBIDE và ALLOW rules cùng endpoint
 
-## Mở rộng Tests
 
-Để test đầy đủ hơn (với DB), bạn có thể:
-
-1. **Integration Tests**: Xem tài liệu [Unit Tests cho Authorization Middleware Integration](./12_authorization_integration_test.md) để biết cách tạo file `authorization_middleware_integration_test.go` với tag `//go:build integration`
-
-2. **Test với Mock Repositories**: Sử dụng interfaces và dependency injection để inject mock repositories
-
-3. **Test Invalid Role Name**: Test case với role không tồn tại hiện đang skip vì cần DB/mock repository
 
 ## Lưu ý
 
