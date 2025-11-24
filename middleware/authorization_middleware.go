@@ -45,9 +45,8 @@ func NewAuthorizationMiddleware(
 		roleNameCacheMutex:          sync.RWMutex{},
 	}
 
-	// Load initial rules
-	mw.refreshCache()
 	// Load super_admin ID and common role names cache
+	// Note: refreshCache() sẽ được gọi sau khi sync routes (qua InvalidateCache())
 	mw.loadRoleNameCache()
 
 	return mw

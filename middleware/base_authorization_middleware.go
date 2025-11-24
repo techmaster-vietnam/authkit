@@ -47,9 +47,8 @@ func NewBaseAuthorizationMiddleware[TUser core.UserInterface, TRole core.RoleInt
 		roleNameCacheMutex:          sync.RWMutex{},
 	}
 
-	// Load initial rules
-	mw.refreshCache()
 	// Load super_admin ID and common role names cache
+	// Note: refreshCache() sẽ được gọi sau khi sync routes (qua InvalidateCache())
 	mw.loadRoleNameCache()
 
 	return mw
@@ -60,7 +59,6 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) Authorize() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		method := c.Method()
 		path := c.Path()
-
 		// Get all matching rules
 		matchingRules := m.findMatchingRules(method, path)
 
@@ -283,7 +281,19 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) matchPath(pattern, path stri
 func (m *BaseAuthorizationMiddleware[TUser, TRole]) refreshCache() {
 	rules, err := m.ruleRepo.GetAllRulesForCache()
 	if err != nil {
+		// Log error để debug - lỗi này có thể khiến cache rỗng
+		goerrorkit.LogError(goerrorkit.WrapWithMessage(err, "Lỗi khi load rules từ database để refresh cache").WithData(map[string]interface{}{
+			"service_name": m.ruleRepo.GetServiceName(),
+		}), "BaseAuthorizationMiddleware.refreshCache")
 		return
+	}
+
+	// Log warning nếu không có rules nào được load
+	if len(rules) == 0 {
+		goerrorkit.LogError(goerrorkit.NewBusinessError(404, "Không có rules nào được load vào cache").WithData(map[string]interface{}{
+			"service_name": m.ruleRepo.GetServiceName(),
+			"hint":         "Kiểm tra xem đã sync routes chưa (ak.SyncRoutes()) và service_name có khớp không",
+		}), "BaseAuthorizationMiddleware.refreshCache")
 	}
 
 	m.cacheMutex.Lock()
@@ -373,4 +383,3 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) getRoleIDByName(roleName str
 
 	return roleID, nil
 }
-

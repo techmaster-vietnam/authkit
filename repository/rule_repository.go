@@ -77,8 +77,9 @@ func (r *RuleRepository) List() ([]models.Rule, error) {
 	if r.serviceName != "" {
 		query = query.Where("service_name = ?", r.serviceName)
 	} else {
-		// In single-app mode, only load rules without service_name (NULL)
-		query = query.Where("service_name IS NULL")
+		// In single-app mode, only load rules without service_name (NULL or empty string)
+		// Check both NULL and empty string for backward compatibility
+		query = query.Where("service_name IS NULL OR service_name = ''")
 	}
 	err := query.Find(&rules).Error
 	return rules, err
@@ -93,8 +94,9 @@ func (r *RuleRepository) GetAllRulesForCache() ([]models.Rule, error) {
 	if r.serviceName != "" {
 		query = query.Where("service_name = ?", r.serviceName)
 	} else {
-		// In single-app mode, only load rules without service_name (NULL)
-		query = query.Where("service_name IS NULL")
+		// In single-app mode, only load rules without service_name (NULL or empty string)
+		// Check both NULL and empty string for backward compatibility
+		query = query.Where("service_name IS NULL OR service_name = ''")
 	}
 	err := query.Find(&rules).Error
 	return rules, err

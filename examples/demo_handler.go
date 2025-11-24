@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/techmaster-vietnam/authkit"
 	"github.com/techmaster-vietnam/authkit/middleware"
@@ -23,6 +25,10 @@ func NewDemoHandler(ak *authkit.AuthKit[*CustomUser, *authkit.BaseRole]) *DemoHa
 // LoginWithUsername demonstrates login with username in JWT token
 // POST /api/demo/login-with-username
 func (h *DemoHandler) LoginWithUsername(c *fiber.Ctx) error {
+	// Debug: Log method and path để kiểm tra tại sao route này được gọi
+	fmt.Printf("[DEBUG] LoginWithUsername được gọi với method=%s, path=%s, route=%s\n",
+		c.Method(), c.Path(), c.Route().Path)
+
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -31,6 +37,11 @@ func (h *DemoHandler) LoginWithUsername(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "Invalid request body",
+			"debug": fiber.Map{
+				"method": c.Method(),
+				"path":   c.Path(),
+				"route":  c.Route().Path,
+			},
 		})
 	}
 
@@ -248,4 +259,3 @@ func compareRoleIDs(a, b []uint) bool {
 	}
 	return true
 }
-

@@ -63,24 +63,20 @@ func main() {
 	}
 	// 5. Reset database (only if RESET_DB=true)
 	if err := resetDatabase(db); err != nil {
-		panic(err)
+		goerrorkit.LogError(err.(*goerrorkit.AppError), "resetDatabase")
+		return
 	}
 
 	// 6. Run migrations
 	if err := runMigrations(db, dbName); err != nil {
-		panic(goerrorkit.NewSystemError(err).
-			WithData(map[string]interface{}{
-				"operation": "migration",
-				"database":  dbName,
-			}))
+		goerrorkit.LogError(err.(*goerrorkit.AppError), "runMigrations")
+		return
 	}
 
 	// 7. Seed initial data (roles and users only, rules sẽ được sync từ routes)
 	if err := SeedData(db); err != nil {
-		panic(goerrorkit.WrapWithMessage(err, "Failed to seed initial data").
-			WithData(map[string]interface{}{
-				"operation": "seed_data",
-			}))
+		goerrorkit.LogError(err.(*goerrorkit.AppError), "SeedData")
+		return
 	}
 
 	// 8. Create Fiber app
@@ -91,6 +87,16 @@ func main() {
 	// 9. Add middleware (RequestID must be before ErrorHandler)
 	app.Use(requestid.New())
 	app.Use(logger.New())
+
+	// Debug middleware để log tất cả requests
+	app.Use(func(c *fiber.Ctx) error {
+		if c.Path() == "/api/rules/1" && c.Method() == "DELETE" {
+			fmt.Printf("[DEBUG Main] DELETE /api/rules/1 - Original Method=%s, Path=%s\n",
+				c.Method(), c.Path())
+		}
+		return c.Next()
+	})
+
 	app.Use(goerrorkit.FiberErrorHandler()) // goerrorkit error handler
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
@@ -108,13 +114,11 @@ func main() {
 		Initialize()
 
 	if err != nil {
-		panic(goerrorkit.WrapWithMessage(err, "Failed to initialize AuthKit").
-			WithData(map[string]interface{}{
-				"operation": "initialize_authkit",
-			}))
+		goerrorkit.LogError(err.(*goerrorkit.AppError), "authkit.New[*CustomUser, *authkit.BaseRole](app, db)")
+		return
 	}
 
-	blogHandler := NewBlogHandler() // Application-specific handler
+	blogHandler := NewBlogHandler()   // Application-specific handler
 	demoHandler := NewDemoHandler(ak) // Demo handler for new features
 
 	// 11. Setup routes với fluent API
@@ -122,10 +126,8 @@ func main() {
 
 	// 12. Sync routes từ code vào database
 	if err := ak.SyncRoutes(); err != nil {
-		panic(goerrorkit.WrapWithMessage(err, "Failed to sync routes to database").
-			WithData(map[string]interface{}{
-				"operation": "sync_routes",
-			}))
+		goerrorkit.LogError(err.(*goerrorkit.AppError), "ak.SyncRoutes")
+		return
 	}
 
 	// 13. Refresh authorization middleware cache sau khi sync routes
@@ -133,7 +135,8 @@ func main() {
 
 	// 17. Start server
 	if err := app.Listen(":" + cfg.Server.Port); err != nil {
-		panic(goerrorkit.NewSystemError(err))
+		goerrorkit.LogError(goerrorkit.NewSystemError(err), "Start server")
+		return
 	}
 }
 

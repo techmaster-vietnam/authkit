@@ -508,9 +508,6 @@
             showLogin();
         }
         
-        // Load roles mapping và rules từ API
-        loadRolesAndRules();
-        
         // Load actions ngay khi page load
         loadActions();
 
@@ -577,8 +574,6 @@
                     currentUser = data.data.user;
                     showAlert('loginAlert', 'Đăng nhập thành công!', 'success');
                     updateUI();
-                    // Reload rules từ API sau khi đăng nhập
-                    loadRolesAndRules();
                     loadActions();
                 } else {
                     showAlert('loginAlert', data.message || 'Đăng nhập thất bại', 'error');
@@ -660,8 +655,13 @@
                     localStorage.removeItem('token');
                 }
             } catch (error) {
-                console.error('Error loading profile:', error);
+                // Silent fail
             }
+        }
+
+        // Helper: Check if user has admin or super_admin role
+        function hasAdminRole() {
+            return currentUser && currentUser.roles && currentUser.roles.some(r => r.name === 'admin' || r.name === 'super_admin');
         }
 
         // Update UI based on login status
@@ -677,7 +677,7 @@
                 document.getElementById('logoutBtn').classList.remove('hidden');
                 
                 // Show admin button if user has admin role
-                const hasAdmin = currentUser.roles && currentUser.roles.some(r => r.name === 'admin');
+                const hasAdmin = hasAdminRole();
                 if (hasAdmin) {
                     document.getElementById('adminBtn').classList.remove('hidden');
                 } else {
@@ -872,8 +872,7 @@
                 return;
             }
 
-            const hasAdmin = currentUser.roles && currentUser.roles.some(r => r.name === 'admin');
-            if (!hasAdmin) {
+            if (!hasAdminRole()) {
                 alert('Bạn không có quyền truy cập');
                 return;
             }
@@ -901,11 +900,11 @@
                     document.getElementById('usersList').innerHTML = '<p>Chức năng quản lý users cần endpoint riêng</p>';
                 }
             } catch (error) {
-                console.error('Error loading users:', error);
+                document.getElementById('usersList').innerHTML = '<div class="alert alert-error">Lỗi khi tải danh sách users</div>';
             }
         }
 
-        // Load roles
+        // Load roles - chỉ gọi khi admin vào admin panel để xem/quản lý roles
         async function loadRoles() {
             if (!token) return;
 
@@ -920,7 +919,7 @@
                     const data = await response.json();
                     const roles = data.data || [];
                     
-                    // Update role mapping
+                    // Update role mapping để dùng cho loadRules()
                     roles.forEach(role => {
                         roleIdToNameMap[role.id] = role.name;
                     });
@@ -945,106 +944,16 @@
                             </tbody>
                         </table>
                     `;
+                } else {
+                    document.getElementById('rolesList').innerHTML = '<div class="alert alert-error">Không thể tải danh sách roles</div>';
                 }
             } catch (error) {
-                console.error('Error loading roles:', error);
+                document.getElementById('rolesList').innerHTML = '<div class="alert alert-error">Lỗi khi tải danh sách roles</div>';
             }
         }
 
-        // Load roles mapping (ID -> name)
-        async function loadRolesMapping() {
-            try {
-                const headers = {};
-                if (token) headers['Authorization'] = 'Bearer ' + token;
-                
-                const response = await fetch('/api/roles', { headers });
-                if (response.ok) {
-                    const data = await response.json();
-                    const roles = data.data || [];
-                    roleIdToNameMap = {};
-                    roles.forEach(role => {
-                        roleIdToNameMap[role.id] = role.name;
-                    });
-                    return true;
-                }
-            } catch (error) {
-                console.error('Error loading roles mapping:', error);
-            }
-            return false;
-        }
 
-        // Load rules from API and update the rules array
-        async function loadRolesAndRules() {
-            // Load roles mapping first
-            await loadRolesMapping();
-            
-            // Try to load rules from API (only if logged in as admin)
-            if (token) {
-                try {
-                    const response = await fetch('/api/rules', {
-                        headers: {
-                            'Authorization': 'Bearer ' + token
-                        }
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        const apiRules = data.data || [];
-                        
-                        // Convert API rules to display format
-                        const convertedRules = apiRules.map(rule => {
-                            // Convert role IDs to role names
-                            const roleNames = (rule.roles || []).map(roleId => {
-                                return roleIdToNameMap[roleId] || `role_${roleId}`;
-                            });
-                            
-                            // Convert type: PUBLIC -> Public, ALLOW -> Allow, FORBIDE -> Forbid
-                            let type = 'Public';
-                            if (rule.type === 'ALLOW') {
-                                type = 'Allow';
-                            } else if (rule.type === 'FORBIDE') {
-                                type = 'Forbid';
-                            } else if (rule.type === 'PUBLIC') {
-                                type = 'Public';
-                            }
-                            
-                            // Handle path patterns: convert /api/blogs/* to /api/blogs/1 for display
-                            let displayPath = rule.path;
-                            if (displayPath.includes('*')) {
-                                // Replace * with example ID for display
-                                displayPath = displayPath.replace('*', '1');
-                            }
-                            
-                            return {
-                                method: rule.method,
-                                path: displayPath,
-                                type: type,
-                                roles: roleNames,
-                                description: rule.description || `${rule.method} ${rule.path}`
-                            };
-                        });
-                        
-                        // Update rules array
-                        rules = convertedRules;
-                        
-                        // Refresh actions display
-                        loadActions();
-                        return;
-                    } else if (response.status === 403) {
-                        // User không có quyền admin, dùng hardcoded rules
-                        console.log('Không có quyền admin, sử dụng rules mặc định');
-                    }
-                } catch (error) {
-                    console.error('Error loading rules from API:', error);
-                    // Fallback to hardcoded rules
-                }
-            }
-            
-            // If not logged in or API call failed, use hardcoded rules
-            // Rules array already initialized with fallback values
-        }
-
-        // Load rules (for admin panel)
+        // Load rules - chỉ gọi khi admin vào admin panel để xem/quản lý rules (quy tắc phân quyền)
         async function loadRules() {
             if (!token) return;
 
@@ -1093,9 +1002,11 @@
                             </tbody>
                         </table>
                     `;
+                } else {
+                    document.getElementById('rulesList').innerHTML = '<div class="alert alert-error">Không thể tải danh sách rules</div>';
                 }
             } catch (error) {
-                console.error('Error loading rules:', error);
+                document.getElementById('rulesList').innerHTML = '<div class="alert alert-error">Lỗi khi tải danh sách rules</div>';
             }
         }
 
