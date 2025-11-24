@@ -39,17 +39,13 @@ func NewBaseAuthorizationMiddleware[TUser core.UserInterface, TRole core.RoleInt
 		ruleRepo:                    ruleRepo,
 		roleRepo:                    roleRepo,
 		userRepo:                    userRepo,
-		cacheTTL:                    5 * time.Minute, // Cache rules for 5 minutes
+		cacheTTL:                    100 * time.Minute, // Cache rules for 100 minutes
 		exactRulesMap:               make(map[string][]models.Rule),
 		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
 		superAdminID:                nil,
 		roleNameToIDMap:             make(map[string]uint),
 		roleNameCacheMutex:          sync.RWMutex{},
 	}
-
-	// Load super_admin ID and common role names cache
-	// Note: refreshCache() sẽ được gọi sau khi sync routes (qua InvalidateCache())
-	mw.loadRoleNameCache()
 
 	return mw
 }
@@ -62,7 +58,7 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) Authorize() fiber.Handler {
 		// Get all matching rules
 		matchingRules := m.findMatchingRules(method, path)
 
-		// If no rule found, default to FORBIDE
+		// If no rule found, default to FORBID
 		if len(matchingRules) == 0 {
 			return goerrorkit.NewAuthError(403, "Không có quyền truy cập endpoint này").WithData(map[string]interface{}{
 				"method": method,
@@ -131,10 +127,10 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) Authorize() fiber.Handler {
 			userRoleIDs = map[uint]bool{roleContextID: true}
 		}
 
-		// Process rules: FORBIDE rules have higher priority than ALLOW rules
+		// Process rules: FORBID rules have higher priority than ALLOW rules
 		for _, rule := range matchingRules {
 			if rule.Type == models.AccessForbid {
-				// FORBIDE rules: check if user has forbidden roles
+				// FORBID rules: check if user has forbidden roles
 				if len(rule.Roles) == 0 {
 					return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
 						"method":        method,
@@ -155,7 +151,7 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) Authorize() fiber.Handler {
 			}
 		}
 
-		// Check ALLOW rules only if no FORBIDE match
+		// Check ALLOW rules only if no FORBID match
 		for _, rule := range matchingRules {
 			if rule.Type == models.AccessAllow {
 				// ALLOW rules: check if user has allowed roles
@@ -328,34 +324,30 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) InvalidateCache() {
 	m.refreshCache()
 }
 
-// loadRoleNameCache loads super_admin ID and common role names into cache
-func (m *BaseAuthorizationMiddleware[TUser, TRole]) loadRoleNameCache() {
-	// Load super_admin ID
-	superAdmin, err := m.roleRepo.GetByName("super_admin")
-	if err == nil {
-		m.roleNameCacheMutex.Lock()
-		superAdminID := superAdmin.GetID()
-		m.superAdminID = &superAdminID
-		m.roleNameToIDMap["super_admin"] = superAdminID
-		m.roleNameCacheMutex.Unlock()
-	}
-
-	// Pre-load common role names
-	commonRoles := []string{"admin", "editor", "author", "reader"}
-	roleMap, err := m.roleRepo.GetIDsByNames(commonRoles)
-	if err == nil {
-		m.roleNameCacheMutex.Lock()
-		for name, id := range roleMap {
-			m.roleNameToIDMap[name] = id
-		}
-		m.roleNameCacheMutex.Unlock()
-	}
-}
-
-// getSuperAdminID returns cached super_admin role ID
+// getSuperAdminID returns cached super_admin role ID (lazy loads if not cached)
 func (m *BaseAuthorizationMiddleware[TUser, TRole]) getSuperAdminID() *uint {
+	// Check cache first
 	m.roleNameCacheMutex.RLock()
-	defer m.roleNameCacheMutex.RUnlock()
+	if m.superAdminID != nil {
+		defer m.roleNameCacheMutex.RUnlock()
+		return m.superAdminID
+	}
+	m.roleNameCacheMutex.RUnlock()
+
+	// Not cached, lazy load from DB
+	superAdmin, err := m.roleRepo.GetByName("super_admin")
+	if err != nil {
+		// Role không tồn tại hoặc lỗi DB - trả về nil để skip super_admin check
+		return nil
+	}
+
+	// Update cache
+	m.roleNameCacheMutex.Lock()
+	superAdminID := superAdmin.GetID()
+	m.superAdminID = &superAdminID
+	m.roleNameToIDMap["super_admin"] = superAdminID
+	m.roleNameCacheMutex.Unlock()
+
 	return m.superAdminID
 }
 

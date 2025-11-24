@@ -12,9 +12,9 @@ import (
 type AccessType string
 
 const (
-	AccessPublic AccessType = "PUBLIC"  // Allow anyone, including anonymous
-	AccessAllow  AccessType = "ALLOW"   // Allow specific roles (empty roles = any authenticated user)
-	AccessForbid AccessType = "FORBIDE" // Forbid specific roles
+	AccessPublic AccessType = "PUBLIC" // Allow anyone, including anonymous
+	AccessAllow  AccessType = "ALLOW"  // Allow specific roles (empty roles = any authenticated user)
+	AccessForbid AccessType = "FORBID" // Forbid specific roles
 )
 
 // IntArray is a custom type for PostgreSQL integer[] array
@@ -70,14 +70,14 @@ func FromUintSlice(slice []uint) IntArray {
 // Rule represents an authorization rule for HTTP endpoints
 // ID format: "METHOD|PATH" (ví dụ: "GET|/api/users")
 type Rule struct {
-	ID          string     `gorm:"primaryKey" json:"id"`                               // Format: "METHOD|PATH"
-	Method      string     `gorm:"not null" json:"method"`                              // GET, POST, PUT, DELETE, etc.
-	Path        string     `gorm:"not null" json:"path"`                                // URL path pattern
-	Type        AccessType `gorm:"type:varchar(20);not null" json:"type"`              // PUBLIC, ALLOW, FORBIDE
-	Roles       IntArray   `gorm:"type:integer[]" json:"roles"`                        // Stored as PostgreSQL array of role IDs
-	Fixed       bool       `gorm:"default:false" json:"fixed"`                         // Fixed=true: rule từ code, không thể sửa từ DB
-	Description string     `gorm:"type:text" json:"description"`                       // Mô tả rule
-	ServiceName string     `gorm:"type:varchar(20);index" json:"service_name"`        // Service name for microservice architecture (max 20 chars)
+	ID          string     `gorm:"primaryKey" json:"id"`                       // Format: "METHOD|PATH"
+	Method      string     `gorm:"not null" json:"method"`                     // GET, POST, PUT, DELETE, etc.
+	Path        string     `gorm:"not null" json:"path"`                       // URL path pattern
+	Type        AccessType `gorm:"type:varchar(20);not null" json:"type"`      // PUBLIC, ALLOW, FORBID
+	Roles       IntArray   `gorm:"type:integer[]" json:"roles"`                // Stored as PostgreSQL array of role IDs
+	Fixed       bool       `gorm:"default:false" json:"fixed"`                 // Fixed=true: rule từ code, không thể sửa từ DB
+	Description string     `gorm:"type:text" json:"description"`               // Mô tả rule
+	ServiceName string     `gorm:"type:varchar(20);index" json:"service_name"` // Service name for microservice architecture (max 20 chars)
 }
 
 // BeforeCreate hook to generate ID from Method and Path

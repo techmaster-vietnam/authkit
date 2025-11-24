@@ -19,7 +19,7 @@ type Rule struct {
     ID          string     // Format: "METHOD|PATH" (ví dụ: "GET|/api/users")
     Method      string     // HTTP method: GET, POST, PUT, DELETE, etc.
     Path        string     // URL path pattern (hỗ trợ wildcard *)
-    Type        AccessType // PUBLIC, ALLOW, FORBIDE
+    Type        AccessType // PUBLIC, ALLOW, FORBID
     Roles       IntArray   // Array of role IDs (PostgreSQL integer[])
     Fixed       bool       // Fixed=true: rule từ code, không thể sửa từ DB
     Description string     // Mô tả rule
@@ -98,13 +98,13 @@ Pattern: GET|/api/users/* → ❌ No Match (khác số segments)
 
 ### 4.1.3. Multiple Rules cho cùng Endpoint
 
-Một endpoint có thể có nhiều rules (ví dụ: cả FORBIDE và ALLOW rules):
+Một endpoint có thể có nhiều rules (ví dụ: cả FORBID và ALLOW rules):
 
 ```go
 // Rule 1: Cấm role "guest"
 Rule {
     ID: "GET|/api/blogs",
-    Type: FORBIDE,
+    Type: FORBID,
     Roles: [guest_id]
 }
 
@@ -119,7 +119,7 @@ Rule {
 **Evaluation Order** (xem chi tiết trong [3.2.3. Rule Evaluation Order](./03-middleware-security.md#323-rule-evaluation-order)):
 1. PUBLIC → Early exit
 2. super_admin → Bypass tất cả
-3. FORBIDE → Kiểm tra trước (ưu tiên cao)
+3. FORBID → Kiểm tra trước (ưu tiên cao)
 4. ALLOW → Kiểm tra sau
 
 ---
@@ -231,12 +231,12 @@ flowchart TD
 - **Có roles** (`Allow("admin", "editor")`) = Chỉ các roles này được phép
 - User chỉ cần có **một trong các roles** được chỉ định là đủ
 
-### 4.2.3. FORBIDE - Cấm các roles cụ thể
+### 4.2.3. FORBID - Cấm các roles cụ thể
 
 **Đặc điểm:**
 - 🔐 Yêu cầu authentication (phải có JWT token hợp lệ)
 - 🚫 Cấm các roles được chỉ định
-- ⚠️ **Ưu tiên cao hơn ALLOW** - nếu user có role bị FORBIDE → từ chối ngay
+- ⚠️ **Ưu tiên cao hơn ALLOW** - nếu user có role bị FORBID → từ chối ngay
 
 **Khi nào sử dụng:**
 - Cấm một số roles cụ thể (ví dụ: cấm guest users)
@@ -251,8 +251,8 @@ apiRouter.Delete("/blogs/:id", blogHandler.Delete).
     Description("Xóa blog (cấm guest)").
     Register()
 
-// Kết hợp FORBIDE và ALLOW:
-// - FORBIDE: Cấm guest
+// Kết hợp FORBID và ALLOW:
+// - FORBID: Cấm guest
 // - ALLOW: Chỉ admin và editor được phép
 // → Kết quả: Chỉ admin và editor được phép (guest bị cấm)
 ```
@@ -265,7 +265,7 @@ flowchart TD
     Auth -->|Invalid| Reject1[❌ 401 Unauthorized]
     Auth -->|Valid| Authz[AuthzMiddleware<br/>Check Rules]
     
-    Authz -->|Has FORBIDE Rule| CheckForbidRoles{User có<br/>Forbidden Role?}
+    Authz -->|Has FORBID Rule| CheckForbidRoles{User có<br/>Forbidden Role?}
     CheckForbidRoles -->|Yes| Reject2[❌ 403 Forbidden<br/>Early Exit]
     CheckForbidRoles -->|No| CheckAllow{Has ALLOW Rule?}
     
@@ -284,9 +284,9 @@ flowchart TD
 
 **Lưu ý quan trọng:**
 
-- **FORBIDE có ưu tiên cao hơn ALLOW** - kiểm tra FORBIDE trước
-- Nếu user có role bị FORBIDE → từ chối ngay (không check ALLOW)
-- Nếu user không có role bị FORBIDE → tiếp tục check ALLOW
+- **FORBID có ưu tiên cao hơn ALLOW** - kiểm tra FORBID trước
+- Nếu user có role bị FORBID → từ chối ngay (không check ALLOW)
+- Nếu user không có role bị FORBID → tiếp tục check ALLOW
 
 ---
 
@@ -398,7 +398,7 @@ type BaseRole struct {
 1. **Bypass tất cả rules** ⭐
    - Nếu user có role `super_admin` → bypass tất cả logic authorization
    - Early exit trong authorization middleware
-   - Không cần check FORBIDE hay ALLOW rules
+   - Không cần check FORBID hay ALLOW rules
 
 2. **Bảo mật cao** 🔒
    - Không thể tạo qua API (bị từ chối với 403)
@@ -421,7 +421,7 @@ flowchart TD
     GetRoles --> CheckSuperAdmin{Has super_admin<br/>Role?}
     
     CheckSuperAdmin -->|Yes| Bypass[✅ Bypass All Rules<br/>Early Exit]
-    CheckSuperAdmin -->|No| CheckRules[Check FORBIDE/ALLOW Rules]
+    CheckSuperAdmin -->|No| CheckRules[Check FORBID/ALLOW Rules]
     
     CheckRules -->|Pass| Allow[✅ Allow]
     CheckRules -->|Fail| Reject[❌ 403 Forbidden]
@@ -649,7 +649,7 @@ curl -X PUT http://localhost:3000/api/rules/GET|/api/custom-endpoint \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "type": "FORBIDE",
+    "type": "FORBID",
     "roles": [6]
   }'
 
@@ -685,8 +685,8 @@ func (h *RuleHandler) AddRule(c *fiber.Ctx) error {
    - System endpoints
    - Endpoints quan trọng cần bảo vệ
 
-2. **Kết hợp FORBIDE và ALLOW khi cần**
-   - FORBIDE để cấm một số roles
+2. **Kết hợp FORBID và ALLOW khi cần**
+   - FORBID để cấm một số roles
    - ALLOW để chỉ định roles được phép
 
 3. **Sử dụng PUBLIC cho endpoints không cần authentication**
@@ -715,7 +715,7 @@ func (h *RuleHandler) AddRule(c *fiber.Ctx) error {
 
 3. **Multiple Rules**
    - Một endpoint có thể có nhiều rules
-   - Evaluation order: PUBLIC → super_admin → FORBIDE → ALLOW
+   - Evaluation order: PUBLIC → super_admin → FORBID → ALLOW
 
 4. **Cache**
    - Rules được cache để tối ưu hiệu suất

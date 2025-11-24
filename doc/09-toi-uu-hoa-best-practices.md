@@ -28,7 +28,7 @@ func (m *BaseAuthorizationMiddleware) Authorize() fiber.Handler {
         // 5. Early exit: super_admin → Allow
         if isSuperAdmin(roleIDs) { return allow }
         
-        // 6. Check FORBIDE rules (priority)
+        // 6. Check FORBID rules (priority)
         // 7. Check ALLOW rules
     }
 }
@@ -203,7 +203,7 @@ if user == nil { return deny }
 // 4. super_admin → Allow (O(1) check với cache)
 if isSuperAdmin(roleIDs) { return allow }
 
-// 5. FORBIDE rules (O(k) với k = số FORBIDE rules)
+// 5. FORBID rules (O(k) với k = số FORBID rules)
 // 6. ALLOW rules (O(k) với k = số ALLOW rules)
 ```
 
@@ -217,13 +217,13 @@ if isSuperAdmin(roleIDs) { return allow }
 **Priority Order:**
 1. **PUBLIC** (highest priority) - Check đầu tiên
 2. **super_admin** - Check sau PUBLIC
-3. **FORBIDE** - Check trước ALLOW
+3. **FORBID** - Check trước ALLOW
 4. **ALLOW** - Check cuối cùng
 
 **Lý do:**
 - PUBLIC và super_admin có thể early exit → check sớm nhất
-- FORBIDE có priority cao hơn ALLOW → check trước
-- Nếu user bị FORBIDE → không cần check ALLOW
+- FORBID có priority cao hơn ALLOW → check trước
+- Nếu user bị FORBID → không cần check ALLOW
 
 ---
 

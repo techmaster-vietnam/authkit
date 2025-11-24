@@ -51,7 +51,7 @@ Tài liệu chi tiết về hệ thống phân quyền rule-based:
 - **Các loại Access Type**: 
   - PUBLIC: Sequence diagram cho anonymous users
   - ALLOW: Flowchart với role checking
-  - FORBIDE: Flowchart với priority evaluation
+  - FORBID: Flowchart với priority evaluation
 - **Role và User-Role Relationship**: 
   - ER diagram chi tiết
   - super_admin role đặc biệt với bypass logic

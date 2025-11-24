@@ -50,7 +50,7 @@ go test ./middleware -cover
 
 #### `Authorize()` middleware - Basic
 - Test PUBLIC rule (cho phép anonymous access)
-- Test no rule found (default FORBIDE)
+- Test no rule found (default FORBID)
 - Test anonymous user với non-PUBLIC rule (trả về 401)
 
 #### `Authorize()` middleware - Role-based Authorization
@@ -59,13 +59,13 @@ go test ./middleware -cover
   - Editor role được phép
   - Regular user bị từ chối
   
-- **TestAuthorize_UserWithForbiddenRole**: Test user có role bị FORBIDE
-  - Banned user bị từ chối (FORBIDE có priority cao hơn ALLOW)
-  - Admin user được phép (FORBIDE không áp dụng)
+- **TestAuthorize_UserWithForbiddenRole**: Test user có role bị FORBID
+  - Banned user bị từ chối (FORBID có priority cao hơn ALLOW)
+  - Admin user được phép (FORBID không áp dụng)
   
 - **TestAuthorize_AllowAnyAuthenticatedUser**: Test ALLOW rule với empty roles (any authenticated user)
   
-- **TestAuthorize_ForbidEveryone**: Test FORBIDE rule với empty roles (forbid everyone, kể cả admin)
+- **TestAuthorize_ForbidEveryone**: Test FORBID rule với empty roles (forbid everyone, kể cả admin)
   
 - **TestAuthorize_SuperAdminBypass**: Test super admin bypass tất cả rules
   - Super admin có thể truy cập mọi endpoint
@@ -77,8 +77,8 @@ go test ./middleware -cover
   - User không có role được yêu cầu - bị từ chối
   
 - **TestAuthorize_MultipleRulesSameEndpoint**: Test multiple rules cùng endpoint
-  - FORBIDE và ALLOW rules cùng endpoint
-  - FORBIDE có priority cao hơn ALLOW
+  - FORBID và ALLOW rules cùng endpoint
+  - FORBID có priority cao hơn ALLOW
 
 ## Cách test hoạt động
 
@@ -114,12 +114,12 @@ Hiện tại coverage khoảng **28.0%** vì:
 ### Test Scenarios
 
 1. **User với Allowed Role**: Test user có role được phép truy cập endpoint
-2. **User với Forbidden Role**: Test user có role bị cấm (FORBIDE rule)
+2. **User với Forbidden Role**: Test user có role bị cấm (FORBID rule)
 3. **Allow Any Authenticated User**: Test rule cho phép bất kỳ authenticated user nào
 4. **Forbid Everyone**: Test rule cấm tất cả users (kể cả admin)
 5. **Super Admin Bypass**: Test super admin có thể bypass tất cả rules
 6. **X-Role-Context Header**: Test user có multiple roles, chọn role context cụ thể
-7. **Multiple Rules Same Endpoint**: Test FORBIDE và ALLOW rules cùng endpoint
+7. **Multiple Rules Same Endpoint**: Test FORBID và ALLOW rules cùng endpoint
 
 
 

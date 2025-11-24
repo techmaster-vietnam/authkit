@@ -127,7 +127,7 @@ apiRouter.Post("/blogs", blogHandler.Create).
     Description("Tạo blog mới").
     Register()
 
-// FORBIDE - Cấm một số roles cụ thể
+// FORBID - Cấm một số roles cụ thể
 apiRouter.Delete("/blogs/:id", blogHandler.Delete).
     Forbid("guest").
     Description("Xóa blog (cấm guest)").

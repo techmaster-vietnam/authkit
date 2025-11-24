@@ -11,12 +11,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// JWTCustomizer là callback function để tùy chỉnh JWT claims
+// Function này được gọi khi tạo JWT token trong quá trình login
+// user: User object đang đăng nhập
+// roleIDs: Danh sách role IDs của user
+// Returns: ClaimsConfig với custom fields để thêm vào JWT token
+type JWTCustomizer[TUser core.UserInterface] func(user TUser, roleIDs []uint) utils.ClaimsConfig
+
 // BaseAuthService là generic auth service
 // TUser phải implement UserInterface, TRole phải implement RoleInterface
 type BaseAuthService[TUser core.UserInterface, TRole core.RoleInterface] struct {
-	userRepo *repository.BaseUserRepository[TUser]
-	roleRepo *repository.BaseRoleRepository[TRole]
-	config   *config.Config
+	userRepo      *repository.BaseUserRepository[TUser]
+	roleRepo      *repository.BaseRoleRepository[TRole]
+	config        *config.Config
+	jwtCustomizer JWTCustomizer[TUser]
 }
 
 // NewBaseAuthService tạo mới BaseAuthService với generic types
@@ -26,10 +34,16 @@ func NewBaseAuthService[TUser core.UserInterface, TRole core.RoleInterface](
 	cfg *config.Config,
 ) *BaseAuthService[TUser, TRole] {
 	return &BaseAuthService[TUser, TRole]{
-		userRepo: userRepo,
-		roleRepo: roleRepo,
-		config:   cfg,
+		userRepo:      userRepo,
+		roleRepo:      roleRepo,
+		config:        cfg,
+		jwtCustomizer: nil,
 	}
+}
+
+// SetJWTCustomizer set JWT customizer callback để tùy chỉnh JWT claims
+func (s *BaseAuthService[TUser, TRole]) SetJWTCustomizer(customizer JWTCustomizer[TUser]) {
+	s.jwtCustomizer = customizer
 }
 
 // BaseLoginRequest represents login request
@@ -79,10 +93,34 @@ func (s *BaseAuthService[TUser, TRole]) Login(req BaseLoginRequest) (*BaseLoginR
 		roleIDs = append(roleIDs, role.GetID())
 	}
 
-	// Generate token with role IDs
-	token, err := utils.GenerateToken(user.GetID(), user.GetEmail(), roleIDs, s.config.JWT.Secret, s.config.JWT.Expiration)
-	if err != nil {
-		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi tạo token")
+	// Generate token với custom claims nếu có JWT customizer
+	var token string
+	if s.jwtCustomizer != nil {
+		// Sử dụng JWT customizer để tạo claims config
+		claimsConfig := s.jwtCustomizer(user, roleIDs)
+		// Đảm bảo roleIDs được set trong claims config
+		claimsConfig.RoleIDs = roleIDs
+		claimsConfig.RoleFormat = "ids"
+
+		// Generate token với flexible claims
+		var err error
+		token, err = utils.GenerateTokenFlexible(
+			user.GetID(),
+			user.GetEmail(),
+			claimsConfig,
+			s.config.JWT.Secret,
+			s.config.JWT.Expiration,
+		)
+		if err != nil {
+			return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi tạo token")
+		}
+	} else {
+		// Generate token với standard claims (backward compatible)
+		var err error
+		token, err = utils.GenerateToken(user.GetID(), user.GetEmail(), roleIDs, s.config.JWT.Secret, s.config.JWT.Expiration)
+		if err != nil {
+			return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi tạo token")
+		}
 	}
 
 	return &BaseLoginResponse[TUser]{
@@ -221,4 +259,3 @@ func (s *BaseAuthService[TUser, TRole]) DeleteProfile(userID string) error {
 	}
 	return nil
 }
-

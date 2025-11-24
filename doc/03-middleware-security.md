@@ -151,7 +151,7 @@ flowchart TD
     GetRoles --> CheckSuperAdmin{Is super_admin?}
     CheckSuperAdmin -->|Yes| Allow2[✅ Allow<br/>Bypass All Rules]
     
-    CheckSuperAdmin -->|No| CheckForbid{Has FORBIDE Rule?}
+    CheckSuperAdmin -->|No| CheckForbid{Has FORBID Rule?}
     CheckForbid -->|Yes| CheckForbidRoles{User có<br/>Forbidden Role?}
     CheckForbidRoles -->|Yes| Deny3[❌ 403 Forbidden]
     CheckForbidRoles -->|No| CheckAllow{Has ALLOW Rule?}
@@ -212,7 +212,7 @@ Rules được đánh giá theo thứ tự ưu tiên:
    - Chỉ cần có role super_admin
    - Emergency access, system administrators
 
-3. **FORBIDE** (Ưu tiên cao) 🔴
+3. **FORBID** (Ưu tiên cao) 🔴
    - Cấm các roles được chỉ định
    - Kiểm tra trước ALLOW rules
    - Ví dụ: `Forbid("guest")` → cấm role guest
@@ -321,8 +321,8 @@ graph TB
 
 ### ✅ Authorization Security
 
-- **Default Deny**: Không có rule → FORBIDE (security first)
-- **Rule Priority**: FORBIDE rules có ưu tiên cao hơn ALLOW
+- **Default Deny**: Không có rule → FORBID (security first)
+- **Rule Priority**: FORBID rules có ưu tiên cao hơn ALLOW
 - **super_admin Protection**: Không thể tạo/gán qua API
 - **Role Context Validation**: X-Role-Context phải được validate
 

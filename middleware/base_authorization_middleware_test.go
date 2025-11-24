@@ -212,7 +212,7 @@ func setupUserContextMiddlewareGeneric[TUser interface{ GetID() string }](userID
 	}
 }
 
-// Test Authorize - no rule found (default FORBIDE)
+// Test Authorize - no rule found (default FORBID)
 func TestBaseAuthorizationMiddleware_Authorize_NoRuleFound(t *testing.T) {
 	mw := &BaseAuthorizationMiddleware[*models.BaseUser, *models.BaseRole]{
 		exactRulesMap:               make(map[string][]models.Rule),
@@ -412,7 +412,7 @@ func TestBaseAuthorizationMiddleware_Authorize_UserWithAllowedRole(t *testing.T)
 	})
 }
 
-// Test Authorize với user có role bị FORBIDE
+// Test Authorize với user có role bị FORBID
 func TestBaseAuthorizationMiddleware_Authorize_UserWithForbiddenRole(t *testing.T) {
 	mw := &BaseAuthorizationMiddleware[*models.BaseUser, *models.BaseRole]{
 		exactRulesMap:               make(map[string][]models.Rule),
@@ -426,7 +426,7 @@ func TestBaseAuthorizationMiddleware_Authorize_UserWithForbiddenRole(t *testing.
 	adminRoleID := uint(1)
 	bannedRoleID := uint(99)
 
-	// Setup cache với FORBIDE rule cho banned role
+	// Setup cache với FORBID rule cho banned role
 	mw.cacheMutex.Lock()
 	if mw.patternRulesByMethodAndSegs["DELETE"] == nil {
 		mw.patternRulesByMethodAndSegs["DELETE"] = make(map[int][]models.Rule)
@@ -449,7 +449,7 @@ func TestBaseAuthorizationMiddleware_Authorize_UserWithForbiddenRole(t *testing.
 	}
 	mw.cacheMutex.Unlock()
 
-	// Test 1: User có banned role - bị từ chối (FORBIDE có priority cao hơn)
+	// Test 1: User có banned role - bị từ chối (FORBID có priority cao hơn)
 	t.Run("banned_role_forbidden", func(t *testing.T) {
 		app := fiber.New()
 		user := &models.BaseUser{ID: "banned_user", Email: "test@example.com", Active: true}
@@ -467,7 +467,7 @@ func TestBaseAuthorizationMiddleware_Authorize_UserWithForbiddenRole(t *testing.
 		}
 	})
 
-	// Test 2: User có admin role - được phép (FORBIDE không áp dụng cho admin)
+	// Test 2: User có admin role - được phép (FORBID không áp dụng cho admin)
 	t.Run("admin_role_allowed", func(t *testing.T) {
 		app := fiber.New()
 		user := &models.BaseUser{ID: "admin_user", Email: "test@example.com", Active: true}
@@ -532,7 +532,7 @@ func TestBaseAuthorizationMiddleware_Authorize_AllowAnyAuthenticatedUser(t *test
 	})
 }
 
-// Test Authorize với FORBIDE rule empty roles (forbid everyone)
+// Test Authorize với FORBID rule empty roles (forbid everyone)
 func TestBaseAuthorizationMiddleware_Authorize_ForbidEveryone(t *testing.T) {
 	mw := &BaseAuthorizationMiddleware[*models.BaseUser, *models.BaseRole]{
 		exactRulesMap:               make(map[string][]models.Rule),
@@ -542,7 +542,7 @@ func TestBaseAuthorizationMiddleware_Authorize_ForbidEveryone(t *testing.T) {
 		roleNameCacheMutex:          sync.RWMutex{},
 	}
 
-	// Setup cache với FORBIDE rule empty roles (forbid everyone)
+	// Setup cache với FORBID rule empty roles (forbid everyone)
 	mw.cacheMutex.Lock()
 	mw.exactRulesMap["POST|/api/admin/delete-all"] = []models.Rule{
 		{
@@ -592,7 +592,7 @@ func TestBaseAuthorizationMiddleware_Authorize_SuperAdminBypass(t *testing.T) {
 	mw.superAdminID = &superAdminRoleID
 	mw.roleNameCacheMutex.Unlock()
 
-	// Setup cache với FORBIDE rule cho regular role
+	// Setup cache với FORBID rule cho regular role
 	mw.cacheMutex.Lock()
 	mw.exactRulesMap["DELETE|/api/system"] = []models.Rule{
 		{
@@ -748,7 +748,7 @@ func TestBaseAuthorizationMiddleware_Authorize_RoleContextHeader(t *testing.T) {
 	})
 }
 
-// Test Authorize với multiple rules cùng endpoint (FORBIDE và ALLOW)
+// Test Authorize với multiple rules cùng endpoint (FORBID và ALLOW)
 func TestBaseAuthorizationMiddleware_Authorize_MultipleRulesSameEndpoint(t *testing.T) {
 	mw := &BaseAuthorizationMiddleware[*models.BaseUser, *models.BaseRole]{
 		exactRulesMap:               make(map[string][]models.Rule),
@@ -762,7 +762,7 @@ func TestBaseAuthorizationMiddleware_Authorize_MultipleRulesSameEndpoint(t *test
 	bannedRoleID := uint(99)
 	regularRoleID := uint(2)
 
-	// Setup cache với cả FORBIDE và ALLOW rules
+	// Setup cache với cả FORBID và ALLOW rules
 	mw.cacheMutex.Lock()
 	mw.exactRulesMap["POST|/api/comments"] = []models.Rule{
 		{
@@ -782,7 +782,7 @@ func TestBaseAuthorizationMiddleware_Authorize_MultipleRulesSameEndpoint(t *test
 	}
 	mw.cacheMutex.Unlock()
 
-	// Test 1: Banned user - bị từ chối (FORBIDE có priority)
+	// Test 1: Banned user - bị từ chối (FORBID có priority)
 	t.Run("banned_user_forbidden", func(t *testing.T) {
 		app := fiber.New()
 		user := &models.BaseUser{ID: "banned_user", Email: "test@example.com", Active: true}
@@ -796,7 +796,7 @@ func TestBaseAuthorizationMiddleware_Authorize_MultipleRulesSameEndpoint(t *test
 			t.Fatalf("Request failed: %v", err)
 		}
 		if resp.StatusCode == 200 {
-			t.Error("Banned user should be forbidden (FORBIDE has priority)")
+			t.Error("Banned user should be forbidden (FORBID has priority)")
 		}
 	})
 
@@ -1041,4 +1041,3 @@ func TestBaseAuthorizationMiddleware_GetRoleIDByName_WithCache(t *testing.T) {
 		t.Errorf("Expected role ID 2, got %d", roleID)
 	}
 }
-

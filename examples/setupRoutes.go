@@ -82,11 +82,11 @@ func setupRoutes(
 		Description("Cập nhật blog").
 		Register()
 	blogs.Delete("/:id", blogHandler.Delete).
-		Allow("author", "editor", "admin").
+		Forbid("reader", "author").
 		Description("Xóa blog").
 		Register()
 	blogs.Get("/my", blogHandler.ListMyBlogs).
-		Allow().
+		Forbid("editor", "admin").
 		Description("Danh sách blog của tôi").
 		Register()
 

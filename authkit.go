@@ -10,6 +10,7 @@ import (
 	"github.com/techmaster-vietnam/authkit/repository"
 	"github.com/techmaster-vietnam/authkit/router"
 	"github.com/techmaster-vietnam/authkit/service"
+	"github.com/techmaster-vietnam/authkit/utils"
 	"gorm.io/gorm"
 )
 
@@ -30,6 +31,13 @@ type (
 	UserInterface = core.UserInterface
 	RoleInterface = core.RoleInterface
 )
+
+// JWTCustomizer là callback function để tùy chỉnh JWT claims
+// Function này được gọi khi tạo JWT token trong quá trình login
+// user: User object đang đăng nhập
+// roleIDs: Danh sách role IDs của user
+// Returns: ClaimsConfig với custom fields để thêm vào JWT token
+type JWTCustomizer[TUser UserInterface] = service.JWTCustomizer[TUser]
 
 // AuthKit là main struct chứa tất cả dependencies
 // TUser phải implement UserInterface, TRole phải implement RoleInterface
@@ -62,11 +70,12 @@ type AuthKit[TUser UserInterface, TRole RoleInterface] struct {
 
 // AuthKitBuilder là builder để tạo AuthKit
 type AuthKitBuilder[TUser UserInterface, TRole RoleInterface] struct {
-	app       *fiber.App
-	db        *gorm.DB
-	config    *Config
-	userModel TUser
-	roleModel TRole
+	app           *fiber.App
+	db            *gorm.DB
+	config        *Config
+	userModel     TUser
+	roleModel     TRole
+	jwtCustomizer JWTCustomizer[TUser]
 }
 
 // New tạo mới AuthKitBuilder với generics
@@ -98,6 +107,14 @@ func (b *AuthKitBuilder[TUser, TRole]) WithRoleModel(roleModel TRole) *AuthKitBu
 	return b
 }
 
+// WithJWTCustomizer set JWT customizer callback để tùy chỉnh JWT claims
+// Callback này được gọi khi tạo JWT token trong quá trình login
+// Cho phép ứng dụng thêm custom fields vào JWT token (ví dụ: id, full_name, v.v.)
+func (b *AuthKitBuilder[TUser, TRole]) WithJWTCustomizer(customizer JWTCustomizer[TUser]) *AuthKitBuilder[TUser, TRole] {
+	b.jwtCustomizer = customizer
+	return b
+}
+
 // Initialize khởi tạo AuthKit với tất cả dependencies
 func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], error) {
 	// Load config nếu chưa có
@@ -110,13 +127,16 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 		return nil, err
 	}
 
-		// Initialize repositories
-		userRepo := repository.NewBaseUserRepository[TUser](b.db)
-		roleRepo := repository.NewBaseRoleRepository[TRole](b.db)
-		ruleRepo := repository.NewRuleRepository(b.db, b.config.ServiceName)
+	// Initialize repositories
+	userRepo := repository.NewBaseUserRepository[TUser](b.db)
+	roleRepo := repository.NewBaseRoleRepository[TRole](b.db)
+	ruleRepo := repository.NewRuleRepository(b.db, b.config.ServiceName)
 
-	// Initialize services
+	// Initialize services với JWT customizer nếu có
 	authService := service.NewBaseAuthService(userRepo, roleRepo, b.config)
+	if b.jwtCustomizer != nil {
+		authService.SetJWTCustomizer(b.jwtCustomizer)
+	}
 	roleService := service.NewBaseRoleService(roleRepo)
 	ruleService := service.NewRuleService(ruleRepo, repository.NewRoleRepository(b.db))
 
@@ -234,6 +254,9 @@ type (
 	UpdateRuleRequest = service.UpdateRuleRequest
 )
 
+// Export ClaimsConfig để ứng dụng có thể sử dụng
+type ClaimsConfig = utils.ClaimsConfig
+
 // NewAuthService creates a new auth service
 func NewAuthService(userRepo *UserRepository, roleRepo *RoleRepository, cfg *Config) *AuthService {
 	return service.NewAuthService(userRepo, roleRepo, cfg)
@@ -247,26 +270,6 @@ func NewRoleService(roleRepo *RoleRepository) *RoleService {
 // NewRuleService creates a new rule service
 func NewRuleService(ruleRepo *RuleRepository, roleRepo *RoleRepository) *RuleService {
 	return service.NewRuleService(ruleRepo, roleRepo)
-}
-
-// Middleware - Export middleware types và constructors
-type (
-	AuthMiddleware          = middleware.AuthMiddleware
-	AuthorizationMiddleware = middleware.AuthorizationMiddleware
-)
-
-// NewAuthMiddleware creates a new auth middleware
-func NewAuthMiddleware(cfg *Config, userRepo *UserRepository) *AuthMiddleware {
-	return middleware.NewAuthMiddleware(cfg, userRepo)
-}
-
-// NewAuthorizationMiddleware creates a new authorization middleware
-func NewAuthorizationMiddleware(
-	ruleRepo *RuleRepository,
-	roleRepo *RoleRepository,
-	userRepo *UserRepository,
-) *AuthorizationMiddleware {
-	return middleware.NewAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
 }
 
 // Middleware helper functions
@@ -283,35 +286,13 @@ func GetUserIDFromContext(c *fiber.Ctx) (string, bool) {
 	return middleware.GetUserIDFromContext(c)
 }
 
-// Handlers - Export handler types và constructors
-type (
-	AuthHandler = handlers.AuthHandler
-	RoleHandler = handlers.RoleHandler
-	RuleHandler = handlers.RuleHandler
-)
-
-// NewAuthHandler creates a new auth handler
-func NewAuthHandler(authService *AuthService) *AuthHandler {
-	return handlers.NewAuthHandler(authService)
-}
-
-// NewRoleHandler creates a new role handler
-func NewRoleHandler(roleService *RoleService) *RoleHandler {
-	return handlers.NewRoleHandler(roleService)
-}
-
-// NewRuleHandler creates a new rule handler
-func NewRuleHandler(ruleService *RuleService, authzMiddleware *AuthorizationMiddleware) *RuleHandler {
-	return handlers.NewRuleHandler(ruleService, authzMiddleware)
+// GetRoleIDsFromContext gets role IDs from context (from validated JWT token)
+func GetRoleIDsFromContext(c *fiber.Ctx) ([]uint, bool) {
+	return middleware.GetRoleIDsFromContext(c)
 }
 
 // LoadConfig loads configuration from environment variables
 // Đây là wrapper function để tránh conflict với package config của ứng dụng chính
 func LoadConfig() *Config {
 	return config.LoadConfig()
-}
-
-// SetupRoutes sets up all routes for AuthKit
-func SetupRoutes(app *fiber.App, db *gorm.DB, cfg *Config) error {
-	return router.SetupRoutes(app, db, cfg)
 }

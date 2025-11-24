@@ -28,7 +28,7 @@ func NewRuleService(ruleRepo *repository.RuleRepository, roleRepo *repository.Ro
 type AddRuleRequest struct {
 	Method string   `json:"method"`
 	Path   string   `json:"path"`
-	Type   string   `json:"type"` // PUBLIC, ALLOW, FORBIDE
+	Type   string   `json:"type"` // PUBLIC, ALLOW, FORBID
 	Roles  []string `json:"roles"`
 }
 
@@ -55,10 +55,10 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 	ruleType := models.AccessType(req.Type)
 	if ruleType != models.AccessPublic && ruleType != models.AccessAllow &&
 		ruleType != models.AccessForbid {
-		return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW hoặc FORBIDE", map[string]interface{}{
+		return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW hoặc FORBID", map[string]interface{}{
 			"field":    "type",
 			"received": req.Type,
-			"allowed":  []string{"PUBLIC", "ALLOW", "FORBIDE"},
+			"allowed":  []string{"PUBLIC", "ALLOW", "FORBID"},
 		})
 	}
 
@@ -94,14 +94,14 @@ func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
 
 	// Generate ID from Method and Path
 	ruleID := fmt.Sprintf("%s|%s", req.Method, req.Path)
-	
+
 	// Get service name from repository (empty in single-app mode)
 	serviceName := s.ruleRepo.GetServiceName()
 	// Truncate to max 20 characters if longer
 	if len(serviceName) > 20 {
 		serviceName = serviceName[:20]
 	}
-	
+
 	rule := &models.Rule{
 		ID:          ruleID,
 		Method:      req.Method,
@@ -134,10 +134,10 @@ func (s *RuleService) UpdateRule(ruleID string, req UpdateRuleRequest) (*models.
 		ruleType := models.AccessType(req.Type)
 		if ruleType != models.AccessPublic && ruleType != models.AccessAllow &&
 			ruleType != models.AccessForbid {
-			return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW hoặc FORBIDE", map[string]interface{}{
+			return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW hoặc FORBID", map[string]interface{}{
 				"field":    "type",
 				"received": req.Type,
-				"allowed":  []string{"PUBLIC", "ALLOW", "FORBIDE"},
+				"allowed":  []string{"PUBLIC", "ALLOW", "FORBID"},
 			})
 		}
 		rule.Type = ruleType

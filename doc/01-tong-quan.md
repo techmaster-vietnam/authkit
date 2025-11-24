@@ -153,7 +153,7 @@ flowchart TD
     CheckSuperAdmin -->|Yes| Allow2[✅ Allow Bypass]
     
     CheckSuperAdmin -->|No| FindRules[Find Matching Rules]
-    FindRules --> CheckForbid{Has FORBIDE Rule?}
+    FindRules --> CheckForbid{Has FORBID Rule?}
     CheckForbid -->|Yes| Deny3[❌ Deny 403]
     CheckForbid -->|No| CheckAllow{Has ALLOW Rule?}
     CheckAllow -->|Yes| CheckRoles{User có Role?}

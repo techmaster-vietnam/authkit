@@ -22,7 +22,8 @@ func resetDatabase(db *gorm.DB) error {
 	// Get underlying *sql.DB from GORM
 	sqlDB, err := db.DB()
 	if err != nil {
-		return goerrorkit.WrapWithMessage(err, "Failed to get underlying sql.DB from GORM")
+		goerrorkit.LogError(goerrorkit.NewSystemError(err), "Failed to get underlying sql.DB from GORM")
+		return err
 	}
 
 	// Step 1: Drop all tables directly (more reliable than rolling back migrations)
@@ -36,7 +37,8 @@ func resetDatabase(db *gorm.DB) error {
 		DROP TABLE IF EXISTS schema_migrations CASCADE;
 	`
 	if _, err := sqlDB.Exec(dropTablesSQL); err != nil {
-		return goerrorkit.WrapWithMessage(err, "Failed to drop tables")
+		goerrorkit.LogError(goerrorkit.NewSystemError(err), "Failed to drop tables")
+		return err
 	}
 	fmt.Println("All tables dropped successfully")
 

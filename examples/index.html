@@ -312,7 +312,9 @@
 
         <div class="nav">
             <div id="userInfo" class="user-info hidden">
+                <strong>ID:</strong> <span id="userId"></span> | 
                 <strong>Người dùng:</strong> <span id="userName"></span> | 
+                <strong>Email:</strong> <span id="userEmail"></span> | 
                 <strong>Roles:</strong> <span id="userRoles"></span> | 
                 <strong>Token:</strong> <span id="tokenPreview"></span>
             </div>
@@ -406,6 +408,39 @@
                 </div>
             </div>
 
+            <!-- Demo Features Section -->
+            <div id="demoSection" class="section">
+                <h2>🚀 Demo Tính Năng Mới</h2>
+                <div id="demoAlert"></div>
+                
+                <div style="margin-bottom: 30px;">
+                    <h3>1. Đăng nhập với Username trong JWT Token</h3>
+                    <p style="color: #6c757d; margin-bottom: 15px;">
+                        Demo đăng nhập với username và custom fields (mobile, address) trong JWT token.
+                        Token sẽ chứa cả role IDs và role names.
+                    </p>
+                    <div class="form-group" style="max-width: 500px;">
+                        <label>Email:</label>
+                        <input type="email" id="demoLoginEmail" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group" style="max-width: 500px;">
+                        <label>Mật khẩu:</label>
+                        <input type="password" id="demoLoginPassword" placeholder="Nhập mật khẩu">
+                    </div>
+                    <button class="btn btn-primary" onclick="demoLoginWithUsername()">Đăng nhập với Username</button>
+                    <div id="demoLoginResult" style="margin-top: 15px;"></div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3>2. Xem thông tin từ Flexible Token</h3>
+                    <p style="color: #6c757d; margin-bottom: 15px;">
+                        Lấy và hiển thị thông tin từ JWT token bao gồm: username, role IDs, role names, và custom fields.
+                    </p>
+                    <button class="btn btn-success" onclick="demoGetTokenInfo()">Lấy Token Info</button>
+                    <div id="demoTokenInfoResult" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
             <!-- Test Users Info -->
             <div class="section">
                 <h2>🧪 Tài khoản Test</h2>
@@ -456,6 +491,45 @@
         let token = localStorage.getItem('token');
         let currentUser = null;
         let roleIdToNameMap = {}; // Map role ID -> role name
+        let displayedRules = []; // Lưu các rules đang được hiển thị (sau khi filter)
+
+        // Decode JWT token để lấy claims (không cần verify signature ở client-side)
+        function decodeJWT(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) return null;
+                
+                // Decode payload (phần thứ 2)
+                const payload = parts[1];
+                // Base64 URL decode
+                const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+                return JSON.parse(decoded);
+            } catch (error) {
+                console.error('Error decoding JWT:', error);
+                return null;
+            }
+        }
+
+        // Lấy thông tin user từ JWT token
+        function getUserFromToken(token) {
+            if (!token) return null;
+            
+            const claims = decodeJWT(token);
+            if (!claims) return null;
+            
+            // Kiểm tra token đã hết hạn chưa
+            if (claims.exp && claims.exp * 1000 < Date.now()) {
+                return null; // Token đã hết hạn
+            }
+            
+            return {
+                id: claims.id || claims.user_id,
+                user_id: claims.user_id,
+                email: claims.email,
+                full_name: claims.full_name || '',
+                role_ids: claims.role_ids || []
+            };
+        }
 
         // Define rules từ setupRoutes trong main.go - Fallback nếu không load được từ API
         let rules = [
@@ -467,17 +541,17 @@
             { method: 'GET', path: '/api/blogs', type: 'Public', roles: [], description: 'Danh sách blog công khai' },
             
             // Authenticated endpoints (chỉ cần đăng nhập, không cần role cụ thể)
-            { method: 'GET', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Lấy thông tin profile' },
-            { method: 'PUT', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Cập nhật thông tin profile' },
-            { method: 'DELETE', path: '/api/auth/profile', type: 'Auth', roles: [], description: 'Xóa tài khoản' },
-            { method: 'POST', path: '/api/auth/change-password', type: 'Auth', roles: [], description: 'Đổi mật khẩu' },
-            { method: 'GET', path: '/api/blogs/my', type: 'Auth', roles: [], description: 'Danh sách blog của tôi' },
+            { method: 'GET', path: '/api/auth/profile', type: 'Allow', roles: [], description: 'Lấy thông tin profile' },
+            { method: 'PUT', path: '/api/auth/profile', type: 'Allow', roles: [], description: 'Cập nhật thông tin profile' },
+            { method: 'DELETE', path: '/api/auth/profile', type: 'Allow', roles: [], description: 'Xóa tài khoản' },
+            { method: 'POST', path: '/api/auth/change-password', type: 'Allow', roles: [], description: 'Đổi mật khẩu' },
             
             // Blog endpoints - Yêu cầu role cụ thể
             { method: 'GET', path: '/api/blogs/1', type: 'Allow', roles: ['reader', 'author', 'editor', 'admin'], description: 'Xem chi tiết blog' },
             { method: 'POST', path: '/api/blogs', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Tạo blog mới' },
             { method: 'PUT', path: '/api/blogs/1', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Cập nhật blog' },
-            { method: 'DELETE', path: '/api/blogs/1', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Xóa blog' },
+            { method: 'DELETE', path: '/api/blogs/1', type: 'Forbid', roles: ['reader', 'author'], description: 'Xóa blog' },
+            { method: 'GET', path: '/api/blogs/my', type: 'Forbid', roles: ['editor', 'admin'], description: 'Danh sách blog của tôi' },
             
             // Role endpoints (admin only)
             { method: 'GET', path: '/api/roles', type: 'Allow', roles: ['admin'], description: 'Danh sách roles' },
@@ -496,6 +570,11 @@
             { method: 'POST', path: '/api/rules', type: 'Allow', roles: ['admin'], description: 'Tạo rule mới' },
             { method: 'PUT', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Cập nhật rule' },
             { method: 'DELETE', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Xóa rule' },
+            
+            // Demo endpoints
+            { method: 'POST', path: '/api/demo/login-with-username', type: 'Public', roles: [], description: 'Đăng nhập với username và custom fields trong JWT token' },
+            { method: 'GET', path: '/api/demo/token-info', type: 'Allow', roles: [], description: 'Lấy thông tin từ flexible JWT token (username, custom fields, role conversion)' },
+            { method: 'GET', path: '/api/demo/role-conversion', type: 'Allow', roles: [], description: 'Demo role conversion utilities (IDs ↔ Names)' },
         ];
 
         // Đảm bảo actionsSection luôn hiển thị cho mọi user
@@ -503,7 +582,24 @@
         
         // Check if user is logged in
         if (token) {
-            loadProfile();
+            // Lấy thông tin cơ bản từ token trước (nhanh, không cần API call)
+            const userFromToken = getUserFromToken(token);
+            if (userFromToken) {
+                currentUser = {
+                    id: userFromToken.id,
+                    email: userFromToken.email,
+                    full_name: userFromToken.full_name,
+                    role_ids: userFromToken.role_ids
+                };
+                updateUI(); // Hiển thị ngay thông tin từ token
+                // Load profile để lấy roles đầy đủ (nếu cần)
+                loadProfile();
+            } else {
+                // Token không hợp lệ hoặc đã hết hạn
+                token = null;
+                localStorage.removeItem('token');
+                showLogin();
+            }
         } else {
             showLogin();
         }
@@ -571,7 +667,23 @@
                 if (response.ok) {
                     token = data.data.token;
                     localStorage.setItem('token', token);
-                    currentUser = data.data.user;
+                    
+                    // Lấy thông tin từ token (nhanh hơn, không cần đợi API)
+                    const userFromToken = getUserFromToken(token);
+                    if (userFromToken) {
+                        currentUser = {
+                            id: userFromToken.id,
+                            email: userFromToken.email,
+                            full_name: userFromToken.full_name,
+                            role_ids: userFromToken.role_ids,
+                            // Giữ lại thông tin từ API nếu có (như roles với names)
+                            ...data.data.user
+                        };
+                    } else {
+                        // Fallback về API response nếu không decode được token
+                        currentUser = data.data.user;
+                    }
+                    
                     showAlert('loginAlert', 'Đăng nhập thành công!', 'success');
                     updateUI();
                     loadActions();
@@ -635,10 +747,31 @@
             loadActions();
         }
 
-        // Load profile
+        // Load profile - chỉ gọi khi cần thông tin đầy đủ (như roles với names)
+        // Thông tin cơ bản (id, email, full_name) đã có từ JWT token
         async function loadProfile() {
             if (!token) return;
 
+            // Lấy thông tin cơ bản từ token trước
+            const userFromToken = getUserFromToken(token);
+            if (!userFromToken) {
+                token = null;
+                localStorage.removeItem('token');
+                updateUI();
+                return;
+            }
+
+            // Cập nhật thông tin cơ bản từ token
+            if (!currentUser) {
+                currentUser = {};
+            }
+            currentUser.id = userFromToken.id;
+            currentUser.email = userFromToken.email;
+            currentUser.full_name = userFromToken.full_name;
+            currentUser.role_ids = userFromToken.role_ids;
+
+            // Chỉ gọi API nếu cần thông tin roles đầy đủ (với names)
+            // Hoặc có thể bỏ qua nếu không cần thiết
             try {
                 const response = await fetch('/api/auth/profile', {
                     headers: {
@@ -648,14 +781,30 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    currentUser = data.data;
+                    // Merge thông tin từ API (chủ yếu là roles với names)
+                    currentUser = {
+                        ...currentUser,
+                        ...data.data,
+                        // Ưu tiên id và full_name từ token (mới nhất)
+                        id: currentUser.id,
+                        full_name: currentUser.full_name
+                    };
                     updateUI();
                 } else {
-                    token = null;
-                    localStorage.removeItem('token');
+                    // Nếu API fail nhưng token vẫn hợp lệ, vẫn hiển thị thông tin từ token
+                    if (userFromToken) {
+                        updateUI();
+                    } else {
+                        token = null;
+                        localStorage.removeItem('token');
+                        updateUI();
+                    }
                 }
             } catch (error) {
-                // Silent fail
+                // Silent fail - vẫn hiển thị thông tin từ token
+                if (userFromToken) {
+                    updateUI();
+                }
             }
         }
 
@@ -669,23 +818,57 @@
             // Đảm bảo actionsSection luôn hiển thị
             document.getElementById('actionsSection').classList.remove('hidden');
             
-            if (token && currentUser) {
-                document.getElementById('userInfo').classList.remove('hidden');
-                document.getElementById('userName').textContent = currentUser.full_name || currentUser.email;
-                document.getElementById('userRoles').textContent = currentUser.roles ? currentUser.roles.map(r => r.name).join(', ') : 'Chưa có role';
-                document.getElementById('tokenPreview').textContent = token.substring(0, 20) + '...';
-                document.getElementById('logoutBtn').classList.remove('hidden');
+            if (token) {
+                // Lấy thông tin từ token nếu currentUser chưa có
+                if (!currentUser) {
+                    const userFromToken = getUserFromToken(token);
+                    if (userFromToken) {
+                        currentUser = {
+                            id: userFromToken.id,
+                            email: userFromToken.email,
+                            full_name: userFromToken.full_name,
+                            role_ids: userFromToken.role_ids
+                        };
+                    }
+                }
                 
-                // Show admin button if user has admin role
-                const hasAdmin = hasAdminRole();
-                if (hasAdmin) {
-                    document.getElementById('adminBtn').classList.remove('hidden');
+                if (currentUser) {
+                    document.getElementById('userInfo').classList.remove('hidden');
+                    // Hiển thị ID từ token
+                    document.getElementById('userId').textContent = currentUser.id || 'N/A';
+                    // Hiển thị tên đầy đủ từ token
+                    document.getElementById('userName').textContent = currentUser.full_name || currentUser.email || 'N/A';
+                    // Hiển thị email từ token
+                    document.getElementById('userEmail').textContent = currentUser.email || 'N/A';
+                    // Hiển thị roles (nếu có từ API, nếu không thì hiển thị role IDs từ token)
+                    if (currentUser.roles && currentUser.roles.length > 0) {
+                        document.getElementById('userRoles').textContent = currentUser.roles.map(r => r.name).join(', ');
+                    } else if (currentUser.role_ids && currentUser.role_ids.length > 0) {
+                        document.getElementById('userRoles').textContent = 'Role IDs: ' + currentUser.role_ids.join(', ');
+                    } else {
+                        document.getElementById('userRoles').textContent = 'Chưa có role';
+                    }
+                    document.getElementById('tokenPreview').textContent = token.substring(0, 20) + '...';
+                    document.getElementById('logoutBtn').classList.remove('hidden');
+                    
+                    // Show admin button if user has admin role
+                    const hasAdmin = hasAdminRole();
+                    if (hasAdmin) {
+                        document.getElementById('adminBtn').classList.remove('hidden');
+                    } else {
+                        document.getElementById('adminBtn').classList.add('hidden');
+                    }
+
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('registerSection').classList.add('hidden');
                 } else {
+                    // Token không hợp lệ
+                    token = null;
+                    localStorage.removeItem('token');
+                    document.getElementById('userInfo').classList.add('hidden');
+                    document.getElementById('logoutBtn').classList.add('hidden');
                     document.getElementById('adminBtn').classList.add('hidden');
                 }
-
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('registerSection').classList.add('hidden');
             } else {
                 document.getElementById('userInfo').classList.add('hidden');
                 document.getElementById('logoutBtn').classList.add('hidden');
@@ -699,15 +882,23 @@
         // Display actions grouped by type
         function loadActions() {
             const actionsList = document.getElementById('actionsList');
-            const publicRules = rules.filter(r => r.type === 'Public');
-            const authRules = rules.filter(r => r.type === 'Auth');
-            const allowRules = rules.filter(r => r.type === 'Allow');
+            // Filter out demo endpoints from actions list
+            const filteredRules = rules.filter(r => !r.path.startsWith('/api/demo/'));
+            const publicRules = filteredRules.filter(r => r.type === 'Public');
+            const allowRules = filteredRules.filter(r => r.type === 'Allow');
+            const forbidRules = filteredRules.filter(r => r.type === 'Forbid');
+            
+            // Lưu tất cả rules đang được hiển thị theo thứ tự (để dùng trong testAction)
+            displayedRules = [];
+            displayedRules.push(...publicRules);
+            displayedRules.push(...allowRules);
+            displayedRules.push(...forbidRules);
             
             let index = 0;
             const sections = [
                 { rules: publicRules, title: '🌐 Công khai (Public)', desc: 'Tất cả mọi người đều có thể truy cập', color: '#28a745' },
-                { rules: authRules, title: '🔑 Yêu cầu đăng nhập (Auth)', desc: 'Chỉ cần đăng nhập, không cần role cụ thể', color: '#667eea' },
-                { rules: allowRules, title: '👥 Yêu cầu role cụ thể (Allow)', desc: 'Cần có role phù hợp để truy cập', color: '#ffc107' }
+                { rules: allowRules, title: '👥 Yêu cầu role cụ thể (Allow)', desc: 'Cần có role phù hợp để truy cập', color: '#667eea' },
+                { rules: forbidRules, title: '🚫 Cấm một số role (Forbid)', desc: 'Các role được liệt kê sẽ bị cấm truy cập', color: '#dc3545' }
             ];
             
             actionsList.innerHTML = sections.map(section => {
@@ -730,11 +921,15 @@
                 accessInfo = '<strong style="color: #28a745;">PUBLIC</strong>';
             } else if (rule.type === 'Forbid') {
                 const rolesStr = rule.roles.length > 0 ? ` (${rule.roles.join(', ')})` : '()';
-                accessInfo = `<strong style="color: #dc3545;">FORBIDE${rolesStr}</strong>`;
+                accessInfo = `<strong style="color: #dc3545;">FORBID${rolesStr}</strong>`;
             } else {
-                // Auth hoặc Allow
-                const rolesStr = rule.roles.length > 0 ? ` (${rule.roles.join(', ')})` : '()';
-                accessInfo = `<strong style="color: #667eea;">ALLOW${rolesStr}</strong>`;
+                // Allow - có thể có roles cụ thể hoặc roles rỗng (mọi user đã đăng nhập)
+                if (rule.roles.length > 0) {
+                    const rolesStr = ` (${rule.roles.join(', ')})`;
+                    accessInfo = `<strong style="color: #667eea;">ALLOW${rolesStr}</strong>`;
+                } else {
+                    accessInfo = '<strong style="color: #667eea;">ALLOW ()</strong>';
+                }
             }
             
             const methodColor = {
@@ -768,7 +963,7 @@
 
         // Helper: Get request body for POST/PUT requests
         function getRequestBody(path, method) {
-            if (path.includes('/auth/login')) {
+            if (path.includes('/auth/login') || path.includes('/demo/login-with-username')) {
                 return JSON.stringify({ email: 'test@example.com', password: 'test' });
             }
             if (path.includes('/auth/register')) {
@@ -832,7 +1027,12 @@
 
         // Test action authorization
         async function testAction(index) {
-            const rule = rules[index];
+            // Sử dụng displayedRules thay vì rules để đảm bảo index đúng với rules đang được hiển thị
+            if (index < 0 || index >= displayedRules.length) {
+                console.error('Invalid rule index:', index);
+                return;
+            }
+            const rule = displayedRules[index];
             const resultDiv = document.getElementById(`result-${index}`);
             const testBtn = document.getElementById(`test-btn-${index}`);
             
@@ -1026,6 +1226,107 @@
             showLogin();
             // Scroll to login form
             document.getElementById('loginSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Demo: Login with Username in JWT Token
+        async function demoLoginWithUsername() {
+            const email = document.getElementById('demoLoginEmail').value;
+            const password = document.getElementById('demoLoginPassword').value;
+            const resultDiv = document.getElementById('demoLoginResult');
+
+            if (!email || !password) {
+                resultDiv.innerHTML = '<div class="alert alert-error">Vui lòng nhập đầy đủ email và mật khẩu</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div style="color: #667eea;">⏳ Đang đăng nhập...</div>';
+
+            try {
+                const response = await fetch('/api/demo/login-with-username', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Lưu token mới
+                    if (data.token) {
+                        token = data.token;
+                        localStorage.setItem('token', token);
+                        
+                        // Cập nhật thông tin user
+                        const userFromToken = getUserFromToken(token);
+                        if (userFromToken) {
+                            currentUser = {
+                                id: userFromToken.id,
+                                email: userFromToken.email,
+                                full_name: userFromToken.full_name,
+                                role_ids: userFromToken.role_ids,
+                                ...data.user
+                            };
+                        } else {
+                            currentUser = data.user;
+                        }
+                        updateUI();
+                    }
+
+                    // Hiển thị kết quả
+                    const claims = decodeJWT(data.token);
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>✅ Đăng nhập thành công!</strong><br>
+                            <strong>Message:</strong> ${data.message || 'Token được tạo với username và custom fields'}<br><br>
+                            <strong>Token Claims:</strong><br>
+                            <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.85em;">${JSON.stringify(claims, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-error">❌ ${data.error || data.message || 'Đăng nhập thất bại'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-error">❌ Lỗi kết nối: ${error.message}</div>`;
+            }
+        }
+
+        // Demo: Get Token Info
+        async function demoGetTokenInfo() {
+            const resultDiv = document.getElementById('demoTokenInfoResult');
+
+            if (!token) {
+                resultDiv.innerHTML = '<div class="alert alert-error">Vui lòng đăng nhập trước</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div style="color: #667eea;">⏳ Đang lấy thông tin token...</div>';
+
+            try {
+                const response = await fetch('/api/demo/token-info', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>✅ Thông tin Token:</strong><br>
+                            <strong>Message:</strong> ${data.message || 'Thông tin được extract từ flexible token'}<br><br>
+                            <strong>Claims:</strong><br>
+                            <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.85em;">${JSON.stringify(data.claims, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-error">❌ ${data.error || data.message || 'Không thể lấy thông tin token'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-error">❌ Lỗi kết nối: ${error.message}</div>`;
+            }
         }
     </script>
 </body>

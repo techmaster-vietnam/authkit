@@ -48,7 +48,7 @@ erDiagram
         varchar_255 id PK "METHOD|PATH format"
         varchar_10 method "GET, POST, PUT, DELETE"
         varchar_500 path "URL pattern"
-        varchar_20 type "PUBLIC, ALLOW, FORBIDE"
+        varchar_20 type "PUBLIC, ALLOW, FORBID"
         integer_array roles "PostgreSQL integer[]"
         boolean fixed "default false"
         text description
@@ -279,7 +279,7 @@ CREATE UNIQUE INDEX idx_service_method_path
 | `id` | VARCHAR(255) | PRIMARY KEY | Format: `"METHOD|PATH"` (ví dụ: `"GET|/api/users"`) |
 | `method` | VARCHAR(10) | NOT NULL | HTTP method (GET, POST, PUT, DELETE, etc.) |
 | `path` | VARCHAR(500) | NOT NULL | URL path pattern (hỗ trợ wildcard `*`) |
-| `type` | VARCHAR(20) | NOT NULL | Access type: `PUBLIC`, `ALLOW`, `FORBIDE` |
+| `type` | VARCHAR(20) | NOT NULL | Access type: `PUBLIC`, `ALLOW`, `FORBID` |
 | `roles` | INTEGER[] | DEFAULT '{}' | PostgreSQL array of role IDs |
 | `fixed` | BOOLEAN | DEFAULT FALSE | Fixed rules không thể sửa từ DB |
 | `description` | TEXT | NULL | Mô tả rule |
@@ -302,7 +302,7 @@ type Rule struct {
     ID          string     `gorm:"primaryKey"` // Format: "METHOD|PATH"
     Method      string     `gorm:"not null"`
     Path        string     `gorm:"not null"`
-    Type        AccessType `gorm:"type:varchar(20);not null"` // PUBLIC, ALLOW, FORBIDE
+    Type        AccessType `gorm:"type:varchar(20);not null"` // PUBLIC, ALLOW, FORBID
     Roles       IntArray   `gorm:"type:integer[]"` // PostgreSQL integer[]
     Fixed       bool       `gorm:"default:false"`
     Description string     `gorm:"type:text"`

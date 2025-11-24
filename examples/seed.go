@@ -8,6 +8,7 @@ import (
 	"github.com/techmaster-vietnam/authkit/utils"
 	"github.com/techmaster-vietnam/goerrorkit"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // SeedData seeds initial data (roles and users) into the database
@@ -15,19 +16,15 @@ import (
 func SeedData(db *gorm.DB) error {
 	// Initialize roles
 	if err := initRoles(db); err != nil {
-		return goerrorkit.WrapWithMessage(err, "Failed to initialize roles").
-			WithData(map[string]interface{}{
-				"operation": "init_roles",
-			})
+		goerrorkit.LogError(goerrorkit.NewSystemError(err), "Failed to initialize roles")
+		return err
 	}
 
 	// Initialize users
 	// Note: Rules sẽ được sync tự động từ routes trong main.go
 	if err := initUsers(db); err != nil {
-		return goerrorkit.WrapWithMessage(err, "Failed to initialize users").
-			WithData(map[string]interface{}{
-				"operation": "init_users",
-			})
+		goerrorkit.LogError(goerrorkit.NewSystemError(err), "Failed to initialize users")
+		return err
 	}
 
 	return nil
@@ -54,25 +51,22 @@ func initRoles(db *gorm.DB) error {
 			System: roleData.system, // Set system flag
 		}
 
-		// FirstOrCreate: tìm theo Name, nếu không có thì tạo mới với ID cụ thể
-		// Nếu role đã tồn tại, cập nhật System flag để đảm bảo consistency
-		result := db.Where("name = ?", roleData.name).FirstOrCreate(role)
-		if result.Error == nil && result.RowsAffected == 0 {
-			// Role đã tồn tại, cập nhật System flag
-			role.System = roleData.system
-			db.Save(role)
-		}
+		// Sử dụng UPSERT của PostgreSQL: INSERT ... ON CONFLICT ... DO UPDATE
+		// Nếu role đã tồn tại (conflict trên name), cập nhật System flag
+		// Lưu ý: tên cột trong database là "is_system" (không phải "system")
+		result := db.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "name"}},
+			DoUpdates: clause.AssignmentColumns([]string{"is_system"}),
+		}).Create(role)
+
 		if result.Error != nil {
-			return goerrorkit.WrapWithMessage(result.Error, fmt.Sprintf("Failed to initialize role %s", roleData.name)).
-				WithData(map[string]interface{}{
-					"role_id":   roleData.id,
-					"role_name": roleData.name,
-				})
+			goerrorkit.LogError(goerrorkit.NewSystemError(result.Error), fmt.Sprintf("Failed to initialize role %s", roleData.name))
+			return result.Error
 		}
 
-		// result.RowsAffected > 0 nghĩa là đã tạo mới
+		// result.RowsAffected > 0 nghĩa là đã tạo mới hoặc cập nhật
 		if result.RowsAffected > 0 {
-			fmt.Printf("Created role: %s (ID: %d, System: %v)\n", roleData.name, roleData.id, roleData.system)
+			fmt.Printf("Upserted role: %s (ID: %d, System: %v)\n", roleData.name, roleData.id, roleData.system)
 		}
 	}
 
@@ -157,13 +151,14 @@ func initUsers(db *gorm.DB) error {
 		// Hash password
 		hashedPassword, err := utils.HashPassword(userData.password)
 		if err != nil {
-			return goerrorkit.WrapWithMessage(err, fmt.Sprintf("Failed to hash password for user %s", userData.email)).
-				WithData(map[string]interface{}{
-					"email": userData.email,
-				})
+			goerrorkit.LogError(goerrorkit.NewSystemError(err), fmt.Sprintf("Failed to hash password for user %s", userData.email))
+			return err
 		}
 
-		// Create or get user với CustomUser (có mobile và address)
+		// Tạo user với UPSERT của PostgreSQL: INSERT ... ON CONFLICT ... DO UPDATE
+		// Nếu user đã tồn tại (conflict trên email), cập nhật các trường password, full_name, mobile, address, is_active, deleted_at
+		// Lưu ý: tên cột trong database là "is_active" (không phải "active")
+		// deleted_at sẽ được set thành NULL để khôi phục user nếu đã bị soft delete
 		user := &CustomUser{
 			BaseUser: authkit.BaseUser{
 				Email:    userData.email,
@@ -175,49 +170,45 @@ func initUsers(db *gorm.DB) error {
 			Address: userData.address,
 		}
 
-		// FirstOrCreate: tìm theo Email, nếu không có thì tạo mới
-		result := db.Where("email = ?", userData.email).FirstOrCreate(user)
+		// Sử dụng UPSERT: nếu email đã tồn tại thì update, nếu chưa thì insert
+		result := db.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "email"}},
+			DoUpdates: clause.AssignmentColumns([]string{"password", "full_name", "mobile", "address", "is_active", "deleted_at"}),
+		}).Create(user)
+
 		if result.Error != nil {
-			return goerrorkit.WrapWithMessage(result.Error, fmt.Sprintf("Failed to initialize user %s", userData.email)).
-				WithData(map[string]interface{}{
-					"email": userData.email,
-				})
+			goerrorkit.LogError(goerrorkit.NewSystemError(result.Error), fmt.Sprintf("Failed to upsert user %s", userData.email))
+			return result.Error
 		}
 
-		// Update password if user already exists (in case password changed)
-		if result.RowsAffected == 0 {
-			user.Password = hashedPassword
-			if err := db.Save(user).Error; err != nil {
-				return goerrorkit.WrapWithMessage(err, fmt.Sprintf("Failed to update password for user %s", userData.email)).
-					WithData(map[string]interface{}{
-						"email": userData.email,
-					})
-			}
-		} else {
-			fmt.Printf("Created user: %s\n", userData.email)
+		if result.RowsAffected > 0 {
+			fmt.Printf("Upserted user: %s\n", userData.email)
 		}
+
+		// Load lại user để đảm bảo có ID đúng (cần thiết cho việc gán roles)
+		// Tạo struct mới để tránh GORM sử dụng ID cũ trong struct user
+		loadedUser := &CustomUser{}
+		if err := db.Where("email = ?", userData.email).First(loadedUser).Error; err != nil {
+			goerrorkit.LogError(goerrorkit.NewSystemError(err), fmt.Sprintf("Failed to load user %s after upsert", userData.email))
+			return err
+		}
+		user = loadedUser
 
 		// Assign roles to user
 		var roles []authkit.Role
 		for _, roleName := range userData.roles {
 			var role authkit.Role
 			if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
-				return goerrorkit.WrapWithMessage(err, fmt.Sprintf("Failed to find role %s for user %s", roleName, userData.email)).
-					WithData(map[string]interface{}{
-						"email":     userData.email,
-						"role_name": roleName,
-					})
+				goerrorkit.LogError(goerrorkit.NewSystemError(err), fmt.Sprintf("Failed to find role %s for user %s", roleName, userData.email))
+				return err
 			}
 			roles = append(roles, role)
 		}
 
 		// Replace all roles for the user
 		if err := db.Model(user).Association("Roles").Replace(roles); err != nil {
-			return goerrorkit.WrapWithMessage(err, fmt.Sprintf("Failed to assign roles to user %s", userData.email)).
-				WithData(map[string]interface{}{
-					"email": userData.email,
-					"roles": userData.roles,
-				})
+			goerrorkit.LogError(goerrorkit.NewSystemError(err), fmt.Sprintf("Failed to assign roles to user %s", userData.email))
+			return err
 		}
 	}
 

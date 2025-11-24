@@ -111,6 +111,17 @@ func main() {
 		WithConfig(cfg).
 		WithUserModel(&CustomUser{}).
 		WithRoleModel(&authkit.BaseRole{}).
+		WithJWTCustomizer(func(user *CustomUser, roleIDs []uint) authkit.ClaimsConfig {
+			// Tùy chỉnh JWT claims: thêm id và full_name vào token
+			return authkit.ClaimsConfig{
+				RoleFormat: "ids",
+				RoleIDs:    roleIDs,
+				CustomFields: map[string]interface{}{
+					"id":        user.GetID(),       // Thêm id vào claims
+					"full_name": user.GetFullName(), // Thêm full_name vào claims
+				},
+			}
+		}).
 		Initialize()
 
 	if err != nil {
