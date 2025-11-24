@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/techmaster-vietnam/authkit/core"
-	"github.com/techmaster-vietnam/authkit/utils"
 	"gorm.io/gorm"
 )
 
@@ -26,7 +25,7 @@ type BaseUser struct {
 // BeforeCreate hook to generate ID
 func (u *BaseUser) BeforeCreate(tx *gorm.DB) error {
 	if u.ID == "" {
-		id, err := utils.GenerateID()
+		id, err := core.GenerateID()
 		if err != nil {
 			return err
 		}

@@ -12,6 +12,7 @@ func setupRoutes(
 	app *fiber.App,
 	ak *authkit.AuthKit[*CustomUser, *authkit.BaseRole],
 	blogHandler *BlogHandler,
+	demoHandler *DemoHandler,
 ) {
 	// Serve favicon (public, không cần đăng ký vào registry)
 	app.Get("/favicon.ico", func(c *fiber.Ctx) error {
@@ -156,5 +157,20 @@ func setupRoutes(
 		Allow("admin").
 		Fixed().
 		Description("Xóa rule").
+		Register()
+
+	// Demo routes - demonstrate new features
+	demo := apiRouter.Group("/demo")
+	demo.Post("/login-with-username", demoHandler.LoginWithUsername).
+		Public().
+		Description("Đăng nhập với username và custom fields trong JWT token").
+		Register()
+	demo.Get("/token-info", demoHandler.GetTokenInfo).
+		Allow().
+		Description("Lấy thông tin từ flexible JWT token (username, custom fields, role conversion)").
+		Register()
+	demo.Get("/role-conversion", demoHandler.DemoRoleConversion).
+		Allow().
+		Description("Demo role conversion utilities (IDs ↔ Names)").
 		Register()
 }

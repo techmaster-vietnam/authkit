@@ -35,14 +35,15 @@ func (m *BaseAuthMiddleware[TUser]) RequireAuth() fiber.Handler {
 			return goerrorkit.NewAuthError(401, "Token không được cung cấp")
 		}
 
-		claims, err := utils.ValidateToken(token, m.config.JWT.Secret)
+		// Validate token and extract role IDs (supports both standard and flexible token formats)
+		userID, _, roleIDs, err := utils.ValidateTokenAndExtractRoleIDs(token, m.config.JWT.Secret)
 		if err != nil {
 			return goerrorkit.NewAuthError(401, "Token không hợp lệ").WithData(map[string]interface{}{
 				"error": err.Error(),
 			})
 		}
 
-		user, err := m.userRepo.GetByID(claims.UserID)
+		user, err := m.userRepo.GetByID(userID)
 		if err != nil {
 			return goerrorkit.WrapWithMessage(err, "Người dùng không tồn tại")
 		}
@@ -53,10 +54,8 @@ func (m *BaseAuthMiddleware[TUser]) RequireAuth() fiber.Handler {
 			})
 		}
 
-		// Extract role IDs from validated JWT token
 		// Role IDs are safe because token signature has been verified
-		// If hacker modified role_ids, ValidateToken would have failed
-		roleIDs := claims.RoleIDs
+		// If hacker modified role_ids, ValidateTokenAndExtractRoleIDs would have failed
 		if roleIDs == nil {
 			roleIDs = []uint{} // Ensure non-nil slice
 		}
@@ -79,4 +78,3 @@ func GetUserFromContextGeneric[TUser core.UserInterface](c *fiber.Ctx) (TUser, b
 	}
 	return user, true
 }
-

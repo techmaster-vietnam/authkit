@@ -35,6 +35,9 @@ Module Go tái sử dụng cao cho ứng dụng Fiber REST API với authenticat
   - [5.5. Xử lý Lỗi với goerrorkit](#55-xử-lý-lỗi-với-goerrorkit)
   - [5.6. Best Practices](#56-best-practices)
   - [5.7. Troubleshooting](#57-troubleshooting)
+  - [5.8. JWT với Custom Fields và Username](#58-jwt-với-custom-fields-và-username)
+  - [5.9. Role Conversion Utilities](#59-role-conversion-utilities)
+  - [5.10. Các Hàm Hữu Ích trong Utils](#510-các-hàm-hữu-ích-trong-utils)
 - [6. System Roles và Role "super_admin"](#6-system-roles-và-role-super_admin)
   - [6.1. Role "super_admin" - Mục đích sử dụng](#61-role-super_admin---mục-đích-sử-dụng)
   - [6.2. Cơ chế Bảo mật của "super_admin"](#62-cơ-chế-bảo-mật-của-super_admin)
@@ -1152,6 +1155,433 @@ func main() {
 - Kiểm tra database connection
 - Kiểm tra quyền của database user
 - Kiểm tra các trường custom có conflict với BaseUser không
+
+### 5.8. JWT với Custom Fields và Username
+
+AuthKit hỗ trợ tạo JWT token với username và custom fields linh hoạt thông qua hàm `GenerateTokenFlexible()`.
+
+#### 5.8.1. Tạo Token với Username và Custom Fields
+
+```go
+import (
+    "github.com/techmaster-vietnam/authkit/utils"
+    "time"
+)
+
+func createTokenWithCustomFields(user *CustomUser, roleIDs []uint, roleNames []string, config *authkit.Config) (string, error) {
+    // Cấu hình claims
+    claimsConfig := utils.ClaimsConfig{
+        Username:   user.GetFullName(), // Thêm username vào token
+        RoleFormat: "both",            // Bao gồm cả IDs và names
+        RoleIDs:    roleIDs,
+        RoleNames:  roleNames,
+        CustomFields: map[string]interface{}{
+            "mobile":  user.Mobile,  // Custom field
+            "address": user.Address, // Custom field
+            "company_id": 123,      // Custom field khác
+        },
+    }
+    
+    // Tạo token
+    token, err := utils.GenerateTokenFlexible(
+        user.GetID(),
+        user.GetEmail(),
+        claimsConfig,
+        config.JWT.Secret,
+        config.JWT.Expiration,
+    )
+    
+    return token, err
+}
+```
+
+**Các tùy chọn RoleFormat:**
+- `"ids"`: Chỉ bao gồm role IDs (`role_ids` trong claims)
+- `"names"`: Chỉ bao gồm role names (`roles` trong claims)
+- `"both"`: Bao gồm cả IDs và names (khuyến nghị để tương thích tốt nhất)
+
+#### 5.8.2. Validate và Extract từ Flexible Token
+
+```go
+import (
+    "github.com/techmaster-vietnam/authkit/utils"
+    "github.com/golang-jwt/jwt/v5"
+)
+
+func extractClaimsFromToken(tokenString string, secret string) error {
+    // Validate token và lấy MapClaims
+    claims, err := utils.ValidateTokenFlexible(tokenString, secret)
+    if err != nil {
+        return err
+    }
+    
+    // Extract các fields cơ bản
+    userID := claims["user_id"].(string)
+    email := claims["email"].(string)
+    
+    // Extract username (nếu có)
+    if username, ok := claims["username"].(string); ok {
+        fmt.Printf("Username: %s\n", username)
+    }
+    
+    // Extract role IDs (nếu có)
+    if roleIDs, ok := claims["role_ids"].([]interface{}); ok {
+        ids := make([]uint, len(roleIDs))
+        for i, id := range roleIDs {
+            ids[i] = uint(id.(float64))
+        }
+        fmt.Printf("Role IDs: %v\n", ids)
+    }
+    
+    // Extract role names (nếu có)
+    if roleNames, ok := claims["roles"].([]interface{}); ok {
+        names := make([]string, len(roleNames))
+        for i, name := range roleNames {
+            names[i] = name.(string)
+        }
+        fmt.Printf("Role Names: %v\n", names)
+    }
+    
+    // Extract custom fields
+    customFields := []string{"mobile", "address", "company_id"}
+    for _, field := range customFields {
+        if value, ok := claims[field]; ok {
+            fmt.Printf("%s: %v\n", field, value)
+        }
+    }
+    
+    return nil
+}
+```
+
+#### 5.8.3. So sánh với Token Cơ bản
+
+**Token cơ bản (backward compatible):**
+```go
+// Vẫn hoạt động như cũ
+token, err := utils.GenerateToken(userID, email, roleIDs, secret, expiration)
+claims, err := utils.ValidateToken(token, secret)
+```
+
+**Token flexible (tính năng mới):**
+```go
+// Hỗ trợ username và custom fields
+config := utils.ClaimsConfig{
+    Username: "John Doe",
+    RoleFormat: "both",
+    RoleIDs: roleIDs,
+    RoleNames: roleNames,
+    CustomFields: map[string]interface{}{
+        "mobile": "0901234567",
+    },
+}
+token, err := utils.GenerateTokenFlexible(userID, email, config, secret, expiration)
+claims, err := utils.ValidateTokenFlexible(token, secret)
+```
+
+**Lưu ý:**
+- Hàm `GenerateToken()` và `ValidateToken()` cũ vẫn hoạt động bình thường (backward compatible)
+- `GenerateTokenFlexible()` sử dụng `MapClaims` để linh hoạt hơn
+- Custom fields có thể là bất kỳ kiểu dữ liệu nào (string, number, boolean, object, array)
+
+### 5.9. Role Conversion Utilities
+
+AuthKit cung cấp các utility functions để chuyển đổi giữa role IDs và role names một cách dễ dàng.
+
+#### 5.9.1. Extract Role Names/IDs từ Models
+
+**Từ slice của Role models:**
+```go
+import "github.com/techmaster-vietnam/authkit/utils"
+
+// Lấy roles từ database
+roles, err := roleRepo.GetByIDs([]uint{1, 2, 3})
+
+// Extract names từ roles
+roleNames := utils.ExtractRoleNamesFromRoles(roles)
+// Kết quả: []string{"admin", "editor", "author"}
+
+// Extract IDs từ roles
+roleIDs := utils.ExtractRoleIDsFromRoles(roles)
+// Kết quả: []uint{1, 2, 3}
+```
+
+**Từ slice của RoleInterface:**
+```go
+// Lấy roles từ user
+userRoles := user.GetRoles() // []core.RoleInterface
+
+// Extract names
+roleNames := utils.ExtractRoleNamesFromRoleInterfaces(userRoles)
+
+// Extract IDs
+roleIDs := utils.ExtractRoleIDsFromRoleInterfaces(userRoles)
+```
+
+#### 5.9.2. Convert Role Names ↔ Role IDs
+
+**Convert Names → IDs (sử dụng repository):**
+```go
+// Bước 1: Lấy map từ repository
+nameToIDMap, err := roleRepo.GetIDsByNames([]string{"admin", "editor"})
+// Kết quả: map[string]uint{"admin": 1, "editor": 2}
+
+// Bước 2: Convert map → slice
+roleIDs := utils.ConvertRoleNameMapToIDs(nameToIDMap, []string{"admin", "editor"})
+// Kết quả: []uint{1, 2}
+```
+
+**Convert IDs → Names (sử dụng repository):**
+```go
+// Bước 1: Lấy roles từ IDs
+roles, err := roleRepo.GetByIDs([]uint{1, 2})
+
+// Bước 2: Extract names
+roleNames := utils.ExtractRoleNamesFromRoles(roles)
+// Kết quả: []string{"admin", "editor"}
+```
+
+**Hoặc sử dụng với lookup functions:**
+```go
+// Với lookup function
+roleIDs := []uint{1, 2, 3}
+roleNames, err := utils.RoleIDsToNames(roleIDs, func(id uint) (string, error) {
+    role, err := roleRepo.GetByID(id)
+    if err != nil {
+        return "", err
+    }
+    return role.GetName(), nil
+})
+
+// Convert ngược lại
+roleNames := []string{"admin", "editor"}
+roleIDs, err := utils.RoleNamesToIDs(roleNames, func(name string) (uint, error) {
+    role, err := roleRepo.GetByName(name)
+    if err != nil {
+        return 0, err
+    }
+    return role.GetID(), nil
+})
+```
+
+#### 5.9.3. Ví dụ Sử dụng trong Handler
+
+```go
+func (h *UserHandler) GetUserRoles(c *fiber.Ctx) error {
+    userID := c.Params("user_id")
+    
+    // Lấy roles từ database
+    roles, err := h.roleRepo.ListRolesOfUser(userID)
+    if err != nil {
+        return err
+    }
+    
+    // Extract cả IDs và names
+    roleIDs := utils.ExtractRoleIDsFromRoles(roles)
+    roleNames := utils.ExtractRoleNamesFromRoles(roles)
+    
+    return c.JSON(fiber.Map{
+        "user_id":    userID,
+        "role_ids":   roleIDs,
+        "role_names": roleNames,
+    })
+}
+
+func (h *UserHandler) AssignRolesByName(c *fiber.Ctx) error {
+    var req struct {
+        RoleNames []string `json:"role_names"`
+    }
+    c.BodyParser(&req)
+    
+    // Convert role names → IDs
+    nameToIDMap, err := h.roleRepo.GetIDsByNames(req.RoleNames)
+    if err != nil {
+        return err
+    }
+    
+    roleIDs := utils.ConvertRoleNameMapToIDs(nameToIDMap, req.RoleNames)
+    
+    // Gán roles cho user bằng IDs
+    // ... logic gán roles ...
+    
+    return c.JSON(fiber.Map{
+        "success": true,
+        "role_ids": roleIDs,
+    })
+}
+```
+
+### 5.10. Các Hàm Hữu Ích trong Utils
+
+AuthKit cung cấp các utility functions hữu ích trong package `utils`:
+
+#### 5.10.1. Password Utilities
+
+**Hash password:**
+```go
+import "github.com/techmaster-vietnam/authkit/utils"
+
+hashedPassword, err := utils.HashPassword("my-password-123")
+if err != nil {
+    return err
+}
+// Lưu hashedPassword vào database
+```
+
+**Verify password:**
+```go
+password := "my-password-123"
+hashedPassword := "$2a$10$..." // Từ database
+
+isValid := utils.CheckPasswordHash(password, hashedPassword)
+if isValid {
+    // Password đúng
+} else {
+    // Password sai
+}
+```
+
+**Ví dụ trong Register Handler:**
+```go
+func (h *AuthHandler) Register(c *fiber.Ctx) error {
+    var req struct {
+        Email    string `json:"email"`
+        Password string `json:"password"`
+    }
+    c.BodyParser(&req)
+    
+    // Hash password
+    hashedPassword, err := utils.HashPassword(req.Password)
+    if err != nil {
+        return fiber.NewError(500, "Failed to hash password")
+    }
+    
+    // Tạo user
+    user := &authkit.BaseUser{
+        Email:    req.Email,
+        Password: hashedPassword,
+        Active:   true,
+    }
+    
+    // Lưu vào database
+    db.Create(user)
+    
+    return c.JSON(fiber.Map{"success": true})
+}
+```
+
+#### 5.10.2. ID Generation
+
+**Tạo ID ngẫu nhiên:**
+```go
+import "github.com/techmaster-vietnam/authkit/utils"
+
+// Tạo ID 12 ký tự ngẫu nhiên (a-zA-Z0-9)
+id, err := utils.GenerateID()
+if err != nil {
+    return err
+}
+// Kết quả ví dụ: "aB3dE5fG7hI9"
+```
+
+**Đặc điểm:**
+- Độ dài: 12 ký tự
+- Charset: `a-zA-Z0-9` (62 ký tự)
+- Sử dụng `crypto/rand` để đảm bảo tính ngẫu nhiên và an toàn
+- Phù hợp cho user IDs, order IDs, transaction IDs, etc.
+
+**Ví dụ sử dụng:**
+```go
+// Tạo user với custom ID
+user := &authkit.BaseUser{
+    ID:       utils.GenerateID(), // Tự động tạo ID
+    Email:    "user@example.com",
+    Password: hashedPassword,
+}
+
+// Hoặc trong BeforeCreate hook (như BaseUser đã làm)
+func (u *CustomUser) BeforeCreate(tx *gorm.DB) error {
+    if u.ID == "" {
+        id, err := utils.GenerateID()
+        if err != nil {
+            return err
+        }
+        u.ID = id
+    }
+    return nil
+}
+```
+
+#### 5.10.3. Tổng hợp Ví dụ
+
+**Ví dụ đầy đủ: Tạo User với Custom Fields và Token với Username:**
+```go
+import (
+    "github.com/techmaster-vietnam/authkit"
+    "github.com/techmaster-vietnam/authkit/utils"
+)
+
+func createUserAndGenerateToken(db *gorm.DB, config *authkit.Config) error {
+    // 1. Hash password
+    hashedPassword, err := utils.HashPassword("123456")
+    if err != nil {
+        return err
+    }
+    
+    // 2. Tạo user với custom fields
+    user := &CustomUser{
+        BaseUser: authkit.BaseUser{
+            Email:    "user@example.com",
+            Password: hashedPassword,
+            FullName: "John Doe",
+            Active:   true,
+        },
+        Mobile:  "0901234567",
+        Address: "123 Main St",
+    }
+    
+    // 3. Lưu vào database
+    if err := db.Create(user).Error; err != nil {
+        return err
+    }
+    
+    // 4. Lấy roles của user
+    roles, err := roleRepo.ListRolesOfUser(user.GetID())
+    if err != nil {
+        return err
+    }
+    
+    // 5. Extract role IDs và names
+    roleIDs := utils.ExtractRoleIDsFromRoles(roles)
+    roleNames := utils.ExtractRoleNamesFromRoles(roles)
+    
+    // 6. Tạo token với username và custom fields
+    claimsConfig := utils.ClaimsConfig{
+        Username:   user.GetFullName(),
+        RoleFormat: "both",
+        RoleIDs:    roleIDs,
+        RoleNames:  roleNames,
+        CustomFields: map[string]interface{}{
+            "mobile":  user.Mobile,
+            "address": user.Address,
+        },
+    }
+    
+    token, err := utils.GenerateTokenFlexible(
+        user.GetID(),
+        user.GetEmail(),
+        claimsConfig,
+        config.JWT.Secret,
+        config.JWT.Expiration,
+    )
+    if err != nil {
+        return err
+    }
+    
+    fmt.Printf("Token: %s\n", token)
+    return nil
+}
+```
 
 ---
 

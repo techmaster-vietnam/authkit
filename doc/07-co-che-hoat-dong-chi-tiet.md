@@ -10,7 +10,211 @@ Tài liệu này mô tả chi tiết **implementation** của các cơ chế bê
 
 ## 7.1. JWT Token Implementation
 
-### 7.1.1. Claims Structure
+### 7.1.1. JWT Token là gì?
+
+**JWT (JSON Web Token)** là một chuẩn mở (RFC 7519) để truyền thông tin an toàn giữa các parties dưới dạng JSON object. Token được ký bằng secret key hoặc public/private key pair.
+
+**Trong AuthKit:**
+- Sử dụng thuật toán **HMAC-SHA256** (HS256) với symmetric key để ký token
+- Chi tiết về thuật toán và thư viện xem tại [7.1.5.1](#7151-implementation-details---thuật-toán-và-thư-viện)
+
+**Đặc điểm chính:**
+- **Stateless**: Server không cần lưu session, mỗi request tự chứa đủ thông tin
+- **Self-contained**: Claims được embed trong token, không cần query database
+- **Signed**: Được ký bằng secret key để đảm bảo tính toàn vẹn
+
+### 7.1.2. Claims để làm gì?
+
+**Claims** là các thông tin được lưu trong JWT token, bao gồm:
+
+1. **Authentication**: Xác định user đã đăng nhập (user_id, email)
+2. **Authorization**: Xác định quyền của user (role_ids, roles)
+3. **Metadata**: Thông tin bổ sung (username, custom fields)
+4. **Expiration**: Thời gian hết hạn của token
+
+**Lợi ích:**
+- Không cần query database mỗi request để lấy user info
+- Tăng hiệu suất (giảm database load)
+- Dễ scale (không cần shared session storage)
+
+### 7.1.3. Cấu trúc JWT Token
+
+JWT token có **3 phần**, ngăn cách bởi dấu chấm (`.`):
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYWJjMTIzIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.signature
+│─────────────────────│ │──────────────────────────────────────────│ │──────────│
+      Header                    Payload (Claims)                      Signature
+```
+
+**1. Header** - Metadata về token:
+```json
+{
+  "alg": "HS256",  // Algorithm để sign (HMAC-SHA256)
+  "typ": "JWT"     // Type của token
+}
+```
+
+**2. Payload (Claims)** - Thông tin được lưu:
+```json
+{
+  "user_id": "abc123",
+  "email": "user@example.com",
+  "role_ids": [1, 2],
+  "exp": 1234567890,
+  "iat": 1234567890
+}
+```
+
+**3. Signature** - Chữ ký để verify tính toàn vẹn:
+```
+HMAC-SHA256(
+  base64UrlEncode(header) + "." + base64UrlEncode(payload),
+  secret_key
+)
+```
+
+### 7.1.4. Encode vs Encrypt - Bảo mật Claims
+
+**⚠️ Quan trọng:** Header và Payload chỉ là **Base64-encoded** (không mã hóa), không phải **encrypt**.
+
+**Bất kỳ ai cũng có thể decode và đọc:**
+
+```javascript
+// Ví dụ decode token (bất kỳ ai cũng làm được)
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYWJjMTIzIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.signature";
+
+// Tách 3 phần
+const [headerB64, payloadB64, signature] = token.split('.');
+
+// Decode Base64 (KHÔNG CẦN SECRET)
+const header = JSON.parse(atob(headerB64));
+// Kết quả: { "alg": "HS256", "typ": "JWT" }
+
+const payload = JSON.parse(atob(payloadB64));
+// Kết quả: { "user_id": "abc123", "email": "user@example.com", "role_ids": [1,2] }
+```
+
+**Bạn có thể test tại:** https://jwt.io
+
+**Signature bảo vệ:**
+- ✅ **Không thể sửa đổi**: Nếu hacker sửa claims → signature không match → token invalid
+- ❌ **Không bảo vệ tính bảo mật**: Claims vẫn có thể đọc được
+
+**→ Không nên lưu thông tin nhạy cảm (password, credit card, SSN) trong claims**
+
+### 7.1.5. Luồng hoạt động
+
+```
+1. Client → POST /api/auth/login
+   Body: { "email": "user@example.com", "password": "123456" }
+
+2. Server → Validate credentials
+   → Generate JWT token với claims
+   → Response: { "token": "eyJhbGciOiJIUzI1NiIs..." }
+
+3. Client → Lưu token vào localStorage
+   localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIs...')
+
+4. Client → GET /api/blogs
+   Header: Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+5. Server → Extract token từ header
+   → Validate token (không lưu token)
+   → Extract claims từ token
+   → Lưu vào context (chỉ trong request này)
+   → Xử lý request
+
+6. Request xong → Context bị xóa (token không được lưu)
+```
+
+**Đặc điểm:**
+- Token được tạo ở **server** khi login
+- Token được trả về cho **client** (browser)
+- Client lưu token (localStorage/cookie)
+- Client gửi token kèm mỗi request
+- Server validate token mỗi request (không lưu token)
+
+```
+1. Client → POST /api/auth/login
+   Body: { "email": "user@example.com", "password": "123456" }
+
+2. Server → Validate credentials
+   → Generate JWT token với claims
+   → Response: { "token": "eyJhbGciOiJIUzI1NiIs..." }
+
+3. Client → Lưu token vào localStorage
+   localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIs...')
+
+4. Client → GET /api/blogs
+   Header: Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+5. Server → Extract token từ header
+   → Validate token (không lưu token)
+   → Extract claims từ token
+   → Lưu vào context (chỉ trong request này)
+   → Xử lý request
+
+6. Request xong → Context bị xóa (token không được lưu)
+```
+
+**Đặc điểm:**
+- Token được tạo ở **server** khi login
+- Token được trả về cho **client** (browser)
+- Client lưu token (localStorage/cookie)
+- Client gửi token kèm mỗi request
+- Server validate token mỗi request (không lưu token)
+
+### 7.1.5.1. Implementation Details - Thuật toán và Thư viện
+
+**Thuật toán ký (Signing Algorithm):**
+- **HMAC-SHA256** (HS256): Sử dụng symmetric key (secret key) để tạo chữ ký
+- HMAC (Hash-based Message Authentication Code) là một cơ chế để xác thực tính toàn vẹn của message
+- SHA-256 là hàm hash một chiều, kết hợp với secret key để tạo chữ ký không thể giả mạo
+
+**Thư viện sử dụng:**
+- **`github.com/golang-jwt/jwt/v5`** (phiên bản 5.3.0)
+- Đây là thư viện chính thức của Go community cho JWT, được maintain tích cực và có security updates thường xuyên
+
+**Code Implementation:**
+
+```34:35:utils/jwt.go
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+```
+
+**Giải thích:**
+1. `jwt.SigningMethodHS256`: Chỉ định thuật toán HMAC-SHA256
+2. `token.SignedString([]byte(secret))`: Tạo chữ ký bằng cách:
+   - Encode header và payload thành Base64URL
+   - Tính toán HMAC-SHA256 của `base64UrlEncode(header) + "." + base64UrlEncode(payload)` với secret key
+   - Encode signature thành Base64URL
+   - Kết hợp: `header.payload.signature`
+
+**Validation và Bảo mật:**
+
+```41:46:utils/jwt.go
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Verify signing method to prevent algorithm confusion attacks
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secret), nil
+	})
+```
+
+**Bảo mật:**
+- ✅ **Kiểm tra signing method**: Chỉ chấp nhận HMAC, từ chối các thuật toán khác (RSA, ECDSA) để tránh algorithm confusion attacks
+- ✅ **Signature verification**: Token chỉ hợp lệ nếu signature khớp với secret key
+- ✅ **Tamper detection**: Nếu hacker sửa claims → signature không match → `token.Valid = false`
+
+**Lý do chọn HMAC-SHA256:**
+- ✅ Đơn giản: Chỉ cần một secret key (không cần public/private key pair)
+- ✅ Hiệu suất cao: HMAC nhanh hơn RSA/ECDSA
+- ✅ Phù hợp cho single-server hoặc shared secret trong microservices
+- ⚠️ Lưu ý: Secret key phải được bảo mật tuyệt đối, không commit vào git
+
+### 7.1.6. Claims Structure trong AuthKit
 
 JWT token trong AuthKit sử dụng custom claims structure:
 
@@ -89,6 +293,274 @@ func ValidateToken(tokenString, secret string) (*JWTClaims, error) {
 - Nếu hacker modify `role_ids` trong token → signature không match → `token.Valid = false`
 - Algorithm confusion attack bị ngăn chặn bởi explicit method check
 
+### 7.1.7. Cấu hình Custom Claims
+
+AuthKit hỗ trợ thêm custom fields vào claims thông qua `ClaimsConfig`:
+
+```go
+type ClaimsConfig struct {
+    // Username to include in token (optional)
+    Username string
+    
+    // Custom fields to add to token claims
+    CustomFields map[string]interface{}
+    
+    // Role format: "ids" ([]uint), "names" ([]string), or "both"
+    RoleFormat string // "ids" | "names" | "both"
+    
+    // Role IDs (when RoleFormat is "ids" or "both")
+    RoleIDs []uint
+    
+    // Role Names (when RoleFormat is "names" or "both")
+    RoleNames []string
+}
+```
+
+#### 7.1.7.1. Tạo Token với Custom Claims
+
+**Ví dụ: Thêm username và custom fields vào token**
+
+```go
+import "github.com/techmaster-vietnam/authkit/utils"
+
+// Lấy thông tin user và roles
+user := getUserFromDB()
+userRoles := user.GetRoles()
+roleIDs := utils.ExtractRoleIDsFromRoleInterfaces(userRoles)
+roleNames := utils.ExtractRoleNamesFromRoleInterfaces(userRoles)
+
+// Cấu hình claims với custom fields
+config := utils.ClaimsConfig{
+    Username:   user.GetFullName(), // Thêm username
+    RoleFormat: "both",             // Bao gồm cả IDs và names
+    RoleIDs:    roleIDs,
+    RoleNames:  roleNames,
+    CustomFields: map[string]interface{}{
+        "mobile":  user.Mobile,      // Custom field: mobile
+        "address": user.Address,     // Custom field: address
+        "company_id": 123,           // Custom field: company_id
+        "department": "IT",          // Custom field: department
+    },
+}
+
+// Tạo token với flexible claims
+token, err := utils.GenerateTokenFlexible(
+    user.GetID(),
+    user.GetEmail(),
+    config,
+    secret,
+    expiration,
+)
+```
+
+**Token được tạo sẽ chứa:**
+```json
+{
+  "user_id": "abc123xyz",
+  "email": "user@example.com",
+  "username": "John Doe",
+  "role_ids": [1, 2],
+  "roles": ["admin", "editor"],
+  "mobile": "0901234567",
+  "address": "123 Main St",
+  "company_id": 123,
+  "department": "IT",
+  "exp": 1234567890,
+  "iat": 1234567890,
+  "iss": "authkit"
+}
+```
+
+#### 7.1.7.2. Implementation của GenerateTokenFlexible
+
+```go
+func GenerateTokenFlexible(
+    userID string,
+    email string,
+    config ClaimsConfig,
+    secret string,
+    expiration time.Duration,
+) (string, error) {
+    // Tạo base claims
+    claims := jwt.MapClaims{
+        "user_id": userID,
+        "email":   email,
+        "exp":     time.Now().Add(expiration).Unix(),
+        "iat":     time.Now().Unix(),
+        "nbf":     time.Now().Unix(),
+        "iss":     "authkit",
+    }
+    
+    // Thêm username nếu có
+    if config.Username != "" {
+        claims["username"] = config.Username
+    }
+    
+    // Thêm roles theo format
+    if config.RoleFormat == "names" || config.RoleFormat == "both" {
+        if len(config.RoleNames) > 0 {
+            claims["roles"] = config.RoleNames
+        }
+    }
+    if config.RoleFormat == "ids" || config.RoleFormat == "both" {
+        if len(config.RoleIDs) > 0 {
+            claims["role_ids"] = config.RoleIDs
+        }
+    }
+    
+    // Thêm custom fields
+    for k, v := range config.CustomFields {
+        if k != "username" || config.Username == "" {
+            claims[k] = v
+        }
+    }
+    
+    // Ký token với secret key
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    return token.SignedString([]byte(secret))
+}
+```
+
+**Chi tiết:**
+- Sử dụng `jwt.MapClaims` để linh hoạt thêm custom fields
+- Custom fields được thêm vào claims trước khi ký
+- Signature bảo vệ tất cả claims (kể cả custom fields)
+
+#### 7.1.7.3. Extract Claims từ Token
+
+**Sử dụng ValidateTokenFlexible để extract claims:**
+
+```go
+import "github.com/techmaster-vietnam/authkit/utils"
+
+// Validate và extract claims
+claims, err := utils.ValidateTokenFlexible(tokenString, secret)
+if err != nil {
+    return err
+}
+
+// Extract các fields cơ bản
+userID := claims["user_id"].(string)
+email := claims["email"].(string)
+
+// Extract username (nếu có)
+if username, ok := claims["username"].(string); ok {
+    fmt.Printf("Username: %s\n", username)
+}
+
+// Extract role IDs
+if roleIDs, ok := claims["role_ids"].([]interface{}); ok {
+    ids := make([]uint, len(roleIDs))
+    for i, id := range roleIDs {
+        ids[i] = uint(id.(float64))
+    }
+}
+
+// Extract role names
+if roleNames, ok := claims["roles"].([]interface{}); ok {
+    names := make([]string, len(roleNames))
+    for i, name := range roleNames {
+        names[i] = name.(string)
+    }
+}
+
+// Extract custom fields
+if mobile, ok := claims["mobile"].(string); ok {
+    fmt.Printf("Mobile: %s\n", mobile)
+}
+if companyID, ok := claims["company_id"].(float64); ok {
+    fmt.Printf("Company ID: %.0f\n", companyID)
+}
+```
+
+#### 7.1.7.4. Ví dụ Sử dụng trong Login Handler
+
+**Tạo custom login handler với username và custom fields:**
+
+```go
+func (h *AuthHandler) LoginWithCustomClaims(c *fiber.Ctx) error {
+    var req struct {
+        Email    string `json:"email"`
+        Password string `json:"password"`
+    }
+    c.BodyParser(&req)
+    
+    // Validate credentials
+    user, err := h.userRepo.GetByEmail(req.Email)
+    if err != nil {
+        return c.Status(401).JSON(fiber.Map{"error": "Invalid credentials"})
+    }
+    
+    if !utils.CheckPasswordHash(req.Password, user.Password) {
+        return c.Status(401).JSON(fiber.Map{"error": "Invalid credentials"})
+    }
+    
+    // Lấy roles của user
+    userRoles := user.GetRoles()
+    roleIDs := utils.ExtractRoleIDsFromRoleInterfaces(userRoles)
+    roleNames := utils.ExtractRoleNamesFromRoleInterfaces(userRoles)
+    
+    // Cấu hình claims với thông tin user
+    config := utils.ClaimsConfig{
+        Username:   user.GetFullName(),
+        RoleFormat: "both",
+        RoleIDs:    roleIDs,
+        RoleNames:  roleNames,
+        CustomFields: map[string]interface{}{
+            "mobile":  getCustomUserMobile(user),
+            "address": getCustomUserAddress(user),
+        },
+    }
+    
+    // Tạo token
+    token, err := utils.GenerateTokenFlexible(
+        user.GetID(),
+        user.GetEmail(),
+        config,
+        h.config.JWT.Secret,
+        h.config.JWT.Expiration,
+    )
+    if err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to generate token"})
+    }
+    
+    return c.JSON(fiber.Map{
+        "token": token,
+        "user":  user,
+    })
+}
+```
+
+#### 7.1.7.5. Lưu ý Bảo mật
+
+**✅ Nên thêm vào claims:**
+- User ID, Email, Username
+- Role IDs, Role Names
+- Custom fields không nhạy cảm (mobile, address, department, etc.)
+
+**❌ KHÔNG NÊN thêm vào claims:**
+- Password (dù đã hash)
+- Credit card numbers
+- Social Security Numbers (SSN)
+- API keys hoặc secrets
+- Thông tin nhạy cảm khác
+
+**Lý do:** Claims chỉ được **encode** (Base64), không phải **encrypt**. Signature chỉ bảo vệ tính toàn vẹn (không thể sửa), không bảo vệ tính bảo mật (không thể đọc).
+
+#### 7.1.7.6. So sánh GenerateToken vs GenerateTokenFlexible
+
+| Tính năng | GenerateToken | GenerateTokenFlexible |
+|-----------|---------------|----------------------|
+| Username | ❌ Không hỗ trợ | ✅ Hỗ trợ |
+| Custom Fields | ❌ Không hỗ trợ | ✅ Hỗ trợ |
+| Role Names | ❌ Chỉ IDs | ✅ IDs, Names, hoặc cả hai |
+| Backward Compatible | ✅ Có | ✅ Có (hàm riêng) |
+| Use Case | Đơn giản, nhanh | Linh hoạt, nhiều thông tin |
+
+**Khi nào dùng:**
+- `GenerateToken()`: Khi chỉ cần user_id, email, role_ids (đơn giản)
+- `GenerateTokenFlexible()`: Khi cần username, custom fields, hoặc role names
+
 ---
 
 ## 7.2. Password Hashing Implementation
@@ -111,7 +583,7 @@ func HashPassword(password string) (string, error) {
 ```
 $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
 │  │  │  │                              │
-│  │  │  └─ Salt (22 chars)            └─ Hash (31 chars)
+│  │  │  └─ Salt (22 chars)             └─ Hash (31 chars)
 │  │  └─ Cost factor (10 = 2^10 rounds)
 │  └─ Version (2a)
 └─ Algorithm identifier

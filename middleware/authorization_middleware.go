@@ -53,140 +53,144 @@ func NewAuthorizationMiddleware(
 	return mw
 }
 
-// Authorize middleware checks authorization based on rules
-func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		method := c.Method()
-		path := c.Path()
+// authorizeHandler is the actual authorization handler function
+// Separated from Authorize() to allow easier debugging (named function instead of closure)
+func (m *AuthorizationMiddleware) authorizeHandler(c *fiber.Ctx) error {
+	method := c.Method()
+	path := c.Path()
 
-		// Refresh cache if needed
-		// m.refreshCacheIfNeeded()
+	// Refresh cache if needed
+	// m.refreshCacheIfNeeded()
 
-		// Get all matching rules
-		matchingRules := m.findMatchingRules(method, path)
+	// Get all matching rules
+	matchingRules := m.findMatchingRules(method, path)
 
-		// If no rule found, default to FORBIDE
-		if len(matchingRules) == 0 {
-			return goerrorkit.NewAuthError(403, "Không có quyền truy cập endpoint này").WithData(map[string]interface{}{
-				"method": method,
-				"path":   path,
-			})
-		}
+	// If no rule found, default to FORBIDE
+	if len(matchingRules) == 0 {
+		return goerrorkit.NewAuthError(403, "Không có quyền truy cập endpoint này").WithData(map[string]interface{}{
+			"method": method,
+			"path":   path,
+		})
+	}
 
-		// Check for PUBLIC rule first (allows anonymous) - early exit
-		for _, rule := range matchingRules {
-			if rule.Type == models.AccessPublic {
-				return c.Next()
-			}
-		}
-
-		// All other rule types require authentication
-		// Reject anonymous users immediately
-		user, ok := GetUserFromContext(c)
-		if !ok {
-			return goerrorkit.NewAuthError(401, "Yêu cầu đăng nhập")
-		}
-
-		// Get role IDs from context (from validated JWT token - no DB query needed)
-		// Role IDs are safe because they come from a token that has been validated
-		// If hacker modified role_ids, ValidateToken would have failed
-		roleIDs, ok := GetRoleIDsFromContext(c)
-		if !ok {
-			// Fallback: if roles not in context, query from DB (backward compatibility)
-			userRoles, err := m.roleRepo.ListRolesOfUser(user.ID)
-			if err != nil {
-				return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy roles của user").WithData(map[string]interface{}{
-					"user_id": user.ID,
-				})
-			}
-			roleIDs = make([]uint, 0, len(userRoles))
-			for _, role := range userRoles {
-				roleIDs = append(roleIDs, role.ID)
-			}
-		}
-
-		// Convert role IDs to map for O(1) lookup (no DB query needed!)
-		userRoleIDs := make(map[uint]bool, len(roleIDs))
-		for _, roleID := range roleIDs {
-			userRoleIDs[roleID] = true
-		}
-
-		// Check for super admin role (bypass all rules) - using cached ID
-		if m.getSuperAdminID() != nil && userRoleIDs[*m.getSuperAdminID()] {
+	// Check for PUBLIC rule first (allows anonymous) - early exit
+	for _, rule := range matchingRules {
+		if rule.Type == models.AccessPublic {
 			return c.Next()
 		}
+	}
 
-		// Check for optional X-Role-Context header
-		// If provided, validate that user has this role and filter to only that role
-		roleContext := c.Get("X-Role-Context")
-		if roleContext != "" {
-			roleContextID, err := m.getRoleIDByName(roleContext)
-			if err != nil {
-				return goerrorkit.NewAuthError(403, "Không có quyền sử dụng role context này").WithData(map[string]interface{}{
-					"requested_role": roleContext,
-					"error":          "Role không tồn tại",
-				})
-			}
-			if !userRoleIDs[roleContextID] {
-				return goerrorkit.NewAuthError(403, "Không có quyền sử dụng role context này").WithData(map[string]interface{}{
-					"requested_role": roleContext,
-					"user_role_ids":  roleIDs,
-				})
-			}
-			// Filter to only use the specified role context
-			userRoleIDs = map[uint]bool{roleContextID: true}
+	// All other rule types require authentication
+	// Reject anonymous users immediately
+	user, ok := GetUserFromContext(c)
+	if !ok {
+		return goerrorkit.NewAuthError(401, "Yêu cầu đăng nhập")
+	}
+
+	// Get role IDs from context (from validated JWT token - no DB query needed)
+	// Role IDs are safe because they come from a token that has been validated
+	// If hacker modified role_ids, ValidateToken would have failed
+	roleIDs, ok := GetRoleIDsFromContext(c)
+	if !ok {
+		// Fallback: if roles not in context, query from DB (backward compatibility)
+		userRoles, err := m.roleRepo.ListRolesOfUser(user.ID)
+		if err != nil {
+			return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy roles của user").WithData(map[string]interface{}{
+				"user_id": user.ID,
+			})
 		}
+		roleIDs = make([]uint, 0, len(userRoles))
+		for _, role := range userRoles {
+			roleIDs = append(roleIDs, role.ID)
+		}
+	}
 
-		// Process rules: FORBIDE rules have higher priority than ALLOW rules
-		// Early exit optimization: check FORBIDE first, if found, reject immediately
-		for _, rule := range matchingRules {
-			if rule.Type == models.AccessForbid {
-				// FORBIDE rules: check if user has forbidden roles
-				if len(rule.Roles) == 0 {
-					// Empty roles array means forbid everyone - reject immediately
+	// Convert role IDs to map for O(1) lookup (no DB query needed!)
+	userRoleIDs := make(map[uint]bool, len(roleIDs))
+	for _, roleID := range roleIDs {
+		userRoleIDs[roleID] = true
+	}
+
+	// Check for super admin role (bypass all rules) - using cached ID
+	if m.getSuperAdminID() != nil && userRoleIDs[*m.getSuperAdminID()] {
+		return c.Next()
+	}
+
+	// Check for optional X-Role-Context header
+	// If provided, validate that user has this role and filter to only that role
+	roleContext := c.Get("X-Role-Context")
+	if roleContext != "" {
+		roleContextID, err := m.getRoleIDByName(roleContext)
+		if err != nil {
+			return goerrorkit.NewAuthError(403, "Không có quyền sử dụng role context này").WithData(map[string]interface{}{
+				"requested_role": roleContext,
+				"error":          "Role không tồn tại",
+			})
+		}
+		if !userRoleIDs[roleContextID] {
+			return goerrorkit.NewAuthError(403, "Không có quyền sử dụng role context này").WithData(map[string]interface{}{
+				"requested_role": roleContext,
+				"user_role_ids":  roleIDs,
+			})
+		}
+		// Filter to only use the specified role context
+		userRoleIDs = map[uint]bool{roleContextID: true}
+	}
+
+	// Process rules: FORBIDE rules have higher priority than ALLOW rules
+	// Early exit optimization: check FORBIDE first, if found, reject immediately
+	for _, rule := range matchingRules {
+		if rule.Type == models.AccessForbid {
+			// FORBIDE rules: check if user has forbidden roles
+			if len(rule.Roles) == 0 {
+				// Empty roles array means forbid everyone - reject immediately
+				return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
+					"method":        method,
+					"path":          path,
+					"user_role_ids": roleIDs,
+				})
+			}
+			// Check if user has any of the forbidden roles (compare IDs directly)
+			for _, roleID := range rule.Roles {
+				if userRoleIDs[roleID] {
 					return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
 						"method":        method,
 						"path":          path,
 						"user_role_ids": roleIDs,
 					})
 				}
-				// Check if user has any of the forbidden roles (compare IDs directly)
-				for _, roleID := range rule.Roles {
-					if userRoleIDs[roleID] {
-						return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
-							"method":        method,
-							"path":          path,
-							"user_role_ids": roleIDs,
-						})
-					}
-				}
 			}
 		}
+	}
 
-		// Check ALLOW rules only if no FORBIDE match
-		for _, rule := range matchingRules {
-			if rule.Type == models.AccessAllow {
-				// ALLOW rules: check if user has allowed roles
-				// Empty roles array means any authenticated user can access
-				if len(rule.Roles) == 0 {
+	// Check ALLOW rules only if no FORBIDE match
+	for _, rule := range matchingRules {
+		if rule.Type == models.AccessAllow {
+			// ALLOW rules: check if user has allowed roles
+			// Empty roles array means any authenticated user can access
+			if len(rule.Roles) == 0 {
+				return c.Next()
+			}
+			// Check if user has any of the allowed roles (compare IDs directly)
+			for _, roleID := range rule.Roles {
+				if userRoleIDs[roleID] {
 					return c.Next()
 				}
-				// Check if user has any of the allowed roles (compare IDs directly)
-				for _, roleID := range rule.Roles {
-					if userRoleIDs[roleID] {
-						return c.Next()
-					}
-				}
 			}
 		}
-
-		// Default deny if no rule matches user's roles
-		return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
-			"method":        method,
-			"path":          path,
-			"user_role_ids": roleIDs,
-		})
 	}
+
+	// Default deny if no rule matches user's roles
+	return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
+		"method":        method,
+		"path":          path,
+		"user_role_ids": roleIDs,
+	})
+}
+
+// Authorize middleware checks authorization based on rules
+func (m *AuthorizationMiddleware) Authorize() fiber.Handler {
+	return m.authorizeHandler
 }
 
 // findMatchingRules finds all matching rules for method and path

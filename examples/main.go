@@ -115,9 +115,10 @@ func main() {
 	}
 
 	blogHandler := NewBlogHandler() // Application-specific handler
+	demoHandler := NewDemoHandler(ak) // Demo handler for new features
 
 	// 11. Setup routes với fluent API
-	setupRoutes(app, ak, blogHandler)
+	setupRoutes(app, ak, blogHandler, demoHandler)
 
 	// 12. Sync routes từ code vào database
 	if err := ak.SyncRoutes(); err != nil {
