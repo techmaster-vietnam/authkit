@@ -240,3 +240,9 @@ func (h *DemoHandler) GetRouteRegistry(c *fiber.Ctx) error {
 func (h *DemoHandler) Foo(c *fiber.Ctx) error {
 	return c.JSON("ok")
 }
+
+// Bar returns a simple "ok" JSON response
+// GET /api/bar
+func (h *DemoHandler) Bar(c *fiber.Ctx) error {
+	return c.JSON("ok")
+}

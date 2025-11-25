@@ -182,4 +182,10 @@ func setupRoutes(
 		Forbid().
 		Description("Foo endpoint - cấm tất cả logged in users").
 		Register()
+
+	// Bar route - cấm users có role "reader" hoặc "admin"
+	apiRouter.Get("/bar", demoHandler.Bar).
+		Forbid("reader", "admin").
+		Description("Bar endpoint - cấm users có role reader hoặc admin").
+		Register()
 }

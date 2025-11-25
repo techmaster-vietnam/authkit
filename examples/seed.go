@@ -139,6 +139,14 @@ func initUsers(db *gorm.DB) error {
 			address:  "654 Reader Boulevard, Hai Phong",
 			roles:    []string{"reader"},
 		},
+		{
+			email:    "bob@gmail.com",
+			password: "123456",
+			fullName: "Bob",
+			mobile:   "0906789012",
+			address:  "987 Bob Street, Ho Chi Minh City",
+			roles:    []string{"reader", "author", "editor"},
+		},
 	}
 
 	for _, userData := range testUsers {
