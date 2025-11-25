@@ -467,10 +467,24 @@ sequenceDiagram
     loop For Each Route
         Sync->>Sync: Build Rule Object<br/>Convert :id → *
         Sync->>DB: Check Rule Exists
-        alt Rule Not Exists
-            Sync->>DB: Create Rule
-        else Rule Exists
-            Sync->>Sync: Skip (giữ nguyên DB)
+        alt Override = true
+            alt Rule Not Exists
+                Sync->>DB: Create Rule
+            else Rule Exists
+                Sync->>DB: Update Rule (ghi đè)
+            end
+        else Fixed = true
+            alt Rule Not Exists
+                Sync->>DB: Create Rule
+            else Rule Exists
+                Sync->>Sync: Skip (giữ nguyên DB)
+            end
+        else Default (Non-Fixed)
+            alt Rule Not Exists
+                Sync->>DB: Create Rule
+            else Rule Exists
+                Sync->>Sync: Skip (giữ nguyên DB)
+            end
         end
     end
     
@@ -483,9 +497,10 @@ sequenceDiagram
 2. **Batch convert role names → role IDs** (tối ưu - một query duy nhất)
 3. **Convert path parameters** (`:id`) thành wildcard (`*`) để pattern matching
 4. **Tạo Rule objects** với role IDs
-5. **Xử lý Fixed rules**:
+5. **Xử lý Fixed và Override rules**:
+   - `Override = true`: Luôn ghi đè cấu hình từ code lên database (tạo mới hoặc update)
    - `Fixed = true`: Chỉ tạo mới nếu chưa tồn tại, **không update** nếu đã có
-   - `Fixed = false`: Chỉ tạo mới nếu chưa tồn tại, giữ nguyên nếu đã có (để user có thể sửa từ DB)
+   - `Fixed = false` và `Override = false`: Chỉ tạo mới nếu chưa tồn tại, giữ nguyên nếu đã có (để user có thể sửa từ DB)
 
 **Ví dụ:**
 
@@ -555,17 +570,29 @@ func SyncRoutesToDatabase(
             Description: route.Description,
         }
 
-        // Chỉ tạo mới nếu chưa tồn tại
-        _, err := ruleRepo.GetByID(ruleID)
+        existingRule, err := ruleRepo.GetByID(ruleID)
         if err == gorm.ErrRecordNotFound {
+            // Rule chưa tồn tại, tạo mới
             ruleRepo.Create(rule)
+        } else if route.Override {
+            // Override=true: luôn ghi đè từ code lên DB
+            ruleRepo.Update(rule)
+        } else if route.Fixed {
+            // Fixed=true: chỉ tạo mới, không update
+            // (đã xử lý ở trên khi err == gorm.ErrRecordNotFound)
+        } else {
+            // Default: chỉ tạo mới, giữ nguyên nếu đã tồn tại
+            // (đã xử lý ở trên khi err == gorm.ErrRecordNotFound)
         }
-        // Nếu đã tồn tại → giữ nguyên (không update)
     }
 }
 ```
 
-### 4.4.2. Fixed Rules - Rules không thể thay đổi từ Database
+### 4.4.2. Fixed Rules và Override Rules
+
+AuthKit hỗ trợ 3 loại rules dựa trên cách xử lý khi sync vào database:
+
+#### 4.4.2.1. Fixed Rules - Rules không thể thay đổi từ Database
 
 **Fixed Rules** là rules được đánh dấu `Fixed = true`, không thể cập nhật hoặc xóa thông qua API.
 
@@ -593,24 +620,85 @@ apiRouter.Get("/admin/users", adminHandler.ListUsers).
     Fixed().  // Đánh dấu là fixed
     Description("Danh sách users (chỉ admin)").
     Register()
+```
 
+#### 4.4.2.2. Override Rules - Luôn ghi đè từ Code
+
+**Override Rules** là rules được đánh dấu `Override = true`, luôn được ghi đè từ code lên database khi sync.
+
+**Đặc điểm:**
+
+1. **Luôn ghi đè khi sync** 🔄
+   - `SyncRoutes()` sẽ update rule nếu đã tồn tại trong DB
+   - Đảm bảo cấu hình trong code luôn được áp dụng
+
+2. **Có thể update/delete qua API** ✅
+   - `PUT /api/rules/:id` → Cho phép update
+   - `DELETE /api/rules/:id` → Cho phép delete
+   - Nhưng khi sync lại, cấu hình từ code sẽ được ghi đè
+
+3. **Use cases** 🎯
+   - Endpoints cần đảm bảo cấu hình từ code luôn được áp dụng
+   - Khi muốn code là source of truth cho rule configuration
+   - Development/testing environments
+
+**Ví dụ:**
+
+```go
+// Override rule - luôn ghi đè từ code lên DB
+apiRouter.Put("/blogs/:id", blogHandler.Update).
+    Allow("author", "editor", "admin").
+    Override().  // Luôn update rule trong DB khi sync
+    Description("Cập nhật blog").
+    Register()
+```
+
+#### 4.4.2.3. Non-Fixed Rules (Default)
+
+**Non-Fixed Rules** là rules mặc định (`Fixed = false`, `Override = false`), có thể được quản lý từ cả code và database.
+
+**Đặc điểm:**
+
+1. **Chỉ tạo mới khi sync** 📝
+   - `SyncRoutes()` chỉ tạo mới nếu chưa tồn tại
+   - Nếu đã tồn tại → giữ nguyên (không update)
+
+2. **Có thể update/delete qua API** ✅
+   - `PUT /api/rules/:id` → Cho phép update
+   - `DELETE /api/rules/:id` → Cho phép delete
+   - Thay đổi từ DB sẽ được giữ nguyên khi sync lại
+
+3. **Use cases** 🎯
+   - Flexible endpoints cho phép điều chỉnh từ database
+   - Dynamic rule management
+   - User-configurable permissions
+
+**Ví dụ:**
+
+```go
 // Non-fixed rule - có thể sửa từ DB
 apiRouter.Post("/blogs", blogHandler.Create).
     Allow("author", "editor").
-    // Không có Fixed() → có thể sửa từ DB
+    // Không có Fixed() hoặc Override() → có thể sửa từ DB
     Description("Tạo blog mới").
     Register()
 ```
 
-**So sánh Fixed vs Non-Fixed:**
+**Lưu ý quan trọng:**
 
-| Đặc điểm | Fixed Rule | Non-Fixed Rule |
-|----------|------------|----------------|
-| Tạo từ code | ✅ Có thể | ✅ Có thể |
-| Update từ DB | ❌ Không thể | ✅ Có thể |
-| Delete từ DB | ❌ Không thể | ✅ Có thể |
-| SyncRoutes() | Chỉ tạo mới | Chỉ tạo mới |
-| Use case | Critical endpoints | Flexible endpoints |
+- ⚠️ **Fixed và Override loại trừ lẫn nhau** - không thể dùng cùng lúc
+- Nếu gọi cả `Fixed()` và `Override()`, method được gọi sau sẽ override method trước
+- Trong code: `Fixed()` sẽ set `Override = false`, `Override()` sẽ set `Fixed = false`
+
+**So sánh 3 loại Rules:**
+
+| Đặc điểm | Fixed Rule | Override Rule | Non-Fixed Rule |
+|----------|------------|---------------|----------------|
+| Tạo từ code | ✅ Có thể | ✅ Có thể | ✅ Có thể |
+| Update từ DB | ❌ Không thể | ✅ Có thể (nhưng sẽ bị ghi đè khi sync) | ✅ Có thể |
+| Delete từ DB | ❌ Không thể | ✅ Có thể (nhưng sẽ được tạo lại khi sync) | ✅ Có thể |
+| SyncRoutes() | Chỉ tạo mới | Tạo mới hoặc update | Chỉ tạo mới |
+| Use case | Critical endpoints | Code là source of truth | Flexible endpoints |
 
 ### 4.4.3. Rule Management API
 
@@ -684,6 +772,11 @@ func (h *RuleHandler) AddRule(c *fiber.Ctx) error {
    - Admin endpoints
    - System endpoints
    - Endpoints quan trọng cần bảo vệ
+
+2. **Sử dụng Override() khi cần đảm bảo code là source of truth**
+   - Endpoints cần luôn đồng bộ cấu hình từ code
+   - Development/testing environments
+   - Khi muốn code luôn ghi đè thay đổi từ database
 
 2. **Kết hợp FORBID và ALLOW khi cần**
    - FORBID để cấm một số roles

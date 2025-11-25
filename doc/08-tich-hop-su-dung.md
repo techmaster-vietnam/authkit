@@ -138,6 +138,13 @@ apiRouter.Get("/admin/users", adminHandler.List).
     Allow("admin").
     Fixed().
     Register()
+
+// Override rule - Luôn ghi đè cấu hình từ code lên database
+apiRouter.Put("/blogs/:id", blogHandler.Update).
+    Allow("author", "editor", "admin").
+    Override().  // Luôn update rule trong DB khi sync
+    Description("Cập nhật blog").
+    Register()
 ```
 
 ### 8.2.3. Lấy User từ Context
@@ -298,7 +305,18 @@ ak, err := authkit.New[*CustomUser, *authkit.BaseRole](app, db).
        Register()
    ```
 
-3. **Sử dụng Description() để mô tả routes**
+3. **Sử dụng Override() khi cần luôn đồng bộ từ code**
+   ```go
+   apiRouter.Put("/blogs/:id", handler).
+       Allow("author", "editor").
+       Override().  // Luôn ghi đè cấu hình từ code lên DB khi sync
+       Register()
+   ```
+   - Override và Fixed loại trừ lẫn nhau, không thể dùng cùng lúc
+   - Override=true: SyncRoutes() sẽ update rule nếu đã tồn tại trong DB
+   - Fixed=true: SyncRoutes() chỉ tạo mới, không update
+
+4. **Sử dụng Description() để mô tả routes**
    ```go
    apiRouter.Post("/blogs", handler).
        Allow("author").
@@ -306,7 +324,7 @@ ak, err := authkit.New[*CustomUser, *authkit.BaseRole](app, db).
        Register()
    ```
 
-4. **Seed roles trước khi sync routes**
+5. **Seed roles trước khi sync routes**
    ```go
    // Seed roles trước
    SeedRoles(db)

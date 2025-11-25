@@ -57,7 +57,7 @@ Tài liệu chi tiết về hệ thống phân quyền rule-based:
   - super_admin role đặc biệt với bypass logic
 - **Route Sync và Rule Management**: 
   - Sequence diagram sync routes flow
-  - Fixed rules vs Non-fixed rules
+  - Fixed rules, Override rules và Non-fixed rules
   - Rule Management API với ví dụ curl
 
 ### 5. [Database Schema và Models](./05-database-schema-models.md)

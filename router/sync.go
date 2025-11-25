@@ -10,8 +10,9 @@ import (
 )
 
 // SyncRoutesToDatabase đồng bộ routes từ code vào database
-//   - Nếu Fixed=true: chỉ tạo mới nếu chưa tồn tại, không update
-//   - Nếu Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
+//   - Nếu Override=true: luôn ghi đè cấu hình từ code lên database (luôn update)
+//   - Nếu Override=false và Fixed=true: chỉ tạo mới nếu chưa tồn tại, không update
+//   - Nếu Override=false và Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
 //     (giữ nguyên Type và Roles từ database vì đó là mong muốn của người dùng)
 //   - Convert role names (string) từ routes → role IDs (uint) khi lưu vào DB
 //   - serviceName: nếu empty, rule sẽ có service_name = NULL (single-app mode)
@@ -73,8 +74,40 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 			ServiceName: ruleServiceName, // Empty string will be stored as NULL in DB
 		}
 
-		if route.Fixed {
-			// Fixed=true: chỉ tạo mới nếu chưa tồn tại, không update
+		if route.Override {
+			// Override=true: luôn ghi đè cấu hình từ code lên database
+			_, err := ruleRepo.GetByID(ruleID)
+			if err == gorm.ErrRecordNotFound {
+				// Rule chưa tồn tại, tạo mới
+				if createErr := ruleRepo.Create(rule); createErr != nil {
+					return goerrorkit.WrapWithMessage(createErr, fmt.Sprintf("Failed to create override rule %s", ruleID)).
+						WithData(map[string]interface{}{
+							"rule_id": ruleID,
+							"method":  route.Method,
+							"path":    route.Path,
+						})
+				}
+			} else if err != nil {
+				// Lỗi khác khi query
+				return goerrorkit.WrapWithMessage(err, fmt.Sprintf("Failed to check override rule %s", ruleID)).
+					WithData(map[string]interface{}{
+						"rule_id": ruleID,
+						"method":  route.Method,
+						"path":    route.Path,
+					})
+			} else {
+				// Rule đã tồn tại, update để ghi đè từ code
+				if updateErr := ruleRepo.Update(rule); updateErr != nil {
+					return goerrorkit.WrapWithMessage(updateErr, fmt.Sprintf("Failed to update override rule %s", ruleID)).
+						WithData(map[string]interface{}{
+							"rule_id": ruleID,
+							"method":  route.Method,
+							"path":    route.Path,
+						})
+				}
+			}
+		} else if route.Fixed {
+			// Override=false và Fixed=true: chỉ tạo mới nếu chưa tồn tại, không update
 			_, err := ruleRepo.GetByID(ruleID)
 			if err == gorm.ErrRecordNotFound {
 				// Rule chưa tồn tại, tạo mới
@@ -97,7 +130,7 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 			}
 			// Rule đã tồn tại, bỏ qua (không update)
 		} else {
-			// Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
+			// Override=false và Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
 			// Giữ nguyên Type và Roles từ database vì đó là mong muốn của người dùng
 			_, err := ruleRepo.GetByID(ruleID)
 			if err == gorm.ErrRecordNotFound {

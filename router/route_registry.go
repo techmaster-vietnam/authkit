@@ -18,6 +18,7 @@ type RouteMetadata struct {
 	AccessType  models.AccessType
 	Roles       []string
 	Fixed       bool
+	Override    bool   // Override=true: luôn ghi đè cấu hình từ code lên DB
 	Description string
 }
 

@@ -185,7 +185,8 @@ func setupRoutes(
 
 	// Bar route - cấm users có role "reader" hoặc "admin"
 	apiRouter.Get("/bar", demoHandler.Bar).
-		Forbid("reader", "admin").
-		Description("Bar endpoint - cấm users có role reader hoặc admin").
+		Forbid("reader", "editor", "admin").
+		Override().
+		Description("Bar dùng Override() để ghi đè rule code từ database").
 		Register()
 }

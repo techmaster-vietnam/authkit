@@ -7,11 +7,11 @@ import (
 
 // RouteBuilder cung cấp fluent API để cấu hình route và phân quyền
 type RouteBuilder struct {
-	metadata    *RouteMetadata
-	router      fiber.Router
-	registry    *RouteRegistry
-	authMw      AuthMiddlewareInterface
-	authzMw     AuthorizationMiddlewareInterface
+	metadata *RouteMetadata
+	router   fiber.Router
+	registry *RouteRegistry
+	authMw   AuthMiddlewareInterface
+	authzMw  AuthorizationMiddlewareInterface
 }
 
 // Public đánh dấu route là public (không cần authentication)
@@ -36,8 +36,18 @@ func (rb *RouteBuilder) Forbid(roles ...string) *RouteBuilder {
 }
 
 // Fixed đánh dấu rule không thể thay đổi từ database
+// Fixed và Override loại trừ lẫn nhau, không thể dùng cùng lúc
 func (rb *RouteBuilder) Fixed() *RouteBuilder {
 	rb.metadata.Fixed = true
+	rb.metadata.Override = false // Loại trừ Override
+	return rb
+}
+
+// Override đánh dấu luôn ghi đè cấu hình từ code lên database
+// Fixed và Override loại trừ lẫn nhau, không thể dùng cùng lúc
+func (rb *RouteBuilder) Override() *RouteBuilder {
+	rb.metadata.Override = true
+	rb.metadata.Fixed = false // Loại trừ Fixed
 	return rb
 }
 
@@ -67,4 +77,3 @@ func (rb *RouteBuilder) Register() {
 		)
 	}
 }
-
