@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Management System - AuthKit Demo</title>
+    <title>Route Registry - AuthKit Demo</title>
     <style>
         * {
             margin: 0;
@@ -12,52 +12,67 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
             padding: 20px;
+            line-height: 1.6;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 15px 30px;
             text-align: center;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.4em;
+            margin-bottom: 0;
         }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-
-        .nav {
-            background: #f8f9fa;
-            padding: 15px 30px;
+        .user-section {
+            padding: 20px 30px;
+            background: #e7f3ff;
             border-bottom: 1px solid #dee2e6;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .nav-buttons {
+        .user-info {
+            flex: 1;
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 15px;
             flex-wrap: wrap;
+        }
+
+        .user-info div {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .user-info div:not(:last-child)::after {
+            content: '|';
+            margin-left: 15px;
+            color: #999;
+        }
+
+        .user-info strong {
+            color: #667eea;
+            margin-right: 5px;
         }
 
         .btn {
@@ -68,8 +83,6 @@
             font-size: 14px;
             font-weight: 500;
             transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
         }
 
         .btn-primary {
@@ -79,17 +92,6 @@
 
         .btn-primary:hover {
             background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
         }
 
         .btn-danger {
@@ -101,122 +103,210 @@
             background: #c82333;
         }
 
-        .btn-secondary {
-            background: #6c757d;
+        .btn-test {
+            background: #17a2b8;
             color: white;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            white-space: nowrap;
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
+        .btn-test:hover {
+            background: #138496;
         }
 
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
+        .btn-test:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
         }
 
-        .btn-warning:hover {
-            background: #e0a800;
+        .auth-result {
+            margin-top: 8px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+            display: none;
+        }
+
+        .auth-result.show {
+            display: block;
+        }
+
+        .auth-result.authorized {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .auth-result.unauthorized {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .content {
             padding: 30px;
         }
 
-        .section {
-            margin-bottom: 40px;
+        .login-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            align-items: flex-start;
         }
 
-        .section h2 {
+        .login-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            flex: 0 0 400px;
+        }
+
+        .user-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .user-list h3 {
+            margin-bottom: 10px;
             color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            font-size: 1em;
+        }
+
+        .user-item {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .user-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .user-item-email {
+            font-weight: 600;
+            color: #667eea;
+            white-space: nowrap;
+        }
+
+        .user-item-roles {
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .user-item-password {
+            color: #999;
+            font-family: monospace;
+            white-space: nowrap;
+            margin-left: auto;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             color: #555;
             font-weight: 500;
         }
 
-        .form-group input,
-        .form-group textarea {
+        .form-group input {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 6px;
+            border-radius: 4px;
             font-size: 14px;
-            transition: border-color 0.3s;
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus {
+        .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
+        .section {
+            margin-bottom: 30px;
         }
 
-        .blog-list {
-            display: grid;
-            gap: 20px;
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
         }
 
-        .blog-card {
+        .route-card {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-
-        .blog-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-
-        .blog-card h3 {
-            color: #333;
+            border-radius: 6px;
+            padding: 15px;
             margin-bottom: 10px;
-        }
-
-        .blog-card .meta {
-            color: #6c757d;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-        }
-
-        .blog-card .content {
-            color: #555;
-            margin-bottom: 15px;
-            padding: 0;
-        }
-
-        .blog-card .actions {
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: start;
+            gap: 15px;
         }
+
+        .route-info {
+            flex: 1;
+        }
+
+        .route-method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin-right: 10px;
+        }
+
+        .method-get { background: #28a745; color: white; }
+        .method-post { background: #667eea; color: white; }
+        .method-put { background: #ffc107; color: #212529; }
+        .method-delete { background: #dc3545; color: white; }
+
+        .route-path {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .route-description {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .route-type {
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .type-public { color: #28a745; font-weight: 600; }
+        .type-allow { color: #667eea; font-weight: 600; }
+        .type-forbid { color: #dc3545; font-weight: 600; }
 
         .alert {
-            padding: 15px;
+            padding: 12px;
             border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            margin-bottom: 15px;
         }
 
         .alert-error {
@@ -225,264 +315,89 @@
             border: 1px solid #f5c6cb;
         }
 
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .user-info {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .user-info strong {
-            color: #667eea;
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .hidden {
             display: none;
         }
 
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .table th,
-        .table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: 500;
-        }
-
-        .badge-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .badge-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .badge-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .badge-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📝 Blog Management System</h1>
-            <p>Demo ứng dụng quản lý blog với AuthKit - Authentication & Authorization</p>
+            <h1>🔐 Authkit Demo App</h1>
         </div>
 
-        <div class="nav">
-            <div id="userInfo" class="user-info hidden">
-                <strong>ID:</strong> <span id="userId"></span> | 
-                <strong>Người dùng:</strong> <span id="userName"></span> | 
-                <strong>Email:</strong> <span id="userEmail"></span> | 
-                <strong>Roles:</strong> <span id="userRoles"></span> | 
-                <strong>Token:</strong> <span id="tokenPreview"></span>
+        <!-- User Info Section -->
+        <div id="userSection" class="user-section hidden">
+            <div class="user-info">
+                <div><strong>ID:</strong> <span id="userId"></span></div>
+                <div><strong>Email:</strong> <span id="userEmail"></span></div>
+                <div><strong>Full Name:</strong> <span id="userName"></span></div>
+                <div><strong>Roles:</strong> <span id="userRoles"></span></div>
             </div>
-            <div class="nav-buttons">
-                <button class="btn btn-primary" onclick="showLogin()">Đăng nhập</button>
-                <button class="btn btn-success" onclick="showRegister()">Đăng ký</button>
-                <button class="btn btn-secondary hidden" id="logoutBtn" onclick="logout()">Đăng xuất</button>
-                <button class="btn btn-warning hidden" id="adminBtn" onclick="showAdminPanel()">Quản trị</button>
-            </div>
+            <button class="btn btn-danger" onclick="logout()">Đăng xuất</button>
         </div>
 
+        <!-- Login Section -->
         <div class="content">
-            <!-- Login Form -->
-            <div id="loginSection" class="section">
-                <h2>🔐 Đăng nhập</h2>
-                <div id="loginAlert"></div>
-                <div class="form-group">
-                    <label>Email:</label>
-                    <input type="email" id="loginEmail" placeholder="email@example.com">
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu:</label>
-                    <input type="password" id="loginPassword" placeholder="Nhập mật khẩu">
-                </div>
-                <button class="btn btn-primary" onclick="login()">Đăng nhập</button>
-            </div>
-
-            <!-- Register Form -->
-            <div id="registerSection" class="section hidden">
-                <h2>📝 Đăng ký</h2>
-                <div id="registerAlert"></div>
-                <div class="form-group">
-                    <label>Email:</label>
-                    <input type="email" id="regEmail" placeholder="email@example.com">
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu:</label>
-                    <input type="password" id="regPassword" placeholder="Tối thiểu 6 ký tự">
-                </div>
-                <div class="form-group">
-                    <label>Họ và tên:</label>
-                    <input type="text" id="regFullName" placeholder="Họ và tên">
-                </div>
-                <button class="btn btn-success" onclick="register()">Đăng ký</button>
-            </div>
-
-            <!-- Actions List -->
-            <div id="actionsSection" class="section">
-                <h2>🔐 Kiểm tra Quyền Truy Cập</h2>
-                <div id="actionsAlert"></div>
-                <div id="actionsList"></div>
-            </div>
-
-            <!-- Create Blog Form -->
-            <div id="createBlogSection" class="section hidden">
-                <h2>✍️ Tạo Blog Mới</h2>
-                <div id="createBlogAlert"></div>
-                <div class="form-group">
-                    <label>Tiêu đề:</label>
-                    <input type="text" id="blogTitle" placeholder="Nhập tiêu đề blog">
-                </div>
-                <div class="form-group">
-                    <label>Nội dung:</label>
-                    <textarea id="blogContent" placeholder="Nhập nội dung blog"></textarea>
-                </div>
-                <button class="btn btn-success" onclick="createBlog()">Tạo Blog</button>
-                <button class="btn btn-secondary" onclick="hideCreateBlog()">Hủy</button>
-            </div>
-
-            <!-- Admin Panel -->
-            <div id="adminSection" class="section hidden">
-                <h2>⚙️ Quản trị hệ thống</h2>
-                <div id="adminAlert"></div>
-                
-                <div style="margin-bottom: 30px;">
-                    <h3>Quản lý Users & Roles</h3>
-                    <button class="btn btn-primary" onclick="loadUsers()">Tải danh sách Users</button>
-                    <div id="usersList"></div>
-                </div>
-
-                <div style="margin-bottom: 30px;">
-                    <h3>Quản lý Roles</h3>
-                    <button class="btn btn-primary" onclick="loadRoles()">Tải danh sách Roles</button>
-                    <div id="rolesList"></div>
-                </div>
-
-                <div>
-                    <h3>Quản lý Rules</h3>
-                    <button class="btn btn-primary" onclick="loadRules()">Tải danh sách Rules</button>
-                    <div id="rulesList"></div>
-                </div>
-            </div>
-
-            <!-- Demo Features Section -->
-            <div id="demoSection" class="section">
-                <h2>🚀 Demo Tính Năng Mới</h2>
-                <div id="demoAlert"></div>
-                
-                <div style="margin-bottom: 30px;">
-                    <h3>1. Đăng nhập với Username trong JWT Token</h3>
-                    <p style="color: #6c757d; margin-bottom: 15px;">
-                        Demo đăng nhập với username và custom fields (mobile, address) trong JWT token.
-                        Token sẽ chứa cả role IDs và role names.
-                    </p>
-                    <div class="form-group" style="max-width: 500px;">
+            <div id="loginSection" class="login-container">
+                <div class="login-form">
+                    <h2 style="margin-bottom: 15px;">Đăng nhập</h2>
+                    <div id="loginAlert"></div>
+                    <div class="form-group">
                         <label>Email:</label>
-                        <input type="email" id="demoLoginEmail" placeholder="email@example.com">
+                        <input type="email" id="loginEmail" placeholder="email@example.com">
                     </div>
-                    <div class="form-group" style="max-width: 500px;">
+                    <div class="form-group">
                         <label>Mật khẩu:</label>
-                        <input type="password" id="demoLoginPassword" placeholder="Nhập mật khẩu">
+                        <input type="password" id="loginPassword" placeholder="Nhập mật khẩu">
                     </div>
-                    <button class="btn btn-primary" onclick="demoLoginWithUsername()">Đăng nhập với Username</button>
-                    <div id="demoLoginResult" style="margin-top: 15px;"></div>
+                    <button class="btn btn-primary" onclick="login()" style="width: 100%;">Đăng nhập</button>
                 </div>
-
-                <div style="margin-bottom: 30px;">
-                    <h3>2. Xem thông tin từ Flexible Token</h3>
-                    <p style="color: #6c757d; margin-bottom: 15px;">
-                        Lấy và hiển thị thông tin từ JWT token bao gồm: username, role IDs, role names, và custom fields.
-                    </p>
-                    <button class="btn btn-success" onclick="demoGetTokenInfo()">Lấy Token Info</button>
-                    <div id="demoTokenInfoResult" style="margin-top: 15px;"></div>
+                <div id="userListSection" class="user-list">
+                    <h3>👥 Danh sách User (Password: 123456)</h3>
+                    <div class="user-item" onclick="fillLogin('reader@gmail.com', '123456')">
+                        <div class="user-item-email">reader@gmail.com</div>
+                        <div class="user-item-roles">Role: reader</div>
+                        <div class="user-item-password">Password: 123456</div>
+                    </div>
+                    <div class="user-item" onclick="fillLogin('author1@gmail.com', '123456')">
+                        <div class="user-item-email">author1@gmail.com</div>
+                        <div class="user-item-roles">Role: author</div>
+                        <div class="user-item-password">Password: 123456</div>
+                    </div>
+                    <div class="user-item" onclick="fillLogin('author2@gmail.com', '123456')">
+                        <div class="user-item-email">author2@gmail.com</div>
+                        <div class="user-item-roles">Role: author</div>
+                        <div class="user-item-password">Password: 123456</div>
+                    </div>
+                    <div class="user-item" onclick="fillLogin('editor@gmail.com', '123456')">
+                        <div class="user-item-email">editor@gmail.com</div>
+                        <div class="user-item-roles">Role: author, editor</div>
+                        <div class="user-item-password">Password: 123456</div>
+                    </div>
+                    <div class="user-item" onclick="fillLogin('admin@gmail.com', '123456')">
+                        <div class="user-item-email">admin@gmail.com</div>
+                        <div class="user-item-roles">Role: admin</div>
+                        <div class="user-item-password">Password: 123456</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Test Users Info -->
-            <div class="section">
-                <h2>🧪 Tài khoản Test</h2>
-                <div class="alert alert-info">
-                    <strong>Danh sách tài khoản test để thử nghiệm:</strong>
-                    <table class="table" style="margin-top: 15px; font-size: 70%; background-color: #f8f9fa;">
-                        <thead>
-                            <tr>
-                                <th>Email</th>
-                                <th>Mật khẩu</th>
-                                <th>Roles</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>admin@gmail.com</strong></td>
-                                <td>123456</td>
-                                <td><span class="badge badge-danger">admin</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>editor@gmail.com</strong></td>
-                                <td>123456</td>
-                                <td><span class="badge badge-warning">editor</span>, <span class="badge badge-success">author</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>author1@gmail.com</strong></td>
-                                <td>123456</td>
-                                <td><span class="badge badge-success">author</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>author2@gmail.com</strong></td>
-                                <td>123456</td>
-                                <td><span class="badge badge-success">author</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>reader@gmail.com</strong></td>
-                                <td>123456</td>
-                                <td><span class="badge badge-primary">reader</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Routes List -->
+            <div id="routesSection" class="section">
+                <div id="routesList"></div>
             </div>
         </div>
     </div>
@@ -490,18 +405,14 @@
     <script>
         let token = localStorage.getItem('token');
         let currentUser = null;
-        let roleIdToNameMap = {}; // Map role ID -> role name
-        let displayedRules = []; // Lưu các rules đang được hiển thị (sau khi filter)
+        let rules = [];
 
-        // Decode JWT token để lấy claims (không cần verify signature ở client-side)
+        // Decode JWT token
         function decodeJWT(token) {
             try {
                 const parts = token.split('.');
                 if (parts.length !== 3) return null;
-                
-                // Decode payload (phần thứ 2)
                 const payload = parts[1];
-                // Base64 URL decode
                 const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
                 return JSON.parse(decoded);
             } catch (error) {
@@ -510,230 +421,301 @@
             }
         }
 
-        // Lấy thông tin user từ JWT token
+        // Get user from token
         function getUserFromToken(token) {
             if (!token) return null;
-            
             const claims = decodeJWT(token);
             if (!claims) return null;
-            
-            // Kiểm tra token đã hết hạn chưa
-            if (claims.exp && claims.exp * 1000 < Date.now()) {
-                return null; // Token đã hết hạn
-            }
-            
+            if (claims.exp && claims.exp * 1000 < Date.now()) return null;
             return {
                 id: claims.id || claims.user_id,
-                user_id: claims.user_id,
                 email: claims.email,
                 full_name: claims.full_name || '',
                 role_ids: claims.role_ids || []
             };
         }
 
-        // Define rules từ setupRoutes trong main.go - Fallback nếu không load được từ API
-        let rules = [
-            // Public endpoints
-            { method: 'GET', path: '/', type: 'Public', roles: [], description: 'Trang chủ' },
-            { method: 'POST', path: '/api/auth/login', type: 'Public', roles: [], description: 'Đăng nhập người dùng' },
-            { method: 'POST', path: '/api/auth/register', type: 'Public', roles: [], description: 'Đăng ký người dùng mới' },
-            { method: 'POST', path: '/api/auth/logout', type: 'Public', roles: [], description: 'Đăng xuất người dùng' },
-            { method: 'GET', path: '/api/blogs', type: 'Public', roles: [], description: 'Danh sách blog công khai' },
-            
-            // Authenticated endpoints (chỉ cần đăng nhập, không cần role cụ thể)
-            { method: 'GET', path: '/api/auth/profile', type: 'Allow', roles: [], description: 'Lấy thông tin profile' },
-            { method: 'PUT', path: '/api/auth/profile', type: 'Allow', roles: [], description: 'Cập nhật thông tin profile' },
-            { method: 'DELETE', path: '/api/auth/profile', type: 'Allow', roles: [], description: 'Xóa tài khoản' },
-            { method: 'POST', path: '/api/auth/change-password', type: 'Allow', roles: [], description: 'Đổi mật khẩu' },
-            
-            // Blog endpoints - Yêu cầu role cụ thể
-            { method: 'GET', path: '/api/blogs/1', type: 'Allow', roles: ['reader', 'author', 'editor', 'admin'], description: 'Xem chi tiết blog' },
-            { method: 'POST', path: '/api/blogs', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Tạo blog mới' },
-            { method: 'PUT', path: '/api/blogs/1', type: 'Allow', roles: ['author', 'editor', 'admin'], description: 'Cập nhật blog' },
-            { method: 'DELETE', path: '/api/blogs/1', type: 'Forbid', roles: ['reader', 'author'], description: 'Xóa blog' },
-            { method: 'GET', path: '/api/blogs/my', type: 'Forbid', roles: ['editor', 'admin'], description: 'Danh sách blog của tôi' },
-            
-            // Role endpoints (admin only)
-            { method: 'GET', path: '/api/roles', type: 'Allow', roles: ['admin'], description: 'Danh sách roles' },
-            { method: 'POST', path: '/api/roles', type: 'Allow', roles: ['admin'], description: 'Tạo role mới' },
-            { method: 'DELETE', path: '/api/roles/1', type: 'Allow', roles: ['admin'], description: 'Xóa role' },
-            { method: 'GET', path: '/api/roles/admin/users', type: 'Allow', roles: ['admin'], description: 'Danh sách users có role' },
-            
-            // User role endpoints (admin only)
-            { method: 'GET', path: '/api/users/1/roles', type: 'Allow', roles: ['admin'], description: 'Danh sách roles của user' },
-            { method: 'POST', path: '/api/users/1/roles/1', type: 'Allow', roles: ['admin'], description: 'Thêm role cho user' },
-            { method: 'DELETE', path: '/api/users/1/roles/1', type: 'Allow', roles: ['admin'], description: 'Xóa role của user' },
-            { method: 'GET', path: '/api/users/1/roles/admin/check', type: 'Allow', roles: ['admin'], description: 'Kiểm tra user có role' },
-            
-            // Rule endpoints (admin only)
-            { method: 'GET', path: '/api/rules', type: 'Allow', roles: ['admin'], description: 'Danh sách rules' },
-            { method: 'POST', path: '/api/rules', type: 'Allow', roles: ['admin'], description: 'Tạo rule mới' },
-            { method: 'PUT', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Cập nhật rule' },
-            { method: 'DELETE', path: '/api/rules/1', type: 'Allow', roles: ['admin'], description: 'Xóa rule' },
-            
-            // Demo endpoints
-            { method: 'POST', path: '/api/demo/login-with-username', type: 'Public', roles: [], description: 'Đăng nhập với username và custom fields trong JWT token' },
-            { method: 'GET', path: '/api/demo/token-info', type: 'Allow', roles: [], description: 'Lấy thông tin từ flexible JWT token (username, custom fields, role conversion)' },
-            { method: 'GET', path: '/api/demo/role-conversion', type: 'Allow', roles: [], description: 'Demo role conversion utilities (IDs ↔ Names)' },
-        ];
+        // Load rules from API
+        async function loadRulesFromAPI() {
+            const routesList = document.getElementById('routesList');
+            if (routesList) {
+                routesList.innerHTML = '<div class="loading">⏳ Đang tải routes từ API...</div>';
+            }
 
-        // Đảm bảo actionsSection luôn hiển thị cho mọi user
-        document.getElementById('actionsSection').classList.remove('hidden');
-        
-        // Check if user is logged in
-        if (token) {
-            // Lấy thông tin cơ bản từ token trước (nhanh, không cần API call)
-            const userFromToken = getUserFromToken(token);
-            if (userFromToken) {
-                currentUser = {
-                    id: userFromToken.id,
-                    email: userFromToken.email,
-                    full_name: userFromToken.full_name,
-                    role_ids: userFromToken.role_ids
+            try {
+                const response = await fetch('/api/routeregistry');
+                if (response.ok) {
+                const data = await response.json();
+                    if (data.success && data.data && Array.isArray(data.data)) {
+                        rules = data.data.map(route => ({
+                            method: route.method,
+                            path: route.path,
+                            type: route.type,
+                            roles: route.roles || [],
+                            description: route.description || ''
+                        }));
+                        console.log(`✅ Đã load ${rules.length} routes từ API`);
+                        displayRoutes();
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Không thể load rules từ API:', error);
+                if (routesList) {
+                    routesList.innerHTML = `<div class="alert alert-error">❌ Không thể load routes: ${error.message}</div>`;
+                }
+            }
+            return false;
+        }
+
+        // Display routes grouped by type
+        function displayRoutes() {
+            const routesList = document.getElementById('routesList');
+            if (!routesList) return;
+
+            // Group routes
+            const publicRoutes = rules.filter(r => r.type === 'Public');
+            const allowEmpty = rules.filter(r => r.type === 'Allow' && (!r.roles || r.roles.length === 0));
+            const allowWithRoles = rules.filter(r => r.type === 'Allow' && r.roles && r.roles.length > 0);
+            const forbidEmpty = rules.filter(r => r.type === 'Forbid' && (!r.roles || r.roles.length === 0));
+            const forbidWithRoles = rules.filter(r => r.type === 'Forbid' && r.roles && r.roles.length > 0);
+
+            let html = '';
+
+            // Public
+            if (publicRoutes.length > 0) {
+                html += '<div class="section"><h3 class="section-title" style="color: #28a745;">🌐 Public</h3>';
+                html += publicRoutes.map(r => createRouteCard(r)).join('');
+                html += '</div>';
+            }
+
+            // Allow()
+            if (allowEmpty.length > 0) {
+                html += '<div class="section"><h3 class="section-title" style="color: #667eea;">👥 Allow()</h3>';
+                html += allowEmpty.map(r => createRouteCard(r)).join('');
+                html += '</div>';
+            }
+
+            // Allow(roles)
+            if (allowWithRoles.length > 0) {
+                html += '<div class="section"><h3 class="section-title" style="color: #667eea;">👥 Allow(roles)</h3>';
+                html += allowWithRoles.map(r => createRouteCard(r)).join('');
+                html += '</div>';
+            }
+
+            // Forbid()
+            if (forbidEmpty.length > 0) {
+                html += '<div class="section"><h3 class="section-title" style="color: #dc3545;">🚫 Forbid()</h3>';
+                html += forbidEmpty.map(r => createRouteCard(r)).join('');
+                html += '</div>';
+            }
+
+            // Forbid(roles)
+            if (forbidWithRoles.length > 0) {
+                html += '<div class="section"><h3 class="section-title" style="color: #dc3545;">🚫 Forbid(roles)</h3>';
+                html += forbidWithRoles.map(r => createRouteCard(r)).join('');
+                html += '</div>';
+            }
+
+            routesList.innerHTML = html || '<div class="alert alert-error">Không có routes nào</div>';
+        }
+
+        // Create route card
+        function createRouteCard(route) {
+            const methodClass = `method-${route.method.toLowerCase()}`;
+            const typeClass = `type-${route.type.toLowerCase()}`;
+            const rolesStr = route.roles && route.roles.length > 0 ? `(${route.roles.join(', ')})` : '()';
+            const routeId = `route-${route.method}-${route.path.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            
+            return `
+                <div class="route-card">
+                    <div class="route-info">
+                        <div>
+                            <span class="route-method ${methodClass}">${route.method}</span>
+                            <span class="route-path">${route.path}</span>
+                            </div>
+                        <div class="route-description">${route.description || ''}</div>
+                        <div class="route-type ${typeClass}">${route.type.toUpperCase()} ${rolesStr}</div>
+                        <div id="${routeId}-result" class="auth-result"></div>
+                    </div>
+                    <div>
+                        <button id="${routeId}-btn" class="btn btn-test" onclick="testRoute('${route.method}', '${route.path}', '${routeId}')">
+                            Test
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Test route authorization
+        async function testRoute(method, path, routeId) {
+            const resultDiv = document.getElementById(`${routeId}-result`);
+            const button = document.getElementById(`${routeId}-btn`);
+            
+            if (!resultDiv) return;
+            
+            // Reset result
+            resultDiv.classList.remove('show', 'authorized', 'unauthorized');
+            resultDiv.textContent = '';
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 };
-                updateUI(); // Hiển thị ngay thông tin từ token
-                // Load profile để lấy roles đầy đủ (nếu cần)
-                loadProfile();
+                
+                // Add Authorization header if token exists
+                if (token) {
+                    options.headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                // For POST/PUT requests, add empty body
+                if (method === 'POST' || method === 'PUT') {
+                    options.body = JSON.stringify({});
+                }
+                
+                const response = await fetch(path, options);
+                const data = await response.json();
+                
+                // Check if response indicates unauthorized (401 or 403)
+                // Or if error message contains "unauthorized" or "forbidden"
+                const isUnauthorized = response.status === 401 || 
+                                      response.status === 403 ||
+                                      (data.message && (
+                                          data.message.toLowerCase().includes('unauthorized') ||
+                                          data.message.toLowerCase().includes('forbidden') ||
+                                          data.message.toLowerCase().includes('không có quyền') ||
+                                          data.message.toLowerCase().includes('chưa đăng nhập')
+                                      ));
+                
+                // Show result
+                resultDiv.classList.add('show');
+                if (isUnauthorized) {
+                    resultDiv.classList.add('unauthorized');
+                    resultDiv.textContent = '❌ Unauthorized';
+                } else {
+                    resultDiv.classList.add('authorized');
+                    resultDiv.textContent = '✅ Authorized';
+                }
+            } catch (error) {
+                // Network errors or other errors - check if it's authorization related
+                resultDiv.classList.add('show');
+                if (error.message && (
+                    error.message.toLowerCase().includes('unauthorized') ||
+                    error.message.toLowerCase().includes('forbidden')
+                )) {
+                    resultDiv.classList.add('unauthorized');
+                    resultDiv.textContent = '❌ Unauthorized';
+                } else {
+                    // For other errors, we'll consider it as potentially authorized
+                    // since the request went through (not blocked by auth middleware)
+                    resultDiv.classList.add('authorized');
+                    resultDiv.textContent = '✅ Authorized (request sent)';
+                }
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test';
+            }
+        }
+
+        // Fill login form with user credentials
+        function fillLogin(email, password) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = password;
+        }
+
+        // Update UI
+        function updateUI() {
+            const userSection = document.getElementById('userSection');
+            const loginSection = document.getElementById('loginSection');
+
+            if (token && currentUser) {
+                userSection.classList.remove('hidden');
+                loginSection.classList.add('hidden');
+                
+                document.getElementById('userId').textContent = currentUser.id || 'N/A';
+                document.getElementById('userEmail').textContent = currentUser.email || 'N/A';
+                document.getElementById('userName').textContent = currentUser.full_name || 'N/A';
+                
+                if (currentUser.roles && currentUser.roles.length > 0) {
+                    document.getElementById('userRoles').textContent = currentUser.roles.map(r => r.name || r).join(', ');
+                } else if (currentUser.role_ids && currentUser.role_ids.length > 0) {
+                    document.getElementById('userRoles').textContent = 'Role IDs: ' + currentUser.role_ids.join(', ');
             } else {
-                // Token không hợp lệ hoặc đã hết hạn
-                token = null;
-                localStorage.removeItem('token');
-                showLogin();
+                    document.getElementById('userRoles').textContent = 'Chưa có role';
+                }
+                } else {
+                userSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
             }
-        } else {
-            showLogin();
-        }
-        
-        // Load actions ngay khi page load
-        loadActions();
-
-        // Show login form
-        function showLogin() {
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('registerSection').classList.add('hidden');
-            document.getElementById('createBlogSection').classList.add('hidden');
-            loadActions();
         }
 
-        // Show register form
-        function showRegister() {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('registerSection').classList.remove('hidden');
-            document.getElementById('createBlogSection').classList.add('hidden');
-            loadActions(); // Đảm bảo actions luôn được load
-        }
-
-        // Hide create blog form
-        function hideCreateBlog() {
-            document.getElementById('createBlogSection').classList.add('hidden');
-        }
-
-        // Show create blog form
-        function showCreateBlog() {
-            if (!token) {
-                alert('Vui lòng đăng nhập để tạo blog');
-                showLogin();
-                return;
+        // Load profile
+        async function loadProfile() {
+            if (!token) return;
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = {
+                        ...currentUser,
+                        ...data.data
+                    };
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
             }
-            document.getElementById('createBlogSection').classList.remove('hidden');
-            document.getElementById('blogTitle').value = '';
-            document.getElementById('blogContent').value = '';
         }
 
         // Login
         async function login() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
+            const alertDiv = document.getElementById('loginAlert');
 
             if (!email || !password) {
-                showAlert('loginAlert', 'Vui lòng nhập đầy đủ thông tin', 'error');
+                alertDiv.innerHTML = '<div class="alert alert-error">Vui lòng nhập đầy đủ thông tin</div>';
                 return;
             }
 
             try {
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
                     token = data.data.token;
-                    localStorage.setItem('token', token);
-                    
-                    // Lấy thông tin từ token (nhanh hơn, không cần đợi API)
-                    const userFromToken = getUserFromToken(token);
-                    if (userFromToken) {
-                        currentUser = {
-                            id: userFromToken.id,
-                            email: userFromToken.email,
-                            full_name: userFromToken.full_name,
-                            role_ids: userFromToken.role_ids,
-                            // Giữ lại thông tin từ API nếu có (như roles với names)
-                            ...data.data.user
+                        localStorage.setItem('token', token);
+                        
+                        const userFromToken = getUserFromToken(token);
+                        if (userFromToken) {
+                            currentUser = {
+                                id: userFromToken.id,
+                                email: userFromToken.email,
+                                full_name: userFromToken.full_name,
+                            role_ids: userFromToken.role_ids
                         };
-                    } else {
-                        // Fallback về API response nếu không decode được token
-                        currentUser = data.data.user;
                     }
                     
-                    showAlert('loginAlert', 'Đăng nhập thành công!', 'success');
+                    alertDiv.innerHTML = '<div class="alert alert-success">Đăng nhập thành công!</div>';
                     updateUI();
-                    loadActions();
+                    loadProfile();
                 } else {
-                    showAlert('loginAlert', data.message || 'Đăng nhập thất bại', 'error');
+                    alertDiv.innerHTML = `<div class="alert alert-error">${data.message || 'Đăng nhập thất bại'}</div>`;
                 }
             } catch (error) {
-                showAlert('loginAlert', 'Lỗi kết nối: ' + error.message, 'error');
-            }
-        }
-
-        // Register
-        async function register() {
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const fullName = document.getElementById('regFullName').value;
-
-            if (!email || !password) {
-                showAlert('registerAlert', 'Vui lòng nhập đầy đủ thông tin bắt buộc', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showAlert('registerAlert', 'Mật khẩu phải có ít nhất 6 ký tự', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email,
-                        password,
-                        full_name: fullName
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('registerAlert', 'Đăng ký thành công! Vui lòng đăng nhập.', 'success');
-                    setTimeout(() => showLogin(), 2000);
-                } else {
-                    showAlert('registerAlert', data.message || 'Đăng ký thất bại', 'error');
-                }
-            } catch (error) {
-                showAlert('registerAlert', 'Lỗi kết nối: ' + error.message, 'error');
+                alertDiv.innerHTML = `<div class="alert alert-error">Lỗi kết nối: ${error.message}</div>`;
             }
         }
 
@@ -743,592 +725,31 @@
             currentUser = null;
             localStorage.removeItem('token');
             updateUI();
-            showLogin();
-            loadActions();
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginAlert').innerHTML = '';
         }
 
-        // Load profile - chỉ gọi khi cần thông tin đầy đủ (như roles với names)
-        // Thông tin cơ bản (id, email, full_name) đã có từ JWT token
-        async function loadProfile() {
-            if (!token) return;
-
-            // Lấy thông tin cơ bản từ token trước
-            const userFromToken = getUserFromToken(token);
-            if (!userFromToken) {
-                token = null;
-                localStorage.removeItem('token');
-                updateUI();
-                return;
-            }
-
-            // Cập nhật thông tin cơ bản từ token
-            if (!currentUser) {
-                currentUser = {};
-            }
-            currentUser.id = userFromToken.id;
-            currentUser.email = userFromToken.email;
-            currentUser.full_name = userFromToken.full_name;
-            currentUser.role_ids = userFromToken.role_ids;
-
-            // Chỉ gọi API nếu cần thông tin roles đầy đủ (với names)
-            // Hoặc có thể bỏ qua nếu không cần thiết
-            try {
-                const response = await fetch('/api/auth/profile', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    // Merge thông tin từ API (chủ yếu là roles với names)
+        // Initialize
+        (async () => {
+            if (token) {
+                const userFromToken = getUserFromToken(token);
+                if (userFromToken) {
                     currentUser = {
-                        ...currentUser,
-                        ...data.data,
-                        // Ưu tiên id và full_name từ token (mới nhất)
-                        id: currentUser.id,
-                        full_name: currentUser.full_name
+                        id: userFromToken.id,
+                        email: userFromToken.email,
+                        full_name: userFromToken.full_name,
+                        role_ids: userFromToken.role_ids
                     };
                     updateUI();
+                    loadProfile();
                 } else {
-                    // Nếu API fail nhưng token vẫn hợp lệ, vẫn hiển thị thông tin từ token
-                    if (userFromToken) {
-                        updateUI();
-                    } else {
-                        token = null;
-                        localStorage.removeItem('token');
-                        updateUI();
-                    }
-                }
-            } catch (error) {
-                // Silent fail - vẫn hiển thị thông tin từ token
-                if (userFromToken) {
-                    updateUI();
-                }
-            }
-        }
-
-        // Helper: Check if user has admin or super_admin role
-        function hasAdminRole() {
-            return currentUser && currentUser.roles && currentUser.roles.some(r => r.name === 'admin' || r.name === 'super_admin');
-        }
-
-        // Update UI based on login status
-        function updateUI() {
-            // Đảm bảo actionsSection luôn hiển thị
-            document.getElementById('actionsSection').classList.remove('hidden');
-            
-            if (token) {
-                // Lấy thông tin từ token nếu currentUser chưa có
-                if (!currentUser) {
-                    const userFromToken = getUserFromToken(token);
-                    if (userFromToken) {
-                        currentUser = {
-                            id: userFromToken.id,
-                            email: userFromToken.email,
-                            full_name: userFromToken.full_name,
-                            role_ids: userFromToken.role_ids
-                        };
-                    }
-                }
-                
-                if (currentUser) {
-                    document.getElementById('userInfo').classList.remove('hidden');
-                    // Hiển thị ID từ token
-                    document.getElementById('userId').textContent = currentUser.id || 'N/A';
-                    // Hiển thị tên đầy đủ từ token
-                    document.getElementById('userName').textContent = currentUser.full_name || currentUser.email || 'N/A';
-                    // Hiển thị email từ token
-                    document.getElementById('userEmail').textContent = currentUser.email || 'N/A';
-                    // Hiển thị roles (nếu có từ API, nếu không thì hiển thị role IDs từ token)
-                    if (currentUser.roles && currentUser.roles.length > 0) {
-                        document.getElementById('userRoles').textContent = currentUser.roles.map(r => r.name).join(', ');
-                    } else if (currentUser.role_ids && currentUser.role_ids.length > 0) {
-                        document.getElementById('userRoles').textContent = 'Role IDs: ' + currentUser.role_ids.join(', ');
-                    } else {
-                        document.getElementById('userRoles').textContent = 'Chưa có role';
-                    }
-                    document.getElementById('tokenPreview').textContent = token.substring(0, 20) + '...';
-                    document.getElementById('logoutBtn').classList.remove('hidden');
-                    
-                    // Show admin button if user has admin role
-                    const hasAdmin = hasAdminRole();
-                    if (hasAdmin) {
-                        document.getElementById('adminBtn').classList.remove('hidden');
-                    } else {
-                        document.getElementById('adminBtn').classList.add('hidden');
-                    }
-
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('registerSection').classList.add('hidden');
-                } else {
-                    // Token không hợp lệ
                     token = null;
                     localStorage.removeItem('token');
-                    document.getElementById('userInfo').classList.add('hidden');
-                    document.getElementById('logoutBtn').classList.add('hidden');
-                    document.getElementById('adminBtn').classList.add('hidden');
-                }
-            } else {
-                document.getElementById('userInfo').classList.add('hidden');
-                document.getElementById('logoutBtn').classList.add('hidden');
-                document.getElementById('adminBtn').classList.add('hidden');
-            }
-            
-            // Reload actions để cập nhật trạng thái quyền truy cập
-            loadActions();
-        }
-
-        // Display actions grouped by type
-        function loadActions() {
-            const actionsList = document.getElementById('actionsList');
-            // Filter out demo endpoints from actions list
-            const filteredRules = rules.filter(r => !r.path.startsWith('/api/demo/'));
-            const publicRules = filteredRules.filter(r => r.type === 'Public');
-            const allowRules = filteredRules.filter(r => r.type === 'Allow');
-            const forbidRules = filteredRules.filter(r => r.type === 'Forbid');
-            
-            // Lưu tất cả rules đang được hiển thị theo thứ tự (để dùng trong testAction)
-            displayedRules = [];
-            displayedRules.push(...publicRules);
-            displayedRules.push(...allowRules);
-            displayedRules.push(...forbidRules);
-            
-            let index = 0;
-            const sections = [
-                { rules: publicRules, title: '🌐 Công khai (Public)', desc: 'Tất cả mọi người đều có thể truy cập', color: '#28a745' },
-                { rules: allowRules, title: '👥 Yêu cầu role cụ thể (Allow)', desc: 'Cần có role phù hợp để truy cập', color: '#667eea' },
-                { rules: forbidRules, title: '🚫 Cấm một số role (Forbid)', desc: 'Các role được liệt kê sẽ bị cấm truy cập', color: '#dc3545' }
-            ];
-            
-            actionsList.innerHTML = sections.map(section => {
-                const sectionHtml = section.rules.map(rule => createActionCard(rule, index++)).join('');
-                return `
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="color: ${section.color}; margin-bottom: 15px;">${section.title}</h3>
-                        <p style="color: #6c757d; margin-bottom: 15px;">${section.desc}</p>
-                        <div style="display: grid; gap: 10px;">${sectionHtml}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Create action card
-        function createActionCard(rule, index) {
-            // Format access type và roles theo yêu cầu
-            let accessInfo = '';
-            if (rule.type === 'Public') {
-                accessInfo = '<strong style="color: #28a745;">PUBLIC</strong>';
-            } else if (rule.type === 'Forbid') {
-                const rolesStr = rule.roles.length > 0 ? ` (${rule.roles.join(', ')})` : '()';
-                accessInfo = `<strong style="color: #dc3545;">FORBID${rolesStr}</strong>`;
-            } else {
-                // Allow - có thể có roles cụ thể hoặc roles rỗng (mọi user đã đăng nhập)
-                if (rule.roles.length > 0) {
-                    const rolesStr = ` (${rule.roles.join(', ')})`;
-                    accessInfo = `<strong style="color: #667eea;">ALLOW${rolesStr}</strong>`;
-                } else {
-                    accessInfo = '<strong style="color: #667eea;">ALLOW ()</strong>';
                 }
             }
-            
-            const methodColor = {
-                'GET': '#28a745',
-                'POST': '#667eea',
-                'PUT': '#ffc107',
-                'DELETE': '#dc3545'
-            }[rule.method] || '#6c757d';
-            
-            return `
-                <div class="blog-card" id="action-${index}">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                <span class="badge" style="background: ${methodColor}; color: white; font-weight: 600;">${rule.method}</span>
-                                <code style="background: #f8f9fa; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">${rule.path}</code>
-                            </div>
-                            <div style="color: #555; margin-bottom: 8px;">${rule.description}</div>
-                            <div style="font-size: 0.9em; color: #6c757d;">
-                                ${accessInfo}
-                            </div>
-                        </div>
-                        <button class="btn btn-primary btn-sm" onclick="testAction(${index})" id="test-btn-${index}">
-                            Kiểm tra
-                        </button>
-                    </div>
-                    <div id="result-${index}" style="margin-top: 10px;"></div>
-                </div>
-            `;
-        }
-
-        // Helper: Get request body for POST/PUT requests
-        function getRequestBody(path, method) {
-            if (path.includes('/auth/login') || path.includes('/demo/login-with-username')) {
-                return JSON.stringify({ email: 'test@example.com', password: 'test' });
-            }
-            if (path.includes('/auth/register')) {
-                return JSON.stringify({ email: 'test@example.com', password: 'test123', full_name: 'Test' });
-            }
-            if (path.includes('/auth/logout')) {
-                // Logout không cần body, nhưng có thể gửi empty object
-                return JSON.stringify({});
-            }
-            if (path.includes('/auth/change-password')) {
-                return JSON.stringify({ old_password: 'old', new_password: 'new123' });
-            }
-            if (path.includes('/auth/profile') && method === 'PUT') {
-                return JSON.stringify({ full_name: 'Updated Name' });
-            }
-            if (path.includes('/blogs') && !path.includes('/blogs/my') && !path.match(/\/blogs\/\d+$/)) {
-                // POST /api/blogs cần body, nhưng GET /api/blogs/:id thì không
-                return JSON.stringify({ title: 'Test Blog', content: 'Test content for authorization check' });
-            }
-            if (path.includes('/roles') && method === 'POST') {
-                return JSON.stringify({ name: 'test_role' });
-            }
-            if (path.includes('/rules') && method === 'POST') {
-                return JSON.stringify({ method: 'GET', path: '/test', type: 'Public', roles: [] });
-            }
-            if (path.includes('/rules') && method === 'PUT') {
-                return JSON.stringify({ method: 'GET', path: '/test', type: 'Public', roles: [] });
-            }
-            return null;
-        }
-
-        // Helper: Extract error message from response
-        async function getErrorMessage(response) {
-            try {
-                const text = await response.text();
-                if (!text) return '';
-                try {
-                    const data = JSON.parse(text);
-                    return data.message || data.error || text;
-                } catch {
-                    return text;
-                }
-            } catch {
-                return '';
-            }
-        }
-
-        // Helper: Display authorization result
-        function displayResult(resultDiv, statusCode, errorMessage) {
-            const statusInfo = errorMessage ? `${statusCode}: ${errorMessage}` : `Status code: ${statusCode}`;
-            
-            if (statusCode === 401) {
-                resultDiv.innerHTML = `<div class="alert alert-info" style="margin: 0; padding: 10px;">🔒 <strong>YÊU CẦU ĐĂNG NHẬP</strong><br>${statusInfo}</div>`;
-            } else if (statusCode === 403) {
-                resultDiv.innerHTML = `<div class="alert alert-error" style="margin: 0; padding: 10px;">❌ <strong>FORBIDDEN</strong><br>${statusInfo}</div>`;
-            } else {
-                const errorInfo = statusCode >= 400 && errorMessage ? `<br>${statusCode}: ${errorMessage}` : (statusCode >= 400 ? `<br>Status code: ${statusCode}` : '');
-                resultDiv.innerHTML = `<div class="alert alert-success" style="margin: 0; padding: 10px;">✅ <strong>ALLOWED</strong>${errorInfo}</div>`;
-            }
-        }
-
-        // Test action authorization
-        async function testAction(index) {
-            // Sử dụng displayedRules thay vì rules để đảm bảo index đúng với rules đang được hiển thị
-            if (index < 0 || index >= displayedRules.length) {
-                console.error('Invalid rule index:', index);
-                return;
-            }
-            const rule = displayedRules[index];
-            const resultDiv = document.getElementById(`result-${index}`);
-            const testBtn = document.getElementById(`test-btn-${index}`);
-            
-            testBtn.disabled = true;
-            testBtn.textContent = 'Đang kiểm tra...';
-            resultDiv.innerHTML = '<div style="color: #667eea;">⏳ Đang kiểm tra quyền truy cập...</div>';
-            
-            try {
-                const headers = {};
-                if (token) headers['Authorization'] = 'Bearer ' + token;
-                
-                const body = (rule.method === 'POST' || rule.method === 'PUT') 
-                    ? getRequestBody(rule.path, rule.method) 
-                    : null;
-                if (body) headers['Content-Type'] = 'application/json';
-                
-                const response = await fetch(rule.path, {
-                    method: rule.method,
-                    headers: headers,
-                    body: body
-                });
-                
-                const errorMessage = await getErrorMessage(response);
-                displayResult(resultDiv, response.status, errorMessage);
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="alert alert-error" style="margin: 0; padding: 10px;">❌ <strong>LỖI KẾT NỐI</strong> - ${error.message}</div>`;
-            } finally {
-                testBtn.disabled = false;
-                testBtn.textContent = 'Kiểm tra';
-            }
-        }
-
-        // Show admin panel
-        function showAdminPanel() {
-            if (!token || !currentUser) {
-                alert('Vui lòng đăng nhập');
-                return;
-            }
-
-            if (!hasAdminRole()) {
-                alert('Bạn không có quyền truy cập');
-                return;
-            }
-
-            document.getElementById('adminSection').classList.remove('hidden');
-            loadUsers();
-            loadRoles();
-            loadRules();
-        }
-
-        // Load users
-        async function loadUsers() {
-            if (!token) return;
-
-            try {
-                const response = await fetch('/api/roles', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    // This is a simplified version - you'd need to implement user listing endpoint
-                    document.getElementById('usersList').innerHTML = '<p>Chức năng quản lý users cần endpoint riêng</p>';
-                }
-            } catch (error) {
-                document.getElementById('usersList').innerHTML = '<div class="alert alert-error">Lỗi khi tải danh sách users</div>';
-            }
-        }
-
-        // Load roles - chỉ gọi khi admin vào admin panel để xem/quản lý roles
-        async function loadRoles() {
-            if (!token) return;
-
-            try {
-                const response = await fetch('/api/roles', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const roles = data.data || [];
-                    
-                    // Update role mapping để dùng cho loadRules()
-                    roles.forEach(role => {
-                        roleIdToNameMap[role.id] = role.name;
-                    });
-                    
-                    document.getElementById('rolesList').innerHTML = `
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tên Role</th>
-                                    <th>Hệ thống</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${roles.map(role => `
-                                    <tr>
-                                        <td>${role.id}</td>
-                                        <td><span class="badge badge-primary">${role.name}</span></td>
-                                        <td>${role.is_system ? 'Có' : 'Không'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    `;
-                } else {
-                    document.getElementById('rolesList').innerHTML = '<div class="alert alert-error">Không thể tải danh sách roles</div>';
-                }
-            } catch (error) {
-                document.getElementById('rolesList').innerHTML = '<div class="alert alert-error">Lỗi khi tải danh sách roles</div>';
-            }
-        }
-
-
-        // Load rules - chỉ gọi khi admin vào admin panel để xem/quản lý rules (quy tắc phân quyền)
-        async function loadRules() {
-            if (!token) return;
-
-            try {
-                const response = await fetch('/api/rules', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const apiRules = data.data || [];
-                    
-                    // Convert role IDs to role names for display
-                    const rulesWithNames = apiRules.map(rule => {
-                        const roleNames = (rule.roles || []).map(roleId => {
-                            return roleIdToNameMap[roleId] || `role_${roleId}`;
-                        });
-                        return { ...rule, roles: roleNames };
-                    });
-                    
-                    document.getElementById('rulesList').innerHTML = `
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Method</th>
-                                    <th>Path</th>
-                                    <th>Type</th>
-                                    <th>Roles</th>
-                                    <th>Fixed</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rulesWithNames.map(rule => `
-                                    <tr>
-                                        <td><span class="badge badge-success">${rule.method}</span></td>
-                                        <td><code>${rule.path}</code></td>
-                                        <td><span class="badge badge-warning">${rule.type}</span></td>
-                                        <td>${rule.roles && rule.roles.length > 0 ? rule.roles.map(r => `<span class="badge badge-primary">${r}</span>`).join(' ') : 'N/A'}</td>
-                                        <td>${rule.fixed ? '<span class="badge badge-danger">Fixed</span>' : '<span class="badge badge-secondary">Editable</span>'}</td>
-                                        <td>${rule.description || '-'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    `;
-                } else {
-                    document.getElementById('rulesList').innerHTML = '<div class="alert alert-error">Không thể tải danh sách rules</div>';
-                }
-            } catch (error) {
-                document.getElementById('rulesList').innerHTML = '<div class="alert alert-error">Lỗi khi tải danh sách rules</div>';
-            }
-        }
-
-        // Show alert
-        function showAlert(elementId, message, type) {
-            const alertDiv = document.getElementById(elementId);
-            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => {
-                alertDiv.innerHTML = '';
-            }, 5000);
-        }
-
-        // Fill login form with test user credentials
-        function fillLogin(email, password) {
-            document.getElementById('loginEmail').value = email;
-            document.getElementById('loginPassword').value = password;
-            showLogin();
-            // Scroll to login form
-            document.getElementById('loginSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // Demo: Login with Username in JWT Token
-        async function demoLoginWithUsername() {
-            const email = document.getElementById('demoLoginEmail').value;
-            const password = document.getElementById('demoLoginPassword').value;
-            const resultDiv = document.getElementById('demoLoginResult');
-
-            if (!email || !password) {
-                resultDiv.innerHTML = '<div class="alert alert-error">Vui lòng nhập đầy đủ email và mật khẩu</div>';
-                return;
-            }
-
-            resultDiv.innerHTML = '<div style="color: #667eea;">⏳ Đang đăng nhập...</div>';
-
-            try {
-                const response = await fetch('/api/demo/login-with-username', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Lưu token mới
-                    if (data.token) {
-                        token = data.token;
-                        localStorage.setItem('token', token);
-                        
-                        // Cập nhật thông tin user
-                        const userFromToken = getUserFromToken(token);
-                        if (userFromToken) {
-                            currentUser = {
-                                id: userFromToken.id,
-                                email: userFromToken.email,
-                                full_name: userFromToken.full_name,
-                                role_ids: userFromToken.role_ids,
-                                ...data.user
-                            };
-                        } else {
-                            currentUser = data.user;
-                        }
-                        updateUI();
-                    }
-
-                    // Hiển thị kết quả
-                    const claims = decodeJWT(data.token);
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <strong>✅ Đăng nhập thành công!</strong><br>
-                            <strong>Message:</strong> ${data.message || 'Token được tạo với username và custom fields'}<br><br>
-                            <strong>Token Claims:</strong><br>
-                            <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.85em;">${JSON.stringify(claims, null, 2)}</pre>
-                        </div>
-                    `;
-                } else {
-                    resultDiv.innerHTML = `<div class="alert alert-error">❌ ${data.error || data.message || 'Đăng nhập thất bại'}</div>`;
-                }
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="alert alert-error">❌ Lỗi kết nối: ${error.message}</div>`;
-            }
-        }
-
-        // Demo: Get Token Info
-        async function demoGetTokenInfo() {
-            const resultDiv = document.getElementById('demoTokenInfoResult');
-
-            if (!token) {
-                resultDiv.innerHTML = '<div class="alert alert-error">Vui lòng đăng nhập trước</div>';
-                return;
-            }
-
-            resultDiv.innerHTML = '<div style="color: #667eea;">⏳ Đang lấy thông tin token...</div>';
-
-            try {
-                const response = await fetch('/api/demo/token-info', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <strong>✅ Thông tin Token:</strong><br>
-                            <strong>Message:</strong> ${data.message || 'Thông tin được extract từ flexible token'}<br><br>
-                            <strong>Claims:</strong><br>
-                            <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.85em;">${JSON.stringify(data.claims, null, 2)}</pre>
-                        </div>
-                    `;
-                } else {
-                    resultDiv.innerHTML = `<div class="alert alert-error">❌ ${data.error || data.message || 'Không thể lấy thông tin token'}</div>`;
-                }
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="alert alert-error">❌ Lỗi kết nối: ${error.message}</div>`;
-            }
-        }
+            await loadRulesFromAPI();
+        })();
     </script>
 </body>
 </html>
-

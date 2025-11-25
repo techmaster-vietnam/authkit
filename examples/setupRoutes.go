@@ -169,8 +169,17 @@ func setupRoutes(
 		Allow().
 		Description("Lấy thông tin từ flexible JWT token (username, custom fields, role conversion)").
 		Register()
-	demo.Get("/role-conversion", demoHandler.DemoRoleConversion).
-		Allow().
-		Description("Demo role conversion utilities (IDs ↔ Names)").
+
+	// Route registry endpoint - trả về tất cả routes đã đăng ký
+	apiRouter.Get("/routeregistry", demoHandler.GetRouteRegistry).
+		Public().
+		Fixed().
+		Description("Lấy danh sách tất cả routes đã đăng ký trong RouteRegistry").
+		Register()
+
+	// Foo route - chỉ cho phép non-logged in users
+	apiRouter.Get("/foo", demoHandler.Foo).
+		Forbid().
+		Description("Foo endpoint - cấm tất cả logged in users").
 		Register()
 }

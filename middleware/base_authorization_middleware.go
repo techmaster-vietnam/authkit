@@ -128,8 +128,10 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) Authorize() fiber.Handler {
 		}
 
 		// Process rules: FORBID rules have higher priority than ALLOW rules
+		hasForbidRule := false
 		for _, rule := range matchingRules {
 			if rule.Type == models.AccessForbid {
+				hasForbidRule = true
 				// FORBID rules: check if user has forbidden roles
 				if len(rule.Roles) == 0 {
 					return goerrorkit.NewAuthError(403, "Không có quyền truy cập").WithData(map[string]interface{}{
@@ -148,10 +150,26 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) Authorize() fiber.Handler {
 						})
 					}
 				}
+
 			}
 		}
 
-		// Check ALLOW rules only if no FORBID match
+		// If only FORBID rule exists and user is not forbidden, allow access immediately
+		if hasForbidRule {
+			// Quick check: does any ALLOW rule exist?
+			hasAllowRule := false
+			for _, rule := range matchingRules {
+				if rule.Type == models.AccessAllow {
+					hasAllowRule = true
+					break
+				}
+			}
+			if !hasAllowRule {
+				return c.Next()
+			}
+		}
+
+		// Check ALLOW rules only if no FORBID match or FORBID + ALLOW both exist
 		for _, rule := range matchingRules {
 			if rule.Type == models.AccessAllow {
 				// ALLOW rules: check if user has allowed roles

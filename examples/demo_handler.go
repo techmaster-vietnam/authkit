@@ -5,7 +5,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/techmaster-vietnam/authkit"
-	"github.com/techmaster-vietnam/authkit/middleware"
 	"github.com/techmaster-vietnam/authkit/utils"
 	"gorm.io/gorm"
 )
@@ -193,69 +192,51 @@ func (h *DemoHandler) GetTokenInfo(c *fiber.Ctx) error {
 	})
 }
 
-// DemoRoleConversion demonstrates role conversion utilities
-// GET /api/demo/role-conversion
-func (h *DemoHandler) DemoRoleConversion(c *fiber.Ctx) error {
-	// Get user from context
-	user, ok := middleware.GetUserFromContext(c)
-	if !ok {
-		return c.Status(401).JSON(fiber.Map{
-			"error": "Unauthorized",
-		})
-	}
+// GetRouteRegistry returns all registered routes from RouteRegistry
+// GET /api/routeregistry
+func (h *DemoHandler) GetRouteRegistry(c *fiber.Ctx) error {
+	routes := h.ak.RouteRegistry.GetAllRoutes()
 
-	// Get user roles
-	roles, err := h.ak.RoleRepo.ListRolesOfUser(user.GetID())
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"error": "Lỗi khi lấy roles",
-		})
-	}
+	// Convert RouteMetadata sang response DTO (bỏ Handler field)
+	routeDTOs := make([]fiber.Map, len(routes))
+	for i, route := range routes {
+		// Convert AccessType sang string
+		accessType := string(route.AccessType)
+		// AccessType có thể là "PUBLIC", "ALLOW", "FORBID" hoặc empty
+		// Nếu empty, mặc định là "Public" để tương thích với frontend
+		if accessType == "" {
+			accessType = "Public"
+		} else {
+			// Convert "PUBLIC" -> "Public", "ALLOW" -> "Allow", "FORBID" -> "Forbid"
+			switch accessType {
+			case "PUBLIC":
+				accessType = "Public"
+			case "ALLOW":
+				accessType = "Allow"
+			case "FORBID":
+				accessType = "Forbid"
+			}
+		}
 
-	// Extract role IDs and names using utility functions
-	// Note: roles is []*authkit.BaseRole, need to convert to []models.Role
-	roleModels := make([]authkit.Role, len(roles))
-	for i, r := range roles {
-		roleModels[i] = *r
+		routeDTOs[i] = fiber.Map{
+			"method":      route.Method,
+			"path":        route.FullPath, // Sử dụng FullPath thay vì Path
+			"type":        accessType,
+			"roles":       route.Roles, // Đã là []string (role names)
+			"fixed":       route.Fixed,
+			"description": route.Description,
+		}
 	}
-	roleIDs := utils.ExtractRoleIDsFromRoles(roleModels)
-	roleNames := utils.ExtractRoleNamesFromRoles(roleModels)
-
-	// Convert role names back to IDs using repository
-	nameToIDMap, err := h.ak.RoleRepo.GetIDsByNames(roleNames)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"error": "Lỗi khi convert role names sang IDs",
-		})
-	}
-	convertedIDs := utils.ConvertRoleNameMapToIDs(nameToIDMap, roleNames)
 
 	return c.JSON(fiber.Map{
 		"success": true,
-		"data": fiber.Map{
-			"original_role_ids":   roleIDs,
-			"original_role_names": roleNames,
-			"converted_role_ids":  convertedIDs,
-			"conversion_valid":    compareRoleIDs(roleIDs, convertedIDs),
-		},
-		"message": "Demo role conversion utilities",
+		"data":    routeDTOs,
+		"count":   len(routeDTOs),
 	})
 }
 
-// Helper functions
-
-func compareRoleIDs(a, b []uint) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	amap := make(map[uint]bool)
-	for _, id := range a {
-		amap[id] = true
-	}
-	for _, id := range b {
-		if !amap[id] {
-			return false
-		}
-	}
-	return true
+// Foo returns a simple "ok" JSON response
+// GET /api/foo
+func (h *DemoHandler) Foo(c *fiber.Ctx) error {
+	return c.JSON("ok")
 }
