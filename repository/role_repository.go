@@ -50,6 +50,10 @@ func (r *RoleRepository) Update(role *models.Role) error {
 }
 
 // Delete hard deletes a role (only if not system role)
+// Uses stored procedure to ensure data consistency:
+// 1. Deletes from user_roles table
+// 2. Removes role_id from rules.roles array
+// 3. Deletes from roles table
 func (r *RoleRepository) Delete(id uint) error {
 	var role models.Role
 	if err := r.db.First(&role, id).Error; err != nil {
@@ -58,7 +62,9 @@ func (r *RoleRepository) Delete(id uint) error {
 	if role.IsSystem() {
 		return gorm.ErrRecordNotFound // Cannot delete system roles
 	}
-	return r.db.Unscoped().Delete(&role).Error
+
+	// Call stored procedure to delete role and clean up related data
+	return r.db.Exec("SELECT delete_role(?)", id).Error
 }
 
 // List lists all roles
@@ -140,7 +146,7 @@ func (r *RoleRepository) GetIDsByNames(names []string) (map[string]uint, error) 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	result := make(map[string]uint, len(roles))
 	for _, role := range roles {
 		result[role.Name] = role.ID

@@ -19,7 +19,9 @@ func NewBaseRoleRepository[T core.RoleInterface](db *gorm.DB) *BaseRoleRepositor
 
 // Create tạo mới role
 func (r *BaseRoleRepository[T]) Create(role T) error {
-	return r.db.Create(&role).Error
+	// Sử dụng Select để chỉ định rõ các fields cần insert, bao gồm cả ID
+	// Điều này đảm bảo ID được insert vào database ngay cả khi không phải auto-increment
+	return r.db.Select("id", "name", "is_system").Create(&role).Error
 }
 
 // GetByID lấy role theo ID
@@ -52,6 +54,10 @@ func (r *BaseRoleRepository[T]) Update(role T) error {
 }
 
 // Delete hard delete role (chỉ nếu không phải system role)
+// Sử dụng stored procedure để đảm bảo tính nhất quán dữ liệu:
+// 1. Xóa khỏi bảng user_roles
+// 2. Xóa role_id khỏi mảng rules.roles
+// 3. Xóa khỏi bảng roles
 func (r *BaseRoleRepository[T]) Delete(id uint) error {
 	var role T
 	if err := r.db.First(&role, id).Error; err != nil {
@@ -60,7 +66,9 @@ func (r *BaseRoleRepository[T]) Delete(id uint) error {
 	if role.IsSystem() {
 		return gorm.ErrRecordNotFound // Cannot delete system roles
 	}
-	return r.db.Unscoped().Delete(&role).Error
+
+	// Gọi stored procedure để xóa role và dọn dẹp dữ liệu liên quan
+	return r.db.Exec("SELECT delete_role(?)", id).Error
 }
 
 // List lấy danh sách tất cả roles
@@ -117,7 +125,7 @@ func (r *BaseRoleRepository[T]) ListRolesOfUser(userID string) ([]T, error) {
 	if err := r.db.Where("id = ?", userID).Preload("Roles").First(&user).Error; err != nil {
 		return nil, err
 	}
-	
+
 	// Convert []models.BaseRole sang []T
 	roles := make([]T, len(user.Roles))
 	for i := range user.Roles {
@@ -166,4 +174,3 @@ func (r *BaseRoleRepository[T]) GetIDsByNames(names []string) (map[string]uint, 
 func (r *BaseRoleRepository[T]) DB() *gorm.DB {
 	return r.db
 }
-
