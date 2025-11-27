@@ -362,6 +362,16 @@ func main() {
         WithConfig(cfg).
         WithUserModel(&authkit.BaseUser{}).
         WithRoleModel(&authkit.BaseRole{}).
+        // Optional: Tùy chỉnh JWT claims khi login (xem phần 5.8)
+        // WithJWTCustomizer(func(user *authkit.BaseUser, roleIDs []uint) authkit.ClaimsConfig {
+        //     return authkit.ClaimsConfig{
+        //         RoleFormat: "ids",
+        //         RoleIDs:    roleIDs,
+        //         CustomFields: map[string]interface{}{
+        //             "full_name": user.GetFullName(),
+        //         },
+        //     }
+        // }).
         Initialize()
 
     if err != nil {
@@ -458,6 +468,8 @@ func main() {
 
 ### 2.2. Gán Roles cho User
 
+**Cách 1: Sử dụng GORM trực tiếp**
+
 ```go
 func assignRoleToUser(db *gorm.DB, userEmail string, roleName string) error {
     // Tìm user
@@ -494,6 +506,51 @@ func assignRolesToUser(db *gorm.DB, userEmail string, roleNames []string) error 
 
     return db.Model(&user).Association("Roles").Replace(roles)
 }
+```
+
+**Cách 2: Sử dụng AuthKit Role Service (Khuyến nghị)**
+
+```go
+// Sử dụng RoleHandler từ AuthKit
+// POST /api/users/:user_id/roles/:role_id
+// Hoặc sử dụng RoleService trực tiếp
+
+func assignRoleToUser(roleService *authkit.BaseRoleService[*authkit.BaseUser, *authkit.BaseRole], userID string, roleID uint) error {
+    // Lấy role IDs của user hiện tại (nếu cần kiểm tra quyền)
+    currentUserRoleIDs := []uint{} // Lấy từ context nếu có
+    
+    return roleService.AddRoleToUser(userID, roleID, currentUserRoleIDs)
+}
+
+// Update nhiều roles cùng lúc (hỗ trợ cả IDs và names)
+func updateUserRoles(roleService *authkit.BaseRoleService[*authkit.BaseUser, *authkit.BaseRole], userID string, roleIDs []uint) error {
+    req := service.BaseUpdateUserRolesRequest{
+        Roles: roleIDs, // Có thể là []uint hoặc []string
+    }
+    return roleService.UpdateUserRoles(userID, req, []uint{})
+}
+```
+
+**Cách 3: Sử dụng REST API**
+
+```bash
+# Thêm role cho user
+POST /api/users/:user_id/roles/:role_id
+
+# Xóa role khỏi user
+DELETE /api/users/:user_id/roles/:role_id
+
+# Update tất cả roles của user (hỗ trợ cả IDs và names)
+PUT /api/users/:userId/roles
+{
+  "roles": [1, 2, 3]  // Hoặc ["admin", "editor"]
+}
+
+# Kiểm tra user có role không
+GET /api/users/:user_id/roles/:role_name/check
+
+# Liệt kê users có role (hỗ trợ cả role_id và role_name)
+GET /api/roles/:role_id_name/users
 ```
 
 ---
@@ -600,7 +657,25 @@ apiRouter.Get("/admin/users", adminHandler.ListUsers).
 **Đặc điểm:**
 - Rule được đánh dấu là "fixed" trong database
 - Không thể cập nhật hoặc xóa rule này thông qua API `/api/rules`
+- Khi sync routes, chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
 - Hữu ích cho các routes quan trọng cần bảo vệ
+
+#### 3.3.5. Override - Luôn ghi đè cấu hình từ code lên database
+
+```go
+apiRouter.Put("/blogs/:id", blogHandler.Update).
+    Allow("author", "editor", "admin").
+    Override().  // Luôn ghi đè cấu hình từ code lên DB khi sync
+    Description("Cập nhật blog").
+    Register()
+```
+
+**Đặc điểm:**
+- Khi sync routes, luôn ghi đè cấu hình từ code lên database (tạo mới hoặc update)
+- Có thể cập nhật hoặc xóa rule này thông qua API `/api/rules`
+- Nhưng khi sync lại, cấu hình từ code sẽ được ghi đè lên database
+- Hữu ích khi muốn code là source of truth cho rule configuration
+- **Lưu ý:** `Fixed()` và `Override()` loại trừ lẫn nhau, không thể dùng cùng lúc
 
 ### 3.4. Cú pháp đầy đủ
 
@@ -608,6 +683,7 @@ apiRouter.Get("/admin/users", adminHandler.ListUsers).
 apiRouter.<METHOD>(<PATH>, <HANDLER>).
     <ACCESS_TYPE>(<ROLES...>).  // Public(), Allow(), hoặc Forbid(roles...)
     Fixed().                     // Optional: đánh dấu rule không thể thay đổi
+    Override().                  // Optional: luôn ghi đè từ code lên DB (không dùng cùng Fixed)
     Description("<MÔ_TẢ>").      // Optional: mô tả route
     Register()                    // Bắt buộc: đăng ký route
 ```
@@ -682,6 +758,13 @@ func setupRoutes(
     blogs.Delete("/:id", blogHandler.Delete).
         Allow("editor", "admin").
         Description("Xóa blog").
+        Register()
+    
+    // Override: luôn ghi đè từ code lên DB khi sync
+    blogs.Put("/:id", blogHandler.Update).
+        Allow("author", "editor", "admin").
+        Override().  // Đảm bảo cấu hình từ code luôn được áp dụng
+        Description("Cập nhật blog").
         Register()
     
     // Allow: mọi user đã đăng nhập
@@ -786,6 +869,13 @@ if ok {
 userID, ok := authkit.GetUserIDFromContext(c)
 if ok {
     // Sử dụng userID
+}
+
+// Lấy Role IDs từ JWT token (từ context)
+roleIDs, ok := authkit.GetRoleIDsFromContext(c)
+if ok {
+    // Sử dụng roleIDs
+    fmt.Printf("User có %d roles: %v\n", len(roleIDs), roleIDs)
 }
 ```
 
@@ -974,16 +1064,75 @@ func main() {
 
 **Lưu ý:**
 - `SyncRoutes()` sẽ tạo/update các rules trong bảng `rules` dựa trên routes bạn đã định nghĩa
-- Nếu route đã có trong database và không phải `Fixed`, nó sẽ được cập nhật
-- Nếu route là `Fixed`, nó sẽ không bị thay đổi từ database
+- **Override rules**: Luôn ghi đè cấu hình từ code lên database (tạo mới hoặc update)
+- **Fixed rules**: Chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
+- **Non-fixed rules**: Chỉ tạo mới nếu chưa tồn tại, giữ nguyên nếu đã tồn tại
+- Tự động xóa các rules không còn trong registry (cleanup rules cũ)
 
-### 5.2. Quản lý Rules từ API
+### 5.2. Quản lý Roles và Rules từ API
+
+AuthKit cung cấp đầy đủ REST API để quản lý roles và rules:
+
+#### 5.2.1. Role Management API
+
+```bash
+# Liệt kê tất cả roles
+GET /api/roles
+
+# Tạo role mới
+POST /api/roles
+{
+  "id": 5,
+  "name": "moderator",
+  "is_system": false
+}
+
+# Xóa role (không thể xóa system role)
+DELETE /api/roles/:id
+
+# Thêm role cho user
+POST /api/users/:user_id/roles/:role_id
+
+# Xóa role khỏi user
+DELETE /api/users/:user_id/roles/:role_id
+
+# Update tất cả roles của user (hỗ trợ cả IDs và names)
+PUT /api/users/:userId/roles
+{
+  "roles": [1, 2, 3]  // Hoặc ["admin", "editor"]
+}
+
+# Kiểm tra user có role không
+GET /api/users/:user_id/roles/:role_name/check
+
+# Liệt kê users có role (hỗ trợ cả role_id và role_name)
+GET /api/roles/:role_id_name/users
+# Ví dụ: GET /api/roles/1/users hoặc GET /api/roles/admin/users
+```
+
+**Lưu ý:**
+- Không thể tạo role `super_admin` qua API (phải tạo trực tiếp trong database)
+- Không thể xóa system roles (bao gồm `super_admin`)
+- `UpdateUserRoles` hỗ trợ cả role IDs (`[]uint`) và role names (`[]string`)
+
+#### 5.2.2. Rule Management API
 
 AuthKit cung cấp API để quản lý rules:
 
 ```bash
-# Liệt kê tất cả rules
-GET /api/rules
+# Liệt kê tất cả rules (với filter tùy chọn)
+GET /api/rules?method=GET&path=blog&type=ALLOW&fixed=true&service=A
+
+# Query parameters:
+# - method: Filter theo HTTP method (GET, POST, PUT, DELETE)
+# - path: Filter theo path (substring match)
+# - type: Filter theo access type (PUBLIC, ALLOW, FORBID)
+# - fixed: Filter theo fixed flag (true, false)
+# - service: Filter theo service name (cho microservice architecture)
+
+# Lấy rule theo ID
+GET /api/rules/:id
+# ID có dạng: "GET|/api/blogs/*" (cần URL encode khi gọi API)
 
 # Tạo rule mới
 POST /api/rules
@@ -1006,25 +1155,55 @@ PUT /api/rules/:id
 DELETE /api/rules/:id
 ```
 
-**Lưu ý:** Rules có `Fixed = true` không thể cập nhật hoặc xóa từ API.
+**Lưu ý:** 
+- Rules có `Fixed = true` không thể cập nhật hoặc xóa từ API
+- Rules có `Override = true` có thể cập nhật/xóa từ API, nhưng sẽ bị ghi đè khi sync routes
 
 ### 5.3. Refresh Cache
 
 Khi bạn thay đổi rules từ database (qua API hoặc trực tiếp), bạn cần refresh cache:
 
 ```go
-// Refresh cache
+// Refresh authorization cache (rules cache)
 ak.InvalidateCache()
 ```
 
-Hoặc trong handler:
+**Refresh Role Cache:**
+
+Khi bạn thay đổi roles từ bên ngoài (ví dụ: seed data, migration, hoặc trực tiếp trong database), bạn cần refresh role cache:
+
+```go
+// Refresh role cache (để cập nhật role ID ↔ name mapping)
+if err := ak.RefreshRoleCache(); err != nil {
+    log.Printf("Failed to refresh role cache: %v", err)
+}
+```
+
+**Khi nào cần refresh role cache:**
+- Sau khi tạo/xóa roles trong database
+- Sau khi seed data với roles mới
+- Sau khi migration thay đổi roles
+- Khi role ID hoặc name bị thay đổi trực tiếp trong database
+
+**Ví dụ trong handler:**
 
 ```go
 func (h *AdminHandler) UpdateRule(c *fiber.Ctx) error {
     // ... cập nhật rule ...
     
-    // Refresh cache
+    // Refresh authorization cache
     ak.InvalidateCache()
+    
+    return c.JSON(fiber.Map{"success": true})
+}
+
+func (h *AdminHandler) CreateRole(c *fiber.Ctx) error {
+    // ... tạo role ...
+    
+    // Refresh role cache sau khi tạo role mới
+    if err := ak.RefreshRoleCache(); err != nil {
+        return err
+    }
     
     return c.JSON(fiber.Map{"success": true})
 }
@@ -1108,7 +1287,15 @@ func main() {
        Register()
    ```
 
-3. **Sử dụng `Description()` để mô tả route**
+3. **Sử dụng `Override()` khi muốn code là source of truth**
+   ```go
+   apiRouter.Put("/blogs/:id", handler).
+       Allow("author", "editor").
+       Override().  // Luôn ghi đè từ code lên DB
+       Register()
+   ```
+
+4. **Sử dụng `Description()` để mô tả route**
    ```go
    apiRouter.Get("/blogs", handler).
        Public().
@@ -1116,24 +1303,54 @@ func main() {
        Register()
    ```
 
-4. **Refresh cache sau khi thay đổi rules**
+5. **Refresh cache sau khi thay đổi rules**
    ```go
    // Sau khi update rule từ API
    ak.InvalidateCache()
    ```
 
-5. **Sử dụng Custom User khi cần mở rộng**
+6. **Refresh role cache sau khi thay đổi roles**
+   ```go
+   // Sau khi tạo/xóa roles từ database
+   ak.RefreshRoleCache()
+   ```
+
+7. **Sử dụng JWTCustomizer để thêm custom fields vào token**
+   ```go
+   ak, err := authkit.New[*CustomUser, *authkit.BaseRole](app, db).
+       WithJWTCustomizer(func(user *CustomUser, roleIDs []uint) authkit.ClaimsConfig {
+           return authkit.ClaimsConfig{
+               Username: user.GetFullName(),
+               RoleFormat: "both",
+               RoleIDs: roleIDs,
+               CustomFields: map[string]interface{}{
+                   "mobile": user.Mobile,
+               },
+           }
+       }).
+       Initialize()
+   ```
+
+8. **Sử dụng Custom User khi cần mở rộng**
    - Embed `BaseUser` thay vì copy code
    - Implement đầy đủ `UserInterface`
    - Sử dụng cùng bảng `users` hoặc chỉ định bảng riêng
 
-6. **Kiểm tra user trong handler**
+9. **Kiểm tra user trong handler**
    ```go
    user, ok := authkit.GetUserFromContextGeneric[*CustomUser](c)
    if !ok {
        return fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
    }
    ```
+
+10. **Lấy role IDs từ context khi cần**
+    ```go
+    roleIDs, ok := authkit.GetRoleIDsFromContext(c)
+    if ok {
+        // Sử dụng roleIDs để kiểm tra quyền
+    }
+    ```
 
 ### 5.7. Troubleshooting
 
@@ -1156,9 +1373,66 @@ func main() {
 - Kiểm tra quyền của database user
 - Kiểm tra các trường custom có conflict với BaseUser không
 
-### 5.8. JWT với Custom Fields và Username
+### 5.8. JWT Customizer - Tùy chỉnh JWT Claims khi Login
 
-AuthKit hỗ trợ tạo JWT token với username và custom fields linh hoạt thông qua hàm `GenerateTokenFlexible()`.
+AuthKit hỗ trợ tùy chỉnh JWT claims khi login thông qua **JWTCustomizer callback**. Tính năng này cho phép bạn thêm custom fields vào JWT token một cách tự động mà không cần override login handler.
+
+#### 5.8.1. Sử dụng JWTCustomizer
+
+**Cách 1: Sử dụng trong AuthKit Builder**
+
+```go
+ak, err := authkit.New[*CustomUser, *authkit.BaseRole](app, db).
+    WithConfig(cfg).
+    WithUserModel(&CustomUser{}).
+    WithRoleModel(&authkit.BaseRole{}).
+    WithJWTCustomizer(func(user *CustomUser, roleIDs []uint) authkit.ClaimsConfig {
+        // Tùy chỉnh JWT claims: thêm custom fields vào token
+        return authkit.ClaimsConfig{
+            Username:   user.GetFullName(), // Thêm username vào token
+            RoleFormat: "both",             // Bao gồm cả IDs và names
+            RoleIDs:    roleIDs,
+            RoleNames:  utils.ExtractRoleNamesFromRoleInterfaces(user.GetRoles()),
+            CustomFields: map[string]interface{}{
+                "mobile":  user.Mobile,  // Custom field
+                "address": user.Address, // Custom field
+                "company_id": 123,      // Custom field khác
+            },
+        }
+    }).
+    Initialize()
+```
+
+**Cách 2: Set sau khi khởi tạo**
+
+```go
+ak, err := authkit.New[*CustomUser, *authkit.BaseRole](app, db).
+    WithConfig(cfg).
+    WithUserModel(&CustomUser{}).
+    WithRoleModel(&authkit.BaseRole{}).
+    Initialize()
+
+// Set JWT customizer sau khi khởi tạo
+ak.AuthService.SetJWTCustomizer(func(user *CustomUser, roleIDs []uint) authkit.ClaimsConfig {
+    return authkit.ClaimsConfig{
+        RoleFormat: "ids",
+        RoleIDs:    roleIDs,
+        CustomFields: map[string]interface{}{
+            "full_name": user.GetFullName(),
+        },
+    }
+})
+```
+
+**Đặc điểm:**
+- JWTCustomizer được gọi tự động khi user login thành công
+- Cho phép thêm username, custom fields vào JWT token
+- Hỗ trợ cả role IDs và role names trong token
+- Nếu không set JWTCustomizer, AuthKit sẽ sử dụng token cơ bản (backward compatible)
+
+#### 5.8.2. JWT với Custom Fields và Username (Manual)
+
+Nếu bạn muốn tạo JWT token thủ công với custom fields, AuthKit cũng hỗ trợ tạo JWT token với username và custom fields linh hoạt thông qua hàm `GenerateTokenFlexible()`.
 
 #### 5.8.1. Tạo Token với Username và Custom Fields
 
