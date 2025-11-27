@@ -35,6 +35,8 @@ type RoleRepositoryInterface[TRole RoleInterface] interface {
 	CheckUserHasRole(userID string, roleName string) (bool, error)
 	ListRolesOfUser(userID string) ([]TRole, error)
 	ListUsersHasRole(roleName string) ([]interface{}, error)
+	ListUsersHasRoleId(roleID uint) ([]interface{}, error)
+	ListUsersHasRoleName(roleName string) ([]interface{}, error)
 	List() ([]TRole, error)
 	Create(role TRole) error
 	Update(role TRole) error

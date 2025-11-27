@@ -310,17 +310,25 @@ func (s *BaseRoleService[TUser, TRole]) CheckUserHasRole(userID string, roleName
 }
 
 // ListUsersHasRole lists all users with a specific role
-// Trả về []models.BaseUser vì không biết custom User type
-func (s *BaseRoleService[TUser, TRole]) ListUsersHasRole(roleName string) ([]interface{}, error) {
-	users, err := s.roleRepo.ListUsersHasRole(roleName)
+// role_id_name có thể là số (role_id) hoặc chuỗi (role_name)
+// Trả về []interface{} vì không biết custom User type
+func (s *BaseRoleService[TUser, TRole]) ListUsersHasRole(role_id_name string) ([]interface{}, error) {
+	var users []interface{}
+	var err error
+
+	// Thử convert sang số, nếu thành công là ID, thất bại sẽ là string
+	roleID, parseErr := strconv.ParseUint(role_id_name, 10, 32)
+	if parseErr == nil {
+		// role_id_name là số, dùng ListUsersHasRoleId
+		users, err = s.roleRepo.ListUsersHasRoleId(uint(roleID))
+	} else {
+		// role_id_name là chuỗi, dùng ListUsersHasRoleName
+		users, err = s.roleRepo.ListUsersHasRoleName(role_id_name)
+	}
+
 	if err != nil {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách user có role")
 	}
 
-	// Convert []models.BaseUser sang []interface{}
-	result := make([]interface{}, len(users))
-	for i := range users {
-		result[i] = users[i]
-	}
-	return result, nil
+	return users, nil
 }

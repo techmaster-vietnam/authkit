@@ -108,10 +108,10 @@ func setupRoutes(
 		Description("Xóa role").
 		Register()
 
-	roles.Get("/:role_name/users", ak.RoleHandler.ListUsersHasRole).
+	roles.Get("/:role_id_name/users", ak.RoleHandler.ListUsersHasRole).
 		Allow("admin").
 		Fixed().
-		Description("Danh sách users có role").
+		Description("Danh sách users có role (role_id_name có thể là số hoặc chuỗi)").
 		Register()
 
 	// User role routes (admin only)

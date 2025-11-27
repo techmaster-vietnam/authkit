@@ -153,6 +153,29 @@ func (r *RoleRepository) ListUsersHasRole(roleName string) ([]models.User, error
 	return users, err
 }
 
+// ListUsersHasRoleId lists all users with a specific role by ID
+func (r *RoleRepository) ListUsersHasRoleId(roleID uint) ([]models.User, error) {
+	var users []models.User
+	err := r.db.Table("users").
+		Joins("JOIN user_roles ON users.id = user_roles.user_id").
+		Where("user_roles.role_id = ?", roleID).
+		Preload("Roles").
+		Find(&users).Error
+	return users, err
+}
+
+// ListUsersHasRoleName lists all users with a specific role by name
+func (r *RoleRepository) ListUsersHasRoleName(roleName string) ([]models.User, error) {
+	var users []models.User
+	err := r.db.Table("users").
+		Joins("JOIN user_roles ON users.id = user_roles.user_id").
+		Joins("JOIN roles ON user_roles.role_id = roles.id").
+		Where("roles.name = ?", roleName).
+		Preload("Roles").
+		Find(&users).Error
+	return users, err
+}
+
 // GetIDsByNames gets role IDs by role names (optimized batch query)
 // Returns map of role name -> role ID for efficient lookup
 func (r *RoleRepository) GetIDsByNames(names []string) (map[string]uint, error) {

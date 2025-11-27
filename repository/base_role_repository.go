@@ -187,6 +187,47 @@ func (r *BaseRoleRepository[T]) ListUsersHasRole(roleName string) ([]interface{}
 	return result, nil
 }
 
+// ListUsersHasRoleId lấy danh sách users có role theo ID
+// Trả về []interface{} để match với RoleRepositoryInterface
+func (r *BaseRoleRepository[T]) ListUsersHasRoleId(roleID uint) ([]interface{}, error) {
+	var users []models.BaseUser
+	err := r.db.Table("users").
+		Joins("JOIN user_roles ON users.id = user_roles.user_id").
+		Where("user_roles.role_id = ?", roleID).
+		Preload("Roles").
+		Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	// Convert []models.BaseUser sang []interface{}
+	result := make([]interface{}, len(users))
+	for i := range users {
+		result[i] = users[i]
+	}
+	return result, nil
+}
+
+// ListUsersHasRoleName lấy danh sách users có role theo tên
+// Trả về []interface{} để match với RoleRepositoryInterface
+func (r *BaseRoleRepository[T]) ListUsersHasRoleName(roleName string) ([]interface{}, error) {
+	var users []models.BaseUser
+	err := r.db.Table("users").
+		Joins("JOIN user_roles ON users.id = user_roles.user_id").
+		Joins("JOIN roles ON user_roles.role_id = roles.id").
+		Where("roles.name = ?", roleName).
+		Preload("Roles").
+		Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	// Convert []models.BaseUser sang []interface{}
+	result := make([]interface{}, len(users))
+	for i := range users {
+		result[i] = users[i]
+	}
+	return result, nil
+}
+
 // GetIDsByNames lấy role IDs theo role names (batch query)
 func (r *BaseRoleRepository[T]) GetIDsByNames(names []string) (map[string]uint, error) {
 	if len(names) == 0 {

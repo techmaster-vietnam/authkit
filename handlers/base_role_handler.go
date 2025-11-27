@@ -168,16 +168,17 @@ func (h *BaseRoleHandler[TUser, TRole]) CheckUserHasRole(c *fiber.Ctx) error {
 }
 
 // ListUsersHasRole handles list users has role request
-// GET /api/roles/:role_name/users
+// GET /api/roles/:role_id_name/users
+// role_id_name có thể là số (role_id) hoặc chuỗi (role_name)
 func (h *BaseRoleHandler[TUser, TRole]) ListUsersHasRole(c *fiber.Ctx) error {
-	roleName := c.Params("role_name")
-	if roleName == "" {
-		return goerrorkit.NewValidationError("Role name là bắt buộc", map[string]interface{}{
-			"field": "role_name",
+	roleIdName := c.Params("role_id_name")
+	if roleIdName == "" {
+		return goerrorkit.NewValidationError("Role ID hoặc name là bắt buộc", map[string]interface{}{
+			"field": "role_id_name",
 		})
 	}
 
-	users, err := h.roleService.ListUsersHasRole(roleName)
+	users, err := h.roleService.ListUsersHasRole(roleIdName)
 	if err != nil {
 		return err
 	}

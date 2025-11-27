@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/repository"
@@ -244,10 +245,24 @@ func (s *RoleService) ListRolesOfUser(userID string) ([]models.Role, error) {
 }
 
 // ListUsersHasRole lists all users with a specific role
-func (s *RoleService) ListUsersHasRole(roleName string) ([]models.User, error) {
-	users, err := s.roleRepo.ListUsersHasRole(roleName)
+// role_id_name có thể là số (role_id) hoặc chuỗi (role_name)
+func (s *RoleService) ListUsersHasRole(role_id_name string) ([]models.User, error) {
+	var users []models.User
+	var err error
+
+	// Thử convert sang số, nếu thành công là ID, thất bại sẽ là string
+	roleID, parseErr := strconv.ParseUint(role_id_name, 10, 32)
+	if parseErr == nil {
+		// role_id_name là số, dùng ListUsersHasRoleId
+		users, err = s.roleRepo.ListUsersHasRoleId(uint(roleID))
+	} else {
+		// role_id_name là chuỗi, dùng ListUsersHasRoleName
+		users, err = s.roleRepo.ListUsersHasRoleName(role_id_name)
+	}
+
 	if err != nil {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách user có role")
 	}
+
 	return users, nil
 }
