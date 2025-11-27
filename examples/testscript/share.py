@@ -148,19 +148,21 @@ def get_role_id_by_name(token: str, role_name: str) -> Optional[int]:
         error(f"Lỗi khi lấy role_id cho {role_name}: {str(e)}")
         return None
 
-def get_user_detail(token: str, identifier: str) -> Optional[Dict]:
+def get_user_detail(token: str, identifier: str, verbose: bool = True) -> Optional[Dict]:
     """
     Lấy thông tin chi tiết người dùng theo ID hoặc email
     
     Args:
         token: JWT token để xác thực
         identifier: ID hoặc email của user cần lấy thông tin
+        verbose: Nếu True, in ra thông tin chi tiết. Mặc định là True
     
     Returns:
         Dictionary chứa thông tin user và roles, hoặc None nếu thất bại
     """
     # Gọi API để lấy user detail
-    info(f"Đang lấy thông tin chi tiết cho: {identifier}...")
+    if verbose:
+        info(f"Đang lấy thông tin chi tiết cho: {identifier}...")
     try:
         resp = requests.get(
             f"{_BASE_URL}/api/users/detail",
@@ -191,23 +193,25 @@ def get_user_detail(token: str, identifier: str) -> Optional[Dict]:
             print(json.dumps(data, indent=2, ensure_ascii=False))
             return None
         
-        success("Lấy thông tin chi tiết user thành công!")
+        if verbose:
+            success("Lấy thông tin chi tiết user thành công!")
         user_detail = data.get("data", {})
         
-        # In ra thông tin user
-        user = user_detail.get("user", {})
-        roles = user_detail.get("roles", [])
-        
-        info(f"User ID: {user.get('id', 'N/A')}")
-        info(f"Email: {user.get('email', 'N/A')}")
-        info(f"Full Name: {user.get('full_name', 'N/A')}")
-        info(f"Is Active: {user.get('is_active', 'N/A')}")
-        info(f"Số lượng roles: {len(roles)}")
-        
-        if roles:
-            info("Danh sách roles:")
-            for role in roles:
-                print(f"  - Role ID: {role.get('role_id')}, Role Name: {role.get('role_name')}")
+        # In ra thông tin user (chỉ khi verbose=True)
+        if verbose:
+            user = user_detail.get("user", {})
+            roles = user_detail.get("roles", [])
+            
+            info(f"User ID: {user.get('id', 'N/A')}")
+            info(f"Email: {user.get('email', 'N/A')}")
+            info(f"Full Name: {user.get('full_name', 'N/A')}")
+            info(f"Is Active: {user.get('is_active', 'N/A')}")
+            info(f"Số lượng roles: {len(roles)}")
+            
+            if roles:
+                info("Danh sách roles:")
+                for role in roles:
+                    print(f"  - Role ID: {role.get('role_id')}, Role Name: {role.get('role_name')}")
         
         return user_detail
         
@@ -281,3 +285,119 @@ def get_user_roles(token: str, identifier: str) -> Optional[list]:
     except Exception as e:
         error(f"Lỗi không mong đợi: {str(e)}")
         return None
+
+def create_role(token: str, role_id: int, role_name: str, is_system: bool = False) -> bool:
+    """
+    Tạo role mới
+    
+    Args:
+        token: JWT token để xác thực
+        role_id: ID của role
+        role_name: Tên role
+        is_system: Có phải system role không
+    
+    Returns:
+        True nếu thành công, False nếu thất bại
+    """
+    try:
+        info("Đang tạo role mới...")
+        info(f"  - ID: {role_id}")
+        info(f"  - Name: {role_name}")
+        info(f"  - Is System: {is_system}")
+        
+        resp = requests.post(
+            f"{_BASE_URL}/api/roles",
+            json={"id": role_id, "name": role_name, "is_system": is_system},
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        resp_data = resp.json()
+        
+        print()
+        info("Response từ server:")
+        print(json.dumps(resp_data, indent=2, ensure_ascii=False))
+        
+        if resp.status_code >= 400 or "error" in resp_data:
+            handle_error_response(resp_data, "tạo role")
+            return False
+        
+        return True
+        
+    except Exception as e:
+        error(f"Lỗi khi tạo role: {str(e)}")
+        return False
+
+def update_user_roles(token: str, user_id: str, role_names: list) -> Tuple[bool, Optional[Dict]]:
+    """
+    Cập nhật danh sách roles cho user
+    
+    Args:
+        token: JWT token để xác thực
+        user_id: ID của user cần cập nhật roles
+        role_names: Danh sách tên roles (ví dụ: ["author", "reader", "tiger"])
+    
+    Returns:
+        Tuple (success, response_data)
+    """
+    try:
+        info(f"Đang cập nhật roles cho user {user_id}...")
+        info(f"  - Danh sách roles: {role_names}")
+        
+        resp = requests.put(
+            f"{_BASE_URL}/api/users/{user_id}/roles",
+            json={"roles": role_names},
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        resp_data = resp.json()
+        
+        print()
+        info("Response từ server:")
+        print(json.dumps(resp_data, indent=2, ensure_ascii=False))
+        
+        if resp.status_code >= 400 or "error" in resp_data:
+            handle_error_response(resp_data, "cập nhật roles cho user")
+            return False, resp_data
+        
+        success("Cập nhật roles thành công!")
+        return True, resp_data
+        
+    except Exception as e:
+        error(f"Lỗi khi cập nhật roles: {str(e)}")
+        return False, None
+
+def display_user_roles(user_detail: Optional[Dict], title: str = "Danh sách roles") -> list:
+    """
+    Hiển thị danh sách roles của user và trả về danh sách role names
+    
+    Args:
+        user_detail: Dictionary chứa thông tin user detail từ get_user_detail
+        title: Tiêu đề để hiển thị
+    
+    Returns:
+        List các role names (ví dụ: ["author", "reader", "tiger"])
+    """
+    print()
+    print("=" * 60)
+    info(f"📋 {title}")
+    print("=" * 60)
+    
+    if not user_detail or "roles" not in user_detail:
+        info("Không có role nào")
+        return []
+    
+    roles = user_detail.get("roles", [])
+    role_names = []
+    
+    if roles:
+        for idx, role in enumerate(roles, 1):
+            role_id = role.get('role_id', 'N/A')
+            role_name = role.get('role_name', 'N/A')
+            print(f"{idx}. Role ID: {role_id}, Role Name: {role_name}")
+            if role_name != 'N/A':
+                role_names.append(role_name)
+    else:
+        info("Không có role nào")
+    
+    print()
+    return role_names
