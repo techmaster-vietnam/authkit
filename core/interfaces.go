@@ -24,3 +24,33 @@ type RoleInterface interface {
 	IsSystem() bool
 }
 
+// RoleRepositoryInterface định nghĩa interface cho Role Repository
+// Cho phép mock repository trong tests
+type RoleRepositoryInterface[TRole RoleInterface] interface {
+	GetByID(id uint) (TRole, error)
+	GetByName(name string) (TRole, error)
+	GetByIDs(ids []uint) ([]TRole, error)
+	AddRoleToUser(userID string, roleID uint) error
+	RemoveRoleFromUser(userID string, roleID uint) error
+	CheckUserHasRole(userID string, roleName string) (bool, error)
+	ListRolesOfUser(userID string) ([]TRole, error)
+	ListUsersHasRole(roleName string) ([]interface{}, error)
+	List() ([]TRole, error)
+	Create(role TRole) error
+	Update(role TRole) error
+	Delete(id uint) error
+	GetIDsByNames(names []string) (map[string]uint, error)
+	DB() interface{} // Trả về *gorm.DB nhưng dùng interface{} để tránh circular dependency
+}
+
+// UserRepositoryInterface định nghĩa interface cho User Repository
+// Cho phép mock repository trong tests
+type UserRepositoryInterface[TUser UserInterface] interface {
+	GetByID(id string) (TUser, error)
+	GetByEmail(email string) (TUser, error)
+	Create(user TUser) error
+	Update(user TUser) error
+	Delete(id string) error
+	List(offset, limit int) ([]TUser, int64, error)
+	DB() interface{} // Trả về *gorm.DB nhưng dùng interface{} để tránh circular dependency
+}

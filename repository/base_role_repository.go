@@ -80,6 +80,7 @@ func (r *BaseRoleRepository[T]) List() ([]T, error) {
 
 // AddRoleToUser thêm role cho user
 // Note: Method này vẫn sử dụng models.BaseUser vì cần làm việc với many2many relationship
+// Sử dụng PostgreSQL UPSERT (ON CONFLICT DO NOTHING) để tối ưu hiệu suất
 func (r *BaseRoleRepository[T]) AddRoleToUser(userID string, roleID uint) error {
 	var user models.BaseUser
 	var role T
@@ -91,7 +92,12 @@ func (r *BaseRoleRepository[T]) AddRoleToUser(userID string, roleID uint) error 
 		return err
 	}
 
-	return r.db.Model(&user).Association("Roles").Append(&role)
+	// Sử dụng PostgreSQL UPSERT: nếu (user_id, role_id) đã tồn tại thì không làm gì
+	// PRIMARY KEY constraint trên (user_id, role_id) sẽ tự động xử lý conflict
+	return r.db.Exec(
+		"INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT (user_id, role_id) DO NOTHING",
+		userID, roleID,
+	).Error
 }
 
 // RemoveRoleFromUser xóa role khỏi user
@@ -104,6 +110,18 @@ func (r *BaseRoleRepository[T]) RemoveRoleFromUser(userID string, roleID uint) e
 	}
 	if err := r.db.First(&role, roleID).Error; err != nil {
 		return err
+	}
+
+	// Kiểm tra user có role đó hay không trước khi xóa
+	var count int64
+	err := r.db.Table("user_roles").
+		Where("user_id = ? AND role_id = ?", userID, roleID).
+		Count(&count).Error
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return gorm.ErrRecordNotFound
 	}
 
 	return r.db.Model(&user).Association("Roles").Delete(&role)
@@ -120,28 +138,37 @@ func (r *BaseRoleRepository[T]) CheckUserHasRole(userID string, roleName string)
 }
 
 // ListRolesOfUser lấy danh sách roles của user
+// Query trực tiếp roles từ database thông qua JOIN với user_roles
+// để đảm bảo GORM tự động scan vào đúng type T
 func (r *BaseRoleRepository[T]) ListRolesOfUser(userID string) ([]T, error) {
+	// Kiểm tra user có tồn tại không
 	var user models.BaseUser
-	if err := r.db.Where("id = ?", userID).Preload("Roles").First(&user).Error; err != nil {
+	if err := r.db.Where("id = ?", userID).First(&user).Error; err != nil {
 		return nil, err
 	}
 
-	// Convert []models.BaseRole sang []T
-	roles := make([]T, len(user.Roles))
-	for i := range user.Roles {
-		// Type assertion - cần cast từ BaseRole sang T
-		// Điều này hoạt động vì T sẽ là BaseRole hoặc custom type embed BaseRole
-		rolePtr := any(&user.Roles[i])
-		if tRole, ok := rolePtr.(T); ok {
-			roles[i] = tRole
-		}
+	// Query trực tiếp roles từ bảng roles thông qua JOIN với user_roles
+	// Sử dụng type []T để GORM tự động scan vào đúng type
+	var roles []T
+	err := r.db.Table("roles").
+		Joins("JOIN user_roles ON roles.id = user_roles.role_id").
+		Where("user_roles.user_id = ?", userID).
+		Find(&roles).Error
+	if err != nil {
+		return nil, err
 	}
+
+	// Đảm bảo luôn trả về empty slice thay vì nil
+	if roles == nil {
+		return []T{}, nil
+	}
+
 	return roles, nil
 }
 
 // ListUsersHasRole lấy danh sách users có role cụ thể
-// Trả về []models.BaseUser vì không biết custom User type
-func (r *BaseRoleRepository[T]) ListUsersHasRole(roleName string) ([]models.BaseUser, error) {
+// Trả về []interface{} để match với RoleRepositoryInterface
+func (r *BaseRoleRepository[T]) ListUsersHasRole(roleName string) ([]interface{}, error) {
 	var users []models.BaseUser
 	err := r.db.Table("users").
 		Joins("JOIN user_roles ON users.id = user_roles.user_id").
@@ -149,7 +176,15 @@ func (r *BaseRoleRepository[T]) ListUsersHasRole(roleName string) ([]models.Base
 		Where("roles.name = ?", roleName).
 		Preload("Roles").
 		Find(&users).Error
-	return users, err
+	if err != nil {
+		return nil, err
+	}
+	// Convert []models.BaseUser sang []interface{}
+	result := make([]interface{}, len(users))
+	for i := range users {
+		result[i] = users[i]
+	}
+	return result, nil
 }
 
 // GetIDsByNames lấy role IDs theo role names (batch query)
@@ -170,7 +205,7 @@ func (r *BaseRoleRepository[T]) GetIDsByNames(names []string) (map[string]uint, 
 	return result, nil
 }
 
-// DB trả về *gorm.DB để cho phép extend với custom methods
-func (r *BaseRoleRepository[T]) DB() *gorm.DB {
+// DB trả về interface{} để match với RoleRepositoryInterface
+func (r *BaseRoleRepository[T]) DB() interface{} {
 	return r.db
 }

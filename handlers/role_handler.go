@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/techmaster-vietnam/authkit/middleware"
 	"github.com/techmaster-vietnam/authkit/service"
 	"github.com/techmaster-vietnam/goerrorkit"
 )
@@ -34,8 +35,7 @@ func (h *RoleHandler) AddRole(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"data":    role,
+		"data": role,
 	})
 }
 
@@ -54,7 +54,6 @@ func (h *RoleHandler) RemoveRole(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
 		"message": "Xóa role thành công",
 	})
 }
@@ -68,8 +67,7 @@ func (h *RoleHandler) ListRoles(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    roles,
+		"data": roles,
 	})
 }
 
@@ -90,12 +88,17 @@ func (h *RoleHandler) AddRoleToUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.roleService.AddRoleToUser(userID, uint(roleID)); err != nil {
+	// Lấy role IDs của user đang login từ context
+	currentUserRoleIDs, ok := middleware.GetRoleIDsFromContext(c)
+	if !ok {
+		currentUserRoleIDs = []uint{}
+	}
+
+	if err := h.roleService.AddRoleToUser(userID, uint(roleID), currentUserRoleIDs); err != nil {
 		return err
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
 		"message": "Thêm role cho user thành công",
 	})
 }
@@ -122,7 +125,6 @@ func (h *RoleHandler) RemoveRoleFromUser(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
 		"message": "Xóa role khỏi user thành công",
 	})
 }
@@ -150,7 +152,6 @@ func (h *RoleHandler) CheckUserHasRole(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
 		"data": fiber.Map{
 			"has_role": hasRole,
 		},
@@ -173,8 +174,7 @@ func (h *RoleHandler) ListRolesOfUser(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    roles,
+		"data": roles,
 	})
 }
 
@@ -194,8 +194,7 @@ func (h *RoleHandler) ListUsersHasRole(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    users,
+		"data": users,
 	})
 }
 

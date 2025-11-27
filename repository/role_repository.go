@@ -75,6 +75,7 @@ func (r *RoleRepository) List() ([]models.Role, error) {
 }
 
 // AddRoleToUser adds a role to a user
+// Sử dụng PostgreSQL UPSERT (ON CONFLICT DO NOTHING) để tối ưu hiệu suất
 func (r *RoleRepository) AddRoleToUser(userID string, roleID uint) error {
 	var user models.User
 	var role models.Role
@@ -86,7 +87,12 @@ func (r *RoleRepository) AddRoleToUser(userID string, roleID uint) error {
 		return err
 	}
 
-	return r.db.Model(&user).Association("Roles").Append(&role)
+	// Sử dụng PostgreSQL UPSERT: nếu (user_id, role_id) đã tồn tại thì không làm gì
+	// PRIMARY KEY constraint trên (user_id, role_id) sẽ tự động xử lý conflict
+	return r.db.Exec(
+		"INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT (user_id, role_id) DO NOTHING",
+		userID, roleID,
+	).Error
 }
 
 // RemoveRoleFromUser removes a role from a user
@@ -99,6 +105,18 @@ func (r *RoleRepository) RemoveRoleFromUser(userID string, roleID uint) error {
 	}
 	if err := r.db.First(&role, roleID).Error; err != nil {
 		return err
+	}
+
+	// Kiểm tra user có role đó hay không trước khi xóa
+	var count int64
+	err := r.db.Table("user_roles").
+		Where("user_id = ? AND role_id = ?", userID, roleID).
+		Count(&count).Error
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return gorm.ErrRecordNotFound
 	}
 
 	return r.db.Model(&user).Association("Roles").Delete(&role)

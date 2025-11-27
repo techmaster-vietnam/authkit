@@ -60,8 +60,8 @@ func (r *BaseUserRepository[T]) List(offset, limit int) ([]T, int64, error) {
 	return users, total, err
 }
 
-// DB trả về *gorm.DB để cho phép extend với custom methods
-func (r *BaseUserRepository[T]) DB() *gorm.DB {
+// DB trả về *gorm.DB nhưng dùng interface{} để match với UserRepositoryInterface
+func (r *BaseUserRepository[T]) DB() interface{} {
 	return r.db
 }
 

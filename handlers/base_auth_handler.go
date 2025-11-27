@@ -37,8 +37,7 @@ func (h *BaseAuthHandler[TUser, TRole]) Login(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    resp,
+		"data": resp,
 	})
 }
 
@@ -46,7 +45,6 @@ func (h *BaseAuthHandler[TUser, TRole]) Login(c *fiber.Ctx) error {
 // POST /api/auth/logout
 func (h *BaseAuthHandler[TUser, TRole]) Logout(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
-		"success": true,
 		"message": "Đăng xuất thành công",
 	})
 }
@@ -67,8 +65,7 @@ func (h *BaseAuthHandler[TUser, TRole]) Register(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"data":    user,
+		"data": user,
 	})
 }
 
@@ -96,7 +93,6 @@ func (h *BaseAuthHandler[TUser, TRole]) ChangePassword(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
 		"message": "Đổi mật khẩu thành công",
 	})
 }
@@ -125,8 +121,7 @@ func (h *BaseAuthHandler[TUser, TRole]) UpdateProfile(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    user,
+		"data": user,
 	})
 }
 
@@ -143,7 +138,6 @@ func (h *BaseAuthHandler[TUser, TRole]) DeleteProfile(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
 		"message": "Xóa tài khoản thành công",
 	})
 }
@@ -157,8 +151,44 @@ func (h *BaseAuthHandler[TUser, TRole]) GetProfile(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    user,
+		"data": user,
 	})
 }
 
+// GetUserDetail handles get user detail request
+// GET /api/users/detail?identifier=id_or_email
+// Chỉ dành cho admin và super_admin
+func (h *BaseAuthHandler[TUser, TRole]) GetUserDetail(c *fiber.Ctx) error {
+	identifier := c.Query("identifier")
+	if identifier == "" {
+		return goerrorkit.NewValidationError("ID hoặc email là bắt buộc", map[string]interface{}{
+			"field": "identifier",
+		})
+	}
+
+	response, err := h.authService.GetUserDetail(identifier)
+	if err != nil {
+		return err
+	}
+
+	// Format response với roles dạng [{role_id, role_name}]
+	type RoleInfo struct {
+		ID   uint   `json:"role_id"`
+		Name string `json:"role_name"`
+	}
+
+	rolesInfo := make([]RoleInfo, 0, len(response.Roles))
+	for _, role := range response.Roles {
+		rolesInfo = append(rolesInfo, RoleInfo{
+			ID:   role.GetID(),
+			Name: role.GetName(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"data": fiber.Map{
+			"user":  response.User,
+			"roles": rolesInfo,
+		},
+	})
+}

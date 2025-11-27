@@ -37,3 +37,414 @@
   "message": "✓ GoErrorKit logger initialized",
   "timestamp": "2025-11-25T16:27:48+07:00"
 }
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T16:40:43+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "base_auth_middleware.go:38",
+  "function": "middleware.(*BaseAuthMiddleware[...]).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-26T16:41:28+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T16:42:04+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T16:44:38+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T16:57:58+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T16:58:03+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "base_auth_middleware.go:38",
+  "function": "middleware.(*BaseAuthMiddleware[...]).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không được cung cấp",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-26T17:00:53+07:00"
+}
+{
+  "data": {
+    "error": "token is malformed: token contains an invalid number of segments"
+  },
+  "error_type": "AUTH",
+  "file": "base_auth_middleware.go:44",
+  "function": "middleware.(*BaseAuthMiddleware[...]).RequireAuth.func1",
+  "level": "error",
+  "message": "Token không hợp lệ",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-26T17:01:15+07:00"
+}
+{
+  "cause": "ERROR: null value in column \"id\" of relation \"roles\" violates not-null constraint (SQLSTATE 23502)",
+  "error_type": "SYSTEM",
+  "file": "base_role_service.go:107",
+  "function": "service.(*BaseRoleService[...]).AddRole",
+  "level": "error",
+  "message": "Lỗi khi tạo role",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-26T17:10:40+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T17:20:32+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T17:24:00+07:00"
+}
+{
+  "data": {
+    "id": 7
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:54",
+  "function": "service.(*BaseRoleService[...]).AddRole",
+  "level": "error",
+  "message": "Role với ID này đã tồn tại",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-26T17:24:15+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T17:35:30+07:00"
+}
+{
+  "data": {
+    "role_id": 7,
+    "role_name": "foo"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:130",
+  "function": "service.(*BaseRoleService[...]).RemoveRole",
+  "level": "error",
+  "message": "Không được phép xóa system role",
+  "path": "DELETE /api/roles/7",
+  "timestamp": "2025-11-26T17:35:48+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-26T22:12:52+07:00"
+}
+{
+  "data": {
+    "id": 7
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:53",
+  "function": "service.(*BaseRoleService[...]).AddRole",
+  "level": "error",
+  "message": "Role với ID này đã tồn tại",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-26T22:29:29+07:00"
+}
+{
+  "data": {
+    "id": 7
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:53",
+  "function": "service.(*BaseRoleService[...]).AddRole",
+  "level": "error",
+  "message": "Role với ID này đã tồn tại",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-26T23:38:48+07:00"
+}
+{
+  "data": {
+    "role_id": 1,
+    "role_name": "super_admin",
+    "user_id": "SSC9KDZMaO7Z"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:172",
+  "function": "service.(*BaseRoleService[...]).AddRoleToUser",
+  "level": "error",
+  "message": "Không được phép gán role 'super_admin' qua REST API. Role này chỉ có thể được gán trực tiếp trong database",
+  "path": "POST /api/users/SSC9KDZMaO7Z/roles/1",
+  "timestamp": "2025-11-26T23:56:52+07:00"
+}
+{
+  "data": {
+    "role_id": 1,
+    "role_name": "super_admin",
+    "user_id": "DQkD72lfcEim"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:172",
+  "function": "service.(*BaseRoleService[...]).AddRoleToUser",
+  "level": "error",
+  "message": "Không được phép gán role 'super_admin' qua REST API. Role này chỉ có thể được gán trực tiếp trong database",
+  "path": "POST /api/users/DQkD72lfcEim/roles/1",
+  "timestamp": "2025-11-26T23:56:52+07:00"
+}
+{
+  "data": {
+    "role_id": 2,
+    "role_name": "admin",
+    "user_id": "DQkD72lfcEim"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:209",
+  "function": "service.(*BaseRoleService[...]).AddRoleToUser",
+  "level": "error",
+  "message": "Admin không được phép gán role 'admin' hoặc 'super_admin'. Chỉ super-admin mới có quyền này",
+  "path": "POST /api/users/DQkD72lfcEim/roles/2",
+  "timestamp": "2025-11-26T23:56:52+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      3,
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "base_authorization_middleware.go:190",
+  "function": "middleware.(*BaseAuthorizationMiddleware[...]).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-26T23:56:52+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T09:12:46+07:00"
+}
+{
+  "error_type": "AUTH",
+  "file": "base_auth_service.go:72",
+  "function": "service.(*BaseAuthService[...]).Login",
+  "level": "error",
+  "message": "Email hoặc mật khẩu không đúng",
+  "path": "POST /api/auth/login",
+  "timestamp": "2025-11-27T09:12:53+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T09:35:00+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T09:55:44+07:00"
+}
+{
+  "data": {
+    "role_id": 7,
+    "role_name": "bar"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:129",
+  "function": "service.(*BaseRoleService[...]).RemoveRole",
+  "level": "error",
+  "message": "Không được phép xóa system role",
+  "path": "DELETE /api/roles/7",
+  "timestamp": "2025-11-27T09:59:46+07:00"
+}
+{
+  "data": {
+    "role_id": 9,
+    "role_name": "river"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:129",
+  "function": "service.(*BaseRoleService[...]).RemoveRole",
+  "level": "error",
+  "message": "Không được phép xóa system role",
+  "path": "DELETE /api/roles/9",
+  "timestamp": "2025-11-27T09:59:54+07:00"
+}
+{
+  "data": {
+    "identifier": "bog@gmail.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_auth_service.go:295",
+  "function": "service.(*BaseAuthService[...]).GetUserDetail",
+  "level": "error",
+  "message": "Không tìm thấy người dùng",
+  "path": "GET /api/users/detail",
+  "timestamp": "2025-11-27T10:01:19+07:00"
+}
+{
+  "data": {
+    "identifier": "bog@gmail.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_auth_service.go:295",
+  "function": "service.(*BaseAuthService[...]).GetUserDetail",
+  "level": "error",
+  "message": "Không tìm thấy người dùng",
+  "path": "GET /api/users/detail",
+  "timestamp": "2025-11-27T10:02:03+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T10:56:00+07:00"
+}
+{
+  "data": {
+    "field": "id"
+  },
+  "error_type": "VALIDATION",
+  "file": "base_role_service.go:45",
+  "function": "service.(*BaseRoleService[...]).AddRole",
+  "level": "error",
+  "message": "ID role là bắt buộc",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-27T10:56:06+07:00"
+}
+{
+  "data": {
+    "role_id": "100",
+    "user_id": "DQkD72lfcEim"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:293",
+  "function": "service.(*BaseRoleService[...]).RemoveRoleFromUser",
+  "level": "error",
+  "message": "User không có role này",
+  "path": "DELETE /api/users/DQkD72lfcEim/roles/100",
+  "timestamp": "2025-11-27T10:58:18+07:00"
+}
+{
+  "data": {
+    "role_id": 1,
+    "role_name": "super_admin",
+    "user_id": "SSC9KDZMaO7Z"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:177",
+  "function": "service.(*BaseRoleService[...]).AddRoleToUser",
+  "level": "error",
+  "message": "Không được phép gán role 'super_admin' qua REST API. Role này chỉ có thể được gán trực tiếp trong database",
+  "path": "POST /api/users/SSC9KDZMaO7Z/roles/1",
+  "timestamp": "2025-11-27T11:04:26+07:00"
+}
+{
+  "data": {
+    "role_id": 1,
+    "role_name": "super_admin",
+    "user_id": "DQkD72lfcEim"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:177",
+  "function": "service.(*BaseRoleService[...]).AddRoleToUser",
+  "level": "error",
+  "message": "Không được phép gán role 'super_admin' qua REST API. Role này chỉ có thể được gán trực tiếp trong database",
+  "path": "POST /api/users/DQkD72lfcEim/roles/1",
+  "timestamp": "2025-11-27T11:04:26+07:00"
+}
+{
+  "data": {
+    "role_id": 2,
+    "role_name": "admin",
+    "user_id": "DQkD72lfcEim"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:214",
+  "function": "service.(*BaseRoleService[...]).AddRoleToUser",
+  "level": "error",
+  "message": "Admin không được phép gán role 'admin' hoặc 'super_admin'. Chỉ super-admin mới có quyền này",
+  "path": "POST /api/users/DQkD72lfcEim/roles/2",
+  "timestamp": "2025-11-27T11:04:26+07:00"
+}
+{
+  "data": {
+    "method": "GET",
+    "path": "/api/roles",
+    "user_role_ids": [
+      3,
+      4
+    ]
+  },
+  "error_type": "AUTH",
+  "file": "base_authorization_middleware.go:190",
+  "function": "middleware.(*BaseAuthorizationMiddleware[...]).Authorize.func1",
+  "level": "error",
+  "message": "Không có quyền truy cập",
+  "path": "GET /api/roles",
+  "timestamp": "2025-11-27T11:04:26+07:00"
+}
+{
+  "data": {
+    "id": 100
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:58",
+  "function": "service.(*BaseRoleService[...]).AddRole",
+  "level": "error",
+  "message": "Role với ID này đã tồn tại",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-27T11:04:51+07:00"
+}
+{
+  "data": {
+    "role_id": "100",
+    "user_id": "DQkD72lfcEim"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:293",
+  "function": "service.(*BaseRoleService[...]).RemoveRoleFromUser",
+  "level": "error",
+  "message": "User không có role này",
+  "path": "DELETE /api/users/DQkD72lfcEim/roles/100",
+  "timestamp": "2025-11-27T11:05:13+07:00"
+}
+{
+  "data": {
+    "role_id": "100",
+    "user_id": "DQkD72lfcEim"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:293",
+  "function": "service.(*BaseRoleService[...]).RemoveRoleFromUser",
+  "level": "error",
+  "message": "User không có role này",
+  "path": "DELETE /api/users/DQkD72lfcEim/roles/100",
+  "timestamp": "2025-11-27T11:05:26+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T11:09:21+07:00"
+}
+{
+  "data": {
+    "id": 100
+  },
+  "error_type": "BUSINESS",
+  "file": "base_role_service.go:58",
+  "function": "service.(*BaseRoleService[...]).AddRole",
+  "level": "error",
+  "message": "Role với ID này đã tồn tại",
+  "path": "POST /api/roles",
+  "timestamp": "2025-11-27T11:09:59+07:00"
+}

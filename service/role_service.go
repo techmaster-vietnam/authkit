@@ -117,7 +117,8 @@ func (s *RoleService) ListRoles() ([]models.Role, error) {
 }
 
 // AddRoleToUser adds a role to a user
-func (s *RoleService) AddRoleToUser(userID string, roleID uint) error {
+// currentUserRoleIDs: role IDs của user đang thực hiện thao tác (từ JWT token)
+func (s *RoleService) AddRoleToUser(userID string, roleID uint, currentUserRoleIDs []uint) error {
 	// Kiểm tra role trước khi gán
 	role, err := s.roleRepo.GetByID(roleID)
 	if err != nil {
@@ -129,13 +130,53 @@ func (s *RoleService) AddRoleToUser(userID string, roleID uint) error {
 		return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin role")
 	}
 
+	roleName := role.Name
+
 	// Bảo vệ: Không cho phép gán role "super_admin" qua REST API
-	if role.Name == "super_admin" {
+	if roleName == "super_admin" {
 		return goerrorkit.NewBusinessError(403, "Không được phép gán role 'super_admin' qua REST API. Role này chỉ có thể được gán trực tiếp trong database").WithData(map[string]interface{}{
 			"role_id":   roleID,
-			"role_name": role.Name,
+			"role_name": roleName,
 			"user_id":   userID,
 		})
+	}
+
+	// Lấy role names của user đang login từ role IDs
+	currentUserRoleNames := make(map[string]bool)
+	if len(currentUserRoleIDs) > 0 {
+		currentUserRoles, err := s.roleRepo.GetByIDs(currentUserRoleIDs)
+		if err != nil {
+			return goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin roles của user đang login")
+		}
+		for _, r := range currentUserRoles {
+			currentUserRoleNames[r.Name] = true
+		}
+	}
+
+	// Kiểm tra quyền gán role:
+	// - super-admin: được gán bất kỳ role nào (bao gồm admin)
+	// - admin: chỉ được gán các role khác admin và super-admin
+	// - các role khác: không được gán role nào
+	isSuperAdmin := currentUserRoleNames["super_admin"]
+	isAdmin := currentUserRoleNames["admin"]
+
+	if !isSuperAdmin && !isAdmin {
+		return goerrorkit.NewBusinessError(403, "Bạn không có quyền gán role cho user khác").WithData(map[string]interface{}{
+			"user_id":   userID,
+			"role_id":   roleID,
+			"role_name": roleName,
+		})
+	}
+
+	// Nếu là admin (nhưng không phải super-admin), không được gán role admin hoặc super-admin
+	if isAdmin && !isSuperAdmin {
+		if roleName == "admin" || roleName == "super_admin" {
+			return goerrorkit.NewBusinessError(403, "Admin không được phép gán role 'admin' hoặc 'super_admin'. Chỉ super-admin mới có quyền này").WithData(map[string]interface{}{
+				"user_id":   userID,
+				"role_id":   roleID,
+				"role_name": roleName,
+			})
+		}
 	}
 
 	if err := s.roleRepo.AddRoleToUser(userID, roleID); err != nil {

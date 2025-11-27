@@ -45,8 +45,7 @@ func (h *BaseRuleHandler[TUser, TRole]) AddRule(c *fiber.Ctx) error {
 	h.authorizationMiddleware.InvalidateCache()
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"data":    rule,
+		"data": rule,
 	})
 }
 
@@ -76,8 +75,7 @@ func (h *BaseRuleHandler[TUser, TRole]) UpdateRule(c *fiber.Ctx) error {
 	h.authorizationMiddleware.InvalidateCache()
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    rule,
+		"data": rule,
 	})
 }
 
@@ -99,7 +97,6 @@ func (h *BaseRuleHandler[TUser, TRole]) RemoveRule(c *fiber.Ctx) error {
 	h.authorizationMiddleware.InvalidateCache()
 
 	return c.JSON(fiber.Map{
-		"success": true,
 		"message": "Xóa rule thành công",
 	})
 }
@@ -113,8 +110,7 @@ func (h *BaseRuleHandler[TUser, TRole]) ListRules(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    rules,
+		"data": rules,
 	})
 }
 

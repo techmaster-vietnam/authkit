@@ -52,7 +52,7 @@ type AuthKit[TUser UserInterface, TRole RoleInterface] struct {
 
 	// Services
 	AuthService *BaseAuthService[TUser, TRole]
-	RoleService *BaseRoleService[TRole]
+	RoleService *BaseRoleService[TUser, TRole]
 	RuleService *RuleService
 
 	// Middleware
@@ -61,7 +61,7 @@ type AuthKit[TUser UserInterface, TRole RoleInterface] struct {
 
 	// Handlers
 	AuthHandler *BaseAuthHandler[TUser, TRole]
-	RoleHandler *BaseRoleHandler[TRole]
+	RoleHandler *BaseRoleHandler[TUser, TRole]
 	RuleHandler *BaseRuleHandler[TUser, TRole]
 
 	// Route registry
@@ -137,7 +137,7 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 	if b.jwtCustomizer != nil {
 		authService.SetJWTCustomizer(b.jwtCustomizer)
 	}
-	roleService := service.NewBaseRoleService(roleRepo)
+	roleService := service.NewBaseRoleService(roleRepo, userRepo)
 	ruleService := service.NewRuleService(ruleRepo, repository.NewRoleRepository(b.db))
 
 	// Initialize middleware với generic types
@@ -228,7 +228,7 @@ type (
 	RoleService                                                         = service.RoleService
 	RuleService                                                         = service.RuleService
 	BaseAuthService[TUser core.UserInterface, TRole core.RoleInterface] = service.BaseAuthService[TUser, TRole]
-	BaseRoleService[TRole core.RoleInterface]                           = service.BaseRoleService[TRole]
+	BaseRoleService[TUser core.UserInterface, TRole core.RoleInterface] = service.BaseRoleService[TUser, TRole]
 )
 
 // Middleware - Export generic middleware types
@@ -240,7 +240,7 @@ type (
 // Handlers - Export generic handler types
 type (
 	BaseAuthHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseAuthHandler[TUser, TRole]
-	BaseRoleHandler[TRole core.RoleInterface]                           = handlers.BaseRoleHandler[TRole]
+	BaseRoleHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseRoleHandler[TUser, TRole]
 	BaseRuleHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseRuleHandler[TUser, TRole]
 )
 

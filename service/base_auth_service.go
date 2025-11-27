@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/techmaster-vietnam/authkit/config"
 	"github.com/techmaster-vietnam/authkit/core"
@@ -258,4 +259,60 @@ func (s *BaseAuthService[TUser, TRole]) DeleteProfile(userID string) error {
 		return goerrorkit.WrapWithMessage(err, "Lỗi khi xóa profile")
 	}
 	return nil
+}
+
+// BaseUserDetailResponse represents user detail response với roles
+type BaseUserDetailResponse[TUser core.UserInterface, TRole core.RoleInterface] struct {
+	User  TUser   `json:"user"`
+	Roles []TRole `json:"roles"`
+}
+
+// GetUserDetail lấy thông tin chi tiết người dùng theo ID hoặc email
+// identifier có thể là ID hoặc email
+func (s *BaseAuthService[TUser, TRole]) GetUserDetail(identifier string) (*BaseUserDetailResponse[TUser, TRole], error) {
+	if identifier == "" {
+		return nil, goerrorkit.NewValidationError("ID hoặc email là bắt buộc", map[string]interface{}{
+			"field": "identifier",
+		})
+	}
+
+	// Kiểm tra identifier là ID hay email dựa trên ký tự @
+	// ID: chuỗi 12 ký tự chỉ gồm A-Za-z0-9 (không có @)
+	// Email: chứa ký tự @
+	var user TUser
+	var err error
+
+	if strings.Contains(identifier, "@") {
+		// Đây là email
+		user, err = s.userRepo.GetByEmail(identifier)
+	} else {
+		// Đây là ID
+		user, err = s.userRepo.GetByID(identifier)
+	}
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, goerrorkit.NewBusinessError(404, "Không tìm thấy người dùng").WithData(map[string]interface{}{
+				"identifier": identifier,
+			})
+		}
+		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin người dùng")
+	}
+
+	// Lấy roles của user từ roleRepo để đảm bảo type đúng
+	userID := user.GetID()
+	roles, err := s.roleRepo.ListRolesOfUser(userID)
+	if err != nil {
+		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách roles")
+	}
+
+	// Đảm bảo roles không nil
+	if roles == nil {
+		roles = []TRole{}
+	}
+
+	return &BaseUserDetailResponse[TUser, TRole]{
+		User:  user,
+		Roles: roles,
+	}, nil
 }

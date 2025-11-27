@@ -6,8 +6,6 @@ import (
 	"github.com/techmaster-vietnam/authkit/router"
 )
 
-// setupRoutes sets up all routes với fluent API
-// Sử dụng AuthKit instance với generic types - CustomUser thay vì BaseUser
 func setupRoutes(
 	app *fiber.App,
 	ak *authkit.AuthKit[*CustomUser, *authkit.BaseRole],
@@ -97,16 +95,19 @@ func setupRoutes(
 		Fixed().
 		Description("Danh sách roles").
 		Register()
+
 	roles.Post("/", ak.RoleHandler.AddRole).
 		Allow("admin").
 		Fixed().
 		Description("Tạo role mới").
 		Register()
+
 	roles.Delete("/:id", ak.RoleHandler.RemoveRole).
 		Allow("admin").
 		Fixed().
 		Description("Xóa role").
 		Register()
+
 	roles.Get("/:role_name/users", ak.RoleHandler.ListUsersHasRole).
 		Allow("admin").
 		Fixed().
@@ -115,25 +116,29 @@ func setupRoutes(
 
 	// User role routes (admin only)
 	users := apiRouter.Group("/users")
-	users.Get("/:user_id/roles", ak.RoleHandler.ListRolesOfUser).
-		Allow("admin").
-		Fixed().
-		Description("Danh sách roles của user").
-		Register()
 	users.Post("/:user_id/roles/:role_id", ak.RoleHandler.AddRoleToUser).
 		Allow("admin").
 		Fixed().
 		Description("Thêm role cho user").
 		Register()
+
 	users.Delete("/:user_id/roles/:role_id", ak.RoleHandler.RemoveRoleFromUser).
 		Allow("admin").
 		Fixed().
 		Description("Xóa role của user").
 		Register()
+
 	users.Get("/:user_id/roles/:role_name/check", ak.RoleHandler.CheckUserHasRole).
 		Allow("admin").
 		Fixed().
 		Description("Kiểm tra user có role").
+		Register()
+
+	// User detail route (admin and super_admin only)
+	users.Get("/detail", ak.AuthHandler.GetUserDetail).
+		Allow("admin").
+		Fixed().
+		Description("Lấy thông tin chi tiết người dùng theo ID hoặc email (query parameter: identifier)").
 		Register()
 
 	// Rule routes (admin only)
