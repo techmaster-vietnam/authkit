@@ -3,42 +3,11 @@
 import json
 import sys
 import requests
-from typing import Dict, Optional, Tuple
-from share import info, success, error, login, get_config, handle_error_response, get_user_detail, get_role_id_by_name, get_base_url
-
-def create_role(token: str, role_id: int, role_name: str, is_system: bool = False) -> Tuple[bool, Optional[int]]:
-    """
-    Tạo role mới
-    
-    Args:
-        token: JWT token để xác thực
-        role_id: ID của role
-        role_name: Tên role
-        is_system: Có phải system role không
-    
-    Returns:
-        Tuple (success, role_id)
-    """
-    try:
-        info(f"Đang tạo role '{role_name}' với ID={role_id}...")
-        resp = requests.post(
-            f"{get_base_url()}/api/roles",
-            json={"id": role_id, "name": role_name, "is_system": is_system},
-            headers={"Authorization": f"Bearer {token}"}
-        )
-        
-        resp_data = resp.json()
-        
-        if resp.status_code >= 400 or "error" in resp_data:
-            handle_error_response(resp_data, "tạo role")
-            return False, None
-        
-        success(f"Tạo role '{role_name}' thành công!")
-        return True, role_id
-        
-    except Exception as e:
-        error(f"Lỗi khi tạo role: {str(e)}")
-        return False, None
+from typing import Dict, Optional
+from share import (
+    info, success, error, login, get_config, handle_error_response, 
+    get_user_detail, get_role_id_by_name, get_base_url, create_role
+)
 
 def assign_role_to_user(token: str, user_id: str, role_id: int) -> bool:
     """
@@ -206,28 +175,6 @@ def print_users_list(users: list, title: str = "Danh sách users"):
     
     print()
 
-def get_user_id_by_email(token: str, email: str) -> Optional[str]:
-    """
-    Lấy user_id từ email
-    
-    Args:
-        token: JWT token để xác thực
-        email: Email của user
-    
-    Returns:
-        user_id hoặc None nếu không tìm thấy
-    """
-    user_detail = get_user_detail(token, email)
-    if not user_detail or "user" not in user_detail:
-        error(f"Không thể lấy user_id của {email}. Có thể user chưa tồn tại.")
-        return None
-    
-    user_id = user_detail["user"].get("id")
-    if not user_id:
-        error(f"Không thể lấy user_id của {email} từ response.")
-        return None
-    
-    return user_id
 
 def main():
     print()
@@ -257,8 +204,7 @@ def main():
     puma_role_id = 200  # Có thể thay đổi nếu cần
     puma_role_name = "puma"
     
-    create_success, created_role_id = create_role(admin_token, puma_role_id, puma_role_name, is_system=False)
-    if not create_success:
+    if not create_role(admin_token, puma_role_id, puma_role_name, is_system=False):
         error("Không thể tạo role 'puma'")
         sys.exit(1)
     
@@ -283,9 +229,14 @@ def main():
     
     for email in user_emails:
         info(f"Đang lấy user_id cho {email}...")
-        user_id = get_user_id_by_email(admin_token, email)
-        if not user_id:
+        user_detail = get_user_detail(admin_token, email)
+        if not user_detail or "user" not in user_detail:
             error(f"Không thể lấy user_id của {email}, bỏ qua...")
+            continue
+        
+        user_id = user_detail["user"].get("id")
+        if not user_id:
+            error(f"Không thể lấy user_id của {email} từ response, bỏ qua...")
             continue
         
         user_ids[email] = user_id

@@ -219,6 +219,78 @@ func (m *MockRoleRepository[TRole]) GetIDsByNames(names []string) (map[string]ui
 	return result, nil
 }
 
+func (m *MockRoleRepository[TRole]) GetRoleNameByID(id uint) (string, bool) {
+	role, ok := m.roles[id]
+	if !ok {
+		return "", false
+	}
+	return role.GetName(), true
+}
+
+func (m *MockRoleRepository[TRole]) GetRoleIDByName(name string) (uint, bool) {
+	role, ok := m.rolesByName[name]
+	if !ok {
+		return 0, false
+	}
+	return role.GetID(), true
+}
+
+func (m *MockRoleRepository[TRole]) GetNamesByIDs(ids []uint) map[uint]string {
+	result := make(map[uint]string)
+	for _, id := range ids {
+		if role, ok := m.roles[id]; ok {
+			result[id] = role.GetName()
+		}
+	}
+	return result
+}
+
+func (m *MockRoleRepository[TRole]) RefreshRoleCache() error {
+	// Mock không cần refresh cache vì đã có sẵn trong maps
+	return nil
+}
+
+func (m *MockRoleRepository[TRole]) UpdateUserRoles(userID string, roleIDs []uint) error {
+	// Kiểm tra tất cả roles có tồn tại không
+	for _, roleID := range roleIDs {
+		if _, ok := m.roles[roleID]; !ok {
+			return gorm.ErrRecordNotFound
+		}
+	}
+	// Xóa tất cả roles hiện tại và thêm các roles mới
+	m.userRoles[userID] = roleIDs
+	// Update roleUsers map
+	for roleID := range m.roleUsers {
+		// Xóa userID khỏi tất cả roles cũ
+		userIDs := m.roleUsers[roleID]
+		newUserIDs := make([]string, 0)
+		for _, uid := range userIDs {
+			if uid != userID {
+				newUserIDs = append(newUserIDs, uid)
+			}
+		}
+		m.roleUsers[roleID] = newUserIDs
+	}
+	// Thêm userID vào các roles mới
+	for _, roleID := range roleIDs {
+		if _, ok := m.roleUsers[roleID]; !ok {
+			m.roleUsers[roleID] = []string{}
+		}
+		// Check if user already in list
+		found := false
+		for _, uid := range m.roleUsers[roleID] {
+			if uid == userID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			m.roleUsers[roleID] = append(m.roleUsers[roleID], userID)
+		}
+	}
+	return nil
+}
+
 func (m *MockRoleRepository[TRole]) DB() interface{} {
 	return nil // Not needed for tests
 }

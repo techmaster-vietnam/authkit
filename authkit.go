@@ -180,6 +180,12 @@ func (ak *AuthKit[TUser, TRole]) InvalidateCache() {
 	ak.AuthorizationMiddleware.InvalidateCache()
 }
 
+// RefreshRoleCache refresh role cache bằng cách load lại tất cả roles từ database
+// Nên gọi sau khi có thay đổi roles từ bên ngoài (ví dụ: seed data, migration)
+func (ak *AuthKit[TUser, TRole]) RefreshRoleCache() error {
+	return ak.RoleRepo.RefreshRoleCache()
+}
+
 // AccessType constants
 const (
 	AccessPublic = models.AccessPublic
@@ -250,7 +256,6 @@ type (
 	LoginResponse     = service.LoginResponse
 	RegisterRequest   = service.RegisterRequest
 	AddRoleRequest    = service.AddRoleRequest
-	AddRuleRequest    = service.AddRuleRequest
 	UpdateRuleRequest = service.UpdateRuleRequest
 )
 

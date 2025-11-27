@@ -144,15 +144,13 @@ func (h *DemoHandler) GetTokenInfo(c *fiber.Ctx) error {
 		}
 		result["role_ids"] = ids
 
-		// Convert role IDs to names using repository
-		roles, err := h.ak.RoleRepo.GetByIDs(ids)
-		if err == nil {
-			// Convert []*authkit.BaseRole to []authkit.Role
-			roleModels := make([]authkit.Role, len(roles))
-			for i, r := range roles {
-				roleModels[i] = *r
+		// Convert role IDs to names using cache
+		idToNameMap := h.ak.RoleRepo.GetNamesByIDs(ids)
+		if len(idToNameMap) > 0 {
+			roleNames := make([]string, 0, len(idToNameMap))
+			for _, name := range idToNameMap {
+				roleNames = append(roleNames, name)
 			}
-			roleNames := utils.ExtractRoleNamesFromRoles(roleModels)
 			result["role_names_from_ids"] = roleNames
 		}
 	}
@@ -165,7 +163,7 @@ func (h *DemoHandler) GetTokenInfo(c *fiber.Ctx) error {
 		}
 		result["role_names"] = names
 
-		// Convert role names to IDs using repository
+		// Convert role names to IDs using cache (GetIDsByNames đã được tối ưu trong repository)
 		nameToIDMap, err := h.ak.RoleRepo.GetIDsByNames(names)
 		if err == nil {
 			ids := utils.ConvertRoleNameMapToIDs(nameToIDMap, names)

@@ -15,10 +15,45 @@ import (
 //   - Nếu Override=false và Fixed=false: chỉ tạo mới nếu chưa tồn tại, không update nếu đã tồn tại
 //     (giữ nguyên Type và Roles từ database vì đó là mong muốn của người dùng)
 //   - Convert role names (string) từ routes → role IDs (uint) khi lưu vào DB
+//   - Tự động xóa rules không còn trong registry (cleanup rules cũ)
 //   - serviceName: nếu empty, rule sẽ có service_name = NULL (single-app mode)
 //                  nếu set, rule sẽ có service_name = serviceName (microservice mode)
 func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepository, roleRepo *repository.RoleRepository, serviceName string) error {
 	routes := registry.GetAllRoutes()
+
+	// Truncate serviceName to max 20 characters if longer
+	ruleServiceName := serviceName
+	if len(ruleServiceName) > 20 {
+		ruleServiceName = ruleServiceName[:20]
+	}
+
+	// Lấy tất cả rules hiện tại trong DB (filtered by service_name)
+	existingRules, err := ruleRepo.List(repository.RuleFilter{})
+	if err != nil {
+		return goerrorkit.WrapWithMessage(err, "Failed to list existing rules")
+	}
+
+	// Tạo map các rule IDs từ registry để check nhanh
+	registryRuleIDs := make(map[string]bool)
+	for _, route := range routes {
+		ruleID := fmt.Sprintf("%s|%s", route.Method, route.FullPath)
+		registryRuleIDs[ruleID] = true
+	}
+
+	// Xóa các rules không còn trong registry
+	for _, existingRule := range existingRules {
+		if !registryRuleIDs[existingRule.ID] {
+			// Rule không còn trong registry, xóa khỏi DB
+			if deleteErr := ruleRepo.Delete(existingRule.ID); deleteErr != nil {
+				return goerrorkit.WrapWithMessage(deleteErr, fmt.Sprintf("Failed to delete obsolete rule %s", existingRule.ID)).
+					WithData(map[string]interface{}{
+						"rule_id": existingRule.ID,
+						"method":  existingRule.Method,
+						"path":    existingRule.Path,
+					})
+			}
+		}
+	}
 
 	// Collect all unique role names from all routes for batch conversion
 	roleNameSet := make(map[string]bool)
@@ -55,12 +90,6 @@ func SyncRoutesToDatabase(registry *RouteRegistry, ruleRepo *repository.RuleRepo
 				// This allows routes to be registered even if role doesn't exist yet
 				// The role might be created later
 			}
-		}
-
-		// Truncate serviceName to max 20 characters if longer
-		ruleServiceName := serviceName
-		if len(ruleServiceName) > 20 {
-			ruleServiceName = ruleServiceName[:20]
 		}
 
 		rule := &models.Rule{

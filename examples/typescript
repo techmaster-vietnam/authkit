@@ -2822,4 +2822,1915 @@ Untracked files:
 	[31mexamples/typescript[m
 
 no changes added to commit (use "git add" and/or "git commit -a")
-[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit]1;~/CODE/authkit]7;file://M1.local/Users/cuong/CODE/authkit\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!1 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[95C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[101D[?1h=[?2004h
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit]1;~/CODE/authkit]7;file://M1.local/Users/cuong/CODE/authkit\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!1 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[95C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[101D[?1h=[?2004hggit [32mg[32mi[32mt[39m[1C[90mstatus[39m[39ma[90ms[90mt[90ma[90mt[90mu[90ms[39m[39mg[39mi[39mt[2C[39m [39m [39m [39m [39m [39m [32mg[32mi[32mt[39m[3C[4ma[24m[90mdd .[39m[39md[39md[39m [39m.[24ma[3C[4m.[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mgit[39m add [4m.[24m[K[?25h
+]2;git add .]1;git[1m[33mFound existing alias for [35m"git add"[33m. You should use: [35m"ga"(B[m
+]133;C;[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit]1;~/CODE/authkit]7;file://M1.local/Users/cuong/CODE/authkit\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m+4[0m[38;5;178m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[98C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[104D[?1h=[?2004hggit [32mg[32mi[32mt[39m[1C[90madd .[39m[39mc[90ma[90md[90md[90m [90m.[39m[39mg[39mi[39mt[2C[39mo[90ma[90md[90md[90m [90m.[39m[39mm[90ma[90md[90md[90m [90m.[39m[39mm[90ma[90md[90md[90m [90m.[39m[39mi[90ma[90md[90md[90m [90m.[39m[39mt[90ma[90md[90md[90m [90m.[39m[39m [39m [39m [39m [39m [11D[32mg[32mi[32mt[39m[8C[90m-m "Correct authorization handler"[39m[34D[39m-[39mm[39m [39m"[39mC[39mo[39mr[39mr[39me[39mc[39mt[39m [39ma[39mu[39mt[39mh[39mo[39mr[39mi[39mz[39ma[39mt[39mi[39mo[39mn[39m [39mh[39ma[39mn[39md[39ml[39me[39mr[39m"[31D[33m"[33mC[33mo[33mr[33mr[33me[33mc[33mt[33m [33ma[33mu[33mt[33mh[33mo[33mr[33mi[33mz[33ma[33mt[33mi[33mo[33mn[33m [33mh[33ma[33mn[33md[33ml[33me[33mr[33m"[39m[33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33mA[33m"[39m[16D[39mg[39mi[39mt[11C[39m"[39mA[39m"d"d" "[19D[32mg[32mi[32mt[39m[11C[33m"[33mA[33md[33md[33m [33m"[39m[33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33m"[39m[39m [33mC[33m"[39m[16D[39mg[39mi[39mt[11C[39m"[39mC[39m"o"m"p"l"e"t"e" "[24D[32mg[32mi[32mt[39m[11C[33m"[33mC[33mo[33mm[33mp[33ml[33me[33mt[33me[33m [33m"[39m[33mr[33m"[39m[25D[39mg[39mi[39mt[11C[39m"[39mC[39mo[39mm[39mp[39ml[39me[39mt[39me[39m [39mr[39m"o"l"e" "[29D[32mg[32mi[32mt[39m[11C[33m"[33mC[33mo[33mm[33mp[33ml[33me[33mt[33me[33m [33mr[33mo[33ml[33me[33m [33m"[39m[33ml[33m"[39m[30D[39mg[39mi[39mt[11C[39m"[39mC[39mo[39mm[39mp[39ml[39me[39mt[39me[39m [39mr[39mo[39ml[39me[39m [39ml[39m"o"g"i" "[34D[32mg[32mi[32mt[39m[11C[33m"[33mC[33mo[33mm[33mp[33ml[33me[33mt[33me[33m [33mr[33mo[33ml[33me[33m [33ml[33mo[33mg[33mi[33m [33m"[39m[33m"[39m[39m [33mc[33m"[39m[1C[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mgit[39m commit -m [33m"Complete role logic"[39m[K[?25h
+]2;git commit -m "Complete role logic"]1;git[1m[33mFound existing alias for [35m"git"[33m. You should use: [35m"g"(B[m
+]133;C;[dev 9ad13af] Complete role logic
+ 4 files changed, 2825 insertions(+), 450 deletions(-)
+ create mode 100755 examples/authkit-example
+ create mode 100644 examples/testscript/__pycache__/share.cpython-313.pyc
+ create mode 100644 examples/typescript
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit]1;~/CODE/authkit]7;file://M1.local/Users/cuong/CODE/authkit\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!1[0m[38;5;178m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[98C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[104D[?1h=[?2004hggỉt [1m[31mg[1m[31mỉ[1m[31mt[0m[39m[1Cp [1m[31mg[1m[31mỉ[0m[39m[0m[39m [1m[31mg[0m[39m[0m[39m [0m[32mg[39m[32mg[39m[90mit commit -m "Complete role logic"[39m[34D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [35Dggi [1m[31mg[1m[31mi[0m[39m[1Cp [90mt commit -m "Complete role logic"[39m[33D[1m[31mg[0m[39m[0m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [34D[0m[32mg[39m[32mg[39m[90mit commit -m "Complete role logic"[39m[34D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [35Dggit [32mg[32mi[32mt[39m[1C[90mcommit -m "Complete role logic"[39m[31D[39mp[90mc[90mo[90mm[90mm[90mi[90mt[90m [90m-[90mm[90m [90m"[90mC[90mo[90mm[90mp[90ml[90me[90mt[90me[90m [90mr[90mo[90ml[90me[90m [90ml[90mo[90mg[90mi[90mc[90m"[39m[31D[39mg[39mi[39mt[2C[39mu[90mc[90mo[90mm[90mm[90mi[90mt[90m [90m-[90mm[90m [90m"[90mC[90mo[90mm[90mp[90ml[90me[90mt[90me[90m [90mr[90mo[90ml[90me[90m [90ml[90mo[90mg[90mi[90mc[90m"[39m[31D[39ms[90mc[90mo[90mm[90mm[90mi[90mt[90m [90m-[90mm[90m [90m"[90mC[90mo[90mm[90mp[90ml[90me[90mt[90me[90m [90mr[90mo[90ml[90me[90m [90ml[90mo[90mg[90mi[90mc[90m"[39m[31D[39mh[90mc[90mo[90mm[90mm[90mi[90mt[90m [90m-[90mm[90m [90m"[90mC[90mo[90mm[90mp[90ml[90me[90mt[90me[90m [90mr[90mo[90ml[90me[90m [90ml[90mo[90mg[90mi[90mc[90m"[39m[31D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [30D[9D[32mg[32mi[32mt[39m[6C[90morigin main[39m[11D[39mo[39mr[39mi[39mg[39mi[39mn[39m [39mm[39ma[39mi[39mn [90mn[39m [39m [90min[39m [39m [39m [4mm[24m[90main[39m[24m [39m [39m [39m [90mmain[39m[39md[90mm[90ma[90mi[90mn[39m[17D[39mg[39mi[39mt[14C[39me[90mm[90ma[90mi[90mn[39m[39mv[39m [39m [39m [19D[32mg[32mi[32mt[39m[16C[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mgit[39m push origin dev[K[?25h
+]2;git push origin dev]1;git[1m[33mFound existing alias for [35m"git push"[33m. You should use: [35m"gp"(B[m
+]133;C;Enumerating objects: 98, done.
+Counting objects:   1% (1/98)Counting objects:   2% (2/98)Counting objects:   3% (3/98)Counting objects:   4% (4/98)Counting objects:   5% (5/98)Counting objects:   6% (6/98)Counting objects:   7% (7/98)Counting objects:   8% (8/98)Counting objects:   9% (9/98)Counting objects:  10% (10/98)Counting objects:  11% (11/98)Counting objects:  12% (12/98)Counting objects:  13% (13/98)Counting objects:  14% (14/98)Counting objects:  15% (15/98)Counting objects:  16% (16/98)Counting objects:  17% (17/98)Counting objects:  18% (18/98)Counting objects:  19% (19/98)Counting objects:  20% (20/98)Counting objects:  21% (21/98)Counting objects:  22% (22/98)Counting objects:  23% (23/98)Counting objects:  24% (24/98)Counting objects:  25% (25/98)Counting objects:  26% (26/98)Counting objects:  27% (27/98)Counting objects:  28% (28/98)Counting objects:  29% (29/98)Counting objects:  30% (30/98)Counting objects:  31% (31/98)Counting objects:  32% (32/98)Counting objects:  33% (33/98)Counting objects:  34% (34/98)Counting objects:  35% (35/98)Counting objects:  36% (36/98)Counting objects:  37% (37/98)Counting objects:  38% (38/98)Counting objects:  39% (39/98)Counting objects:  40% (40/98)Counting objects:  41% (41/98)Counting objects:  42% (42/98)Counting objects:  43% (43/98)Counting objects:  44% (44/98)Counting objects:  45% (45/98)Counting objects:  46% (46/98)Counting objects:  47% (47/98)Counting objects:  48% (48/98)Counting objects:  50% (49/98)Counting objects:  51% (50/98)Counting objects:  52% (51/98)Counting objects:  53% (52/98)Counting objects:  54% (53/98)Counting objects:  55% (54/98)Counting objects:  56% (55/98)Counting objects:  57% (56/98)Counting objects:  58% (57/98)Counting objects:  59% (58/98)Counting objects:  60% (59/98)Counting objects:  61% (60/98)Counting objects:  62% (61/98)Counting objects:  63% (62/98)Counting objects:  64% (63/98)Counting objects:  65% (64/98)Counting objects:  66% (65/98)Counting objects:  67% (66/98)Counting objects:  68% (67/98)Counting objects:  69% (68/98)Counting objects:  70% (69/98)Counting objects:  71% (70/98)Counting objects:  72% (71/98)Counting objects:  73% (72/98)Counting objects:  74% (73/98)Counting objects:  75% (74/98)Counting objects:  76% (75/98)Counting objects:  77% (76/98)Counting objects:  78% (77/98)Counting objects:  79% (78/98)Counting objects:  80% (79/98)Counting objects:  81% (80/98)Counting objects:  82% (81/98)Counting objects:  83% (82/98)Counting objects:  84% (83/98)Counting objects:  85% (84/98)Counting objects:  86% (85/98)Counting objects:  87% (86/98)Counting objects:  88% (87/98)Counting objects:  89% (88/98)Counting objects:  90% (89/98)Counting objects:  91% (90/98)Counting objects:  92% (91/98)Counting objects:  93% (92/98)Counting objects:  94% (93/98)Counting objects:  95% (94/98)Counting objects:  96% (95/98)Counting objects:  97% (96/98)Counting objects:  98% (97/98)Counting objects: 100% (98/98)Counting objects: 100% (98/98), done.
+Delta compression using up to 10 threads
+Compressing objects:   1% (1/70)Compressing objects:   2% (2/70)Compressing objects:   4% (3/70)Compressing objects:   5% (4/70)Compressing objects:   7% (5/70)Compressing objects:   8% (6/70)Compressing objects:  10% (7/70)Compressing objects:  11% (8/70)Compressing objects:  12% (9/70)Compressing objects:  14% (10/70)Compressing objects:  15% (11/70)Compressing objects:  17% (12/70)Compressing objects:  18% (13/70)Compressing objects:  20% (14/70)Compressing objects:  21% (15/70)Compressing objects:  22% (16/70)Compressing objects:  24% (17/70)Compressing objects:  25% (18/70)Compressing objects:  27% (19/70)Compressing objects:  28% (20/70)Compressing objects:  30% (21/70)Compressing objects:  31% (22/70)Compressing objects:  32% (23/70)Compressing objects:  34% (24/70)Compressing objects:  35% (25/70)Compressing objects:  37% (26/70)Compressing objects:  38% (27/70)Compressing objects:  40% (28/70)Compressing objects:  41% (29/70)Compressing objects:  42% (30/70)Compressing objects:  44% (31/70)Compressing objects:  45% (32/70)Compressing objects:  47% (33/70)Compressing objects:  48% (34/70)Compressing objects:  50% (35/70)Compressing objects:  51% (36/70)Compressing objects:  52% (37/70)Compressing objects:  54% (38/70)Compressing objects:  55% (39/70)Compressing objects:  57% (40/70)Compressing objects:  58% (41/70)Compressing objects:  60% (42/70)Compressing objects:  61% (43/70)Compressing objects:  62% (44/70)Compressing objects:  64% (45/70)Compressing objects:  65% (46/70)Compressing objects:  67% (47/70)Compressing objects:  68% (48/70)Compressing objects:  70% (49/70)Compressing objects:  71% (50/70)Compressing objects:  72% (51/70)Compressing objects:  74% (52/70)Compressing objects:  75% (53/70)Compressing objects:  77% (54/70)Compressing objects:  78% (55/70)Compressing objects:  80% (56/70)Compressing objects:  81% (57/70)Compressing objects:  82% (58/70)Compressing objects:  84% (59/70)Compressing objects:  85% (60/70)Compressing objects:  87% (61/70)Compressing objects:  88% (62/70)Compressing objects:  90% (63/70)Compressing objects:  91% (64/70)Compressing objects:  92% (65/70)Compressing objects:  94% (66/70)Compressing objects:  95% (67/70)Compressing objects:  97% (68/70)Compressing objects:  98% (69/70)Compressing objects: 100% (70/70)Compressing objects: 100% (70/70), done.
+Writing objects:   1% (1/75)Writing objects:   2% (2/75)Writing objects:   4% (3/75)Writing objects:   5% (4/75)Writing objects:   6% (5/75)Writing objects:   8% (6/75)Writing objects:   9% (7/75)Writing objects:  10% (8/75)Writing objects:  12% (9/75)Writing objects:  12% (9/75), 1.07 MiB | 1.68 MiB/sWriting objects:  13% (10/75), 1.07 MiB | 1.68 MiB/sWriting objects:  14% (11/75), 1.07 MiB | 1.68 MiB/sWriting objects:  16% (12/75), 1.07 MiB | 1.68 MiB/sWriting objects:  17% (13/75), 1.07 MiB | 1.68 MiB/sWriting objects:  18% (14/75), 1.07 MiB | 1.68 MiB/sWriting objects:  20% (15/75), 1.07 MiB | 1.68 MiB/sWriting objects:  21% (16/75), 1.07 MiB | 1.68 MiB/sWriting objects:  22% (17/75), 1.07 MiB | 1.68 MiB/sWriting objects:  24% (18/75), 1.07 MiB | 1.68 MiB/sWriting objects:  25% (19/75), 1.07 MiB | 1.68 MiB/sWriting objects:  26% (20/75), 1.07 MiB | 1.68 MiB/sWriting objects:  28% (21/75), 1.07 MiB | 1.68 MiB/sWriting objects:  29% (22/75), 1.07 MiB | 1.68 MiB/sWriting objects:  30% (23/75), 1.07 MiB | 1.68 MiB/sWriting objects:  33% (25/75), 1.07 MiB | 1.68 MiB/sWriting objects:  34% (26/75), 1.07 MiB | 1.68 MiB/sWriting objects:  36% (27/75), 1.07 MiB | 1.68 MiB/sWriting objects:  37% (28/75), 1.07 MiB | 1.68 MiB/sWriting objects:  38% (29/75), 1.07 MiB | 1.68 MiB/sWriting objects:  40% (30/75), 1.07 MiB | 1.68 MiB/sWriting objects:  41% (31/75), 1.07 MiB | 1.68 MiB/sWriting objects:  42% (32/75), 1.07 MiB | 1.68 MiB/sWriting objects:  44% (33/75), 1.07 MiB | 1.68 MiB/sWriting objects:  45% (34/75), 1.07 MiB | 1.68 MiB/sWriting objects:  46% (35/75), 1.07 MiB | 1.68 MiB/sWriting objects:  48% (36/75), 1.07 MiB | 1.68 MiB/sWriting objects:  49% (37/75), 1.07 MiB | 1.68 MiB/sWriting objects:  50% (38/75), 1.07 MiB | 1.68 MiB/sWriting objects:  52% (39/75), 1.07 MiB | 1.68 MiB/sWriting objects:  53% (40/75), 1.07 MiB | 1.68 MiB/sWriting objects:  54% (41/75), 1.07 MiB | 1.68 MiB/sWriting objects:  56% (42/75), 1.07 MiB | 1.68 MiB/sWriting objects:  57% (43/75), 1.07 MiB | 1.68 MiB/sWriting objects:  58% (44/75), 1.07 MiB | 1.68 MiB/sWriting objects:  60% (45/75), 1.07 MiB | 1.68 MiB/sWriting objects:  61% (46/75), 1.07 MiB | 1.68 MiB/sWriting objects:  62% (47/75), 1.07 MiB | 1.68 MiB/sWriting objects:  64% (48/75), 1.07 MiB | 1.68 MiB/sWriting objects:  65% (49/75), 1.07 MiB | 1.68 MiB/sWriting objects:  66% (50/75), 1.07 MiB | 1.68 MiB/sWriting objects:  68% (51/75), 1.07 MiB | 1.68 MiB/sWriting objects:  69% (52/75), 1.07 MiB | 1.68 MiB/sWriting objects:  70% (53/75), 1.07 MiB | 1.68 MiB/sWriting objects:  72% (54/75), 1.07 MiB | 1.68 MiB/sWriting objects:  73% (55/75), 1.07 MiB | 1.68 MiB/sWriting objects:  74% (56/75), 1.07 MiB | 1.68 MiB/sWriting objects:  76% (57/75), 1.07 MiB | 1.68 MiB/sWriting objects:  77% (58/75), 1.07 MiB | 1.68 MiB/sWriting objects:  78% (59/75), 1.07 MiB | 1.68 MiB/sWriting objects:  80% (60/75), 1.07 MiB | 1.68 MiB/sWriting objects:  81% (61/75), 1.07 MiB | 1.68 MiB/sWriting objects:  82% (62/75), 1.07 MiB | 1.68 MiB/sWriting objects:  84% (63/75), 1.07 MiB | 1.68 MiB/sWriting objects:  85% (64/75), 1.07 MiB | 1.68 MiB/sWriting objects:  86% (65/75), 1.07 MiB | 1.68 MiB/sWriting objects:  88% (66/75), 1.07 MiB | 1.68 MiB/sWriting objects:  89% (67/75), 1.07 MiB | 1.68 MiB/sWriting objects:  90% (68/75), 1.07 MiB | 1.68 MiB/sWriting objects:  92% (69/75), 1.07 MiB | 1.68 MiB/sWriting objects:  93% (70/75), 1.07 MiB | 1.68 MiB/sWriting objects:  94% (71/75), 1.07 MiB | 1.68 MiB/sWriting objects:  96% (72/75), 1.07 MiB | 1.68 MiB/sWriting objects:  97% (73/75), 1.07 MiB | 1.68 MiB/sWriting objects:  98% (74/75), 1.07 MiB | 1.68 MiB/sWriting objects: 100% (75/75), 1.07 MiB | 1.68 MiB/sWriting objects: 100% (75/75), 9.57 MiB | 6.26 MiB/s, done.
+Total 75 (delta 42), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas:   0% (0/42)[Kremote: Resolving deltas:   2% (1/42)[Kremote: Resolving deltas:   4% (2/42)[Kremote: Resolving deltas:   7% (3/42)[Kremote: Resolving deltas:   9% (4/42)[Kremote: Resolving deltas:  11% (5/42)[Kremote: Resolving deltas:  14% (6/42)[Kremote: Resolving deltas:  16% (7/42)[Kremote: Resolving deltas:  19% (8/42)[Kremote: Resolving deltas:  21% (9/42)[Kremote: Resolving deltas:  23% (10/42)[Kremote: Resolving deltas:  26% (11/42)[Kremote: Resolving deltas:  28% (12/42)[Kremote: Resolving deltas:  30% (13/42)[Kremote: Resolving deltas:  33% (14/42)[Kremote: Resolving deltas:  35% (15/42)[Kremote: Resolving deltas:  38% (16/42)[Kremote: Resolving deltas:  40% (17/42)[Kremote: Resolving deltas:  42% (18/42)[Kremote: Resolving deltas:  45% (19/42)[Kremote: Resolving deltas:  47% (20/42)[Kremote: Resolving deltas:  50% (21/42)[Kremote: Resolving deltas:  52% (22/42)[Kremote: Resolving deltas:  54% (23/42)[Kremote: Resolving deltas:  57% (24/42)[Kremote: Resolving deltas:  59% (25/42)[Kremote: Resolving deltas:  61% (26/42)[Kremote: Resolving deltas:  64% (27/42)[Kremote: Resolving deltas:  66% (28/42)[Kremote: Resolving deltas:  69% (29/42)[Kremote: Resolving deltas:  71% (30/42)[Kremote: Resolving deltas:  73% (31/42)[Kremote: Resolving deltas:  76% (32/42)[Kremote: Resolving deltas:  78% (33/42)[Kremote: Resolving deltas:  80% (34/42)[Kremote: Resolving deltas:  83% (35/42)[Kremote: Resolving deltas:  85% (36/42)[Kremote: Resolving deltas:  88% (37/42)[Kremote: Resolving deltas:  90% (38/42)[Kremote: Resolving deltas:  92% (39/42)[Kremote: Resolving deltas:  95% (40/42)[Kremote: Resolving deltas:  97% (41/42)[Kremote: Resolving deltas: 100% (42/42)[Kremote: Resolving deltas: 100% (42/42), completed with 17 local objects.[K
+remote: 
+remote: Create a pull request for 'dev' on GitHub by visiting:[K
+remote:      https://github.com/techmaster-vietnam/authkit/pull/new/dev[K
+remote: 
+To https://github.com/techmaster-vietnam/authkit.git
+ * [new branch]      dev -> dev
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit]1;~/CODE/authkit]7;file://M1.local/Users/cuong/CODE/authkit\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!1[0m[38;5;178m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[95C[0m[49m[38;5;101m6s[0m[38;5;101m[49m[38;5;101m[0m[38;5;101m[49m[38;5;101m[0m[38;5;101m[49m[38;5;37m  base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[104D[?1h=[?2004hggit [32mg[32mi[32mt[39m[1C[90mpush origin dev[39m[15D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [14D[90mpush origin dev[39m[15D[39ms[90mp[90mu[90ms[90mh[90m [90mo[90mr[90mi[90mg[90mi[90mn[90m [90md[90me[90mv[39m[15D[39mg[39mi[39mt[2C[39mt[90mp[90mu[90ms[90mh[90m [90mo[90mr[90mi[90mg[90mi[90mn[90m [90md[90me[90mv[39m[15D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [14D[32mg[32mi[32mt[39m[4C[90matus[39m[39ma[39mt[39mu[39ms[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mgit[39m status[K[?25h
+]2;git status]1;git[1m[33mFound existing alias for [35m"git status"[33m. You should use: [35m"gst"(B[m
+]133;C;On branch dev
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	[31mmodified:   examples/typescript[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit]1;~/CODE/authkit]7;file://M1.local/Users/cuong/CODE/authkit\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!1[0m[38;5;178m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[98C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[104D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3Jauthkit.go [1m[36mcore[39;49m[0m       [1m[36mexamples[39;49m[0m   go.sum     LICENSE    [1m[36mmiddleware[39;49m[0m README.md  [1m[36mrouter[39;49m[0m     [1m[36mutils[39;49m[0m
+[1m[36mconfig[39;49m[0m     [1m[36mdoc[39;49m[0m        go.mod     [1m[36mhandlers[39;49m[0m   [1m[36mlogs[39;49m[0m       [1m[36mmodels[39;49m[0m     [1m[36mrepository[39;49m[0m [1m[36mservice[39;49m[0m
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit]1;~/CODE/authkit]7;file://M1.local/Users/cuong/CODE/authkit\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!2 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[95C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[101D[?1h=[?2004hl[32ml[39m[32ml[39m[90mc[39m[39m [39m eexamples[8D[4m[32me[4m[32mx[4m[32ma[4m[32mm[4m[32mp[4m[32ml[4m[32me[4m[32ms[24m[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[4m[32mexamples[24m[39m[K[?25h
+]2;examples]1;examples]133;C;[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples]1;..hkit/examples]7;file://M1.local/Users/cuong/CODE/authkit/examples\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/[1m[38;5;31m[38;5;39mexamples[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!2 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[86C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[92D[?1h=[?2004hs[1m[31ms[0m[39m[1m[31ms[0m[39m[90mcript[39m[0m[39m [39m [39m [39m [39m [39m lls[32ml[32ms[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mls[39m[K[?25h
+]2;ls -G]1;ls]133;C;[31m__debug_bin4289438538[39;49m[0m customUser.go         index.html            [1m[36mmigrations[39;49m[0m            reset.go              [1m[36mtestscript[39;49m[0m
+[31mauthkit-example[39;49m[0m       demo_handler.go       [1m[36mlogs[39;49m[0m                  migrations.go         seed.go               typescript
+blog_handler.go       favicon.png           main.go               README.md             setupRoutes.go
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples]1;..hkit/examples]7;file://M1.local/Users/cuong/CODE/authkit/examples\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/[1m[38;5;31m[38;5;39mexamples[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!2 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[86C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[92D[?1h=[?2004httestscript[10D[7mt[7me[7ms[7mt[7ms[7mc[7mr[7mi[7mp[7mt[27m[10D[27mt[27me[27ms[27mt[27ms[27mc[27mr[27mi[27mp[27mt[10D[4m[32mt[4m[32me[4m[32ms[4m[32mt[4m[32ms[4m[32mc[4m[32mr[4m[32mi[4m[32mp[4m[32mt[24m[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[4m[32mtestscript[24m[39m[K[?25h
+]2;testscript]1;testscript]133;C;[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!2 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[75C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[81D[?1h=[?2004hlls[32ml[32ms[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mls[39m[K[?25h
+]2;ls -G]1;ls]133;C;[1m[36m__pycache__[39;49m[0m           create_role.py        demo_role_cycle.py    README.md             user_get_detail.py
+[31madd_role_to_user.py[39;49m[0m   [31mdelete_role.py[39;49m[0m        list_user_has_role.py share.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!2 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[75C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[81D[?1h=[?2004hcchmod [32mc[32mh[32mm[32mo[32md[39m[1C[90m+x setup_mfa.sh[39m[15D[39m-[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [14Dx[8D[39mc[39mh[39mm[39mo[39md[3C [9D[32mc[32mh[32mm[32mo[32md[39m[4C[9D[39md[39m [39m [39m [39m    delete_role.py[14Dchmod -x [7md[7me[7ml[7me[7mt[7me_role.py[27m[14D[27md[27me[27ml[27me[27mt[27me[27m_[27mr[27mo[27ml[27me[27m.[27mp[27my[23D[32mc[32mh[32mm[32mo[32md[39m[4C[4md[4me[4ml[4me[4mt[4me[4m_[4mr[4mo[4ml[4me[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mchmod[39m -x [4mdelete_role.py[24m[K[?25h
+]2;chmod -x delete_role.py]1;chmod]133;C;[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!3 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[75C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[81D[?1h=[?2004hlls[32ml[32ms[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mls[39m[K[?25h
+]2;ls -G]1;ls]133;C;[1m[36m__pycache__[39;49m[0m           create_role.py        demo_role_cycle.py    README.md             user_get_detail.py
+[31madd_role_to_user.py[39;49m[0m   delete_role.py        list_user_has_role.py share.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!3 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[75C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[81D[?1h=[?2004hls[32ml[32ms[39m[1C[32ml[39m[39m [32ml[39m[90ms[39m[39m [39m ccmod [1m[31mc[1m[31mm[1m[31mo[1m[31md[0m[39m[1C[1m[31mo[0m[39m[0m[39m [1m[31mc[1m[31mm[0m[39m[0m[39m [90md[39m[1m[31mc[0m[39m[0m[39m [39m [1m[31mc[0m[39m[90mhmod -x delete_role.py[39m[22D[1m[31mc[1m[31mh[0m[39m[39mm[39mo[39md[39m [39m-[39mx[39m [39md[39me[39ml[39me[39mt[39me[39m_[39mr[39mo[39ml[39me[39m.[39mp[39my[23D[0m[32mc[0m[32mh[32mm[32mo[32md[39m[4C[4md[4me[4ml[4me[4mt[4me[4m_[4mr[4mo[4ml[4me[4m.[4mp[4my[24m[23D[39ma[39m [39m [39m [39m     [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [22Dadd_role_to_user.py[19Dchmod -x delete_role.py[7madd_role_to_user.py[27m[19D[27ma[27md[27md[27m_[27mr[27mo[27ml[27me[27m_[27mt[27mo[27m_[27mu[27ms[27me[27mr[27m.[27mp[27my[41D[32mc[32mh[32mm[32mo[32md[39m[36Cadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20Dadd_role_to_user.py [20D[4ma[4md[4md[4m_[4mr[4mo[4ml[4me[4m_[4mt[4mo[4m_[4mu[4ms[4me[4mr[4m.[4mp[4my[24m[19D[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mchmod[39m -x [4madd_role_to_user.py[24m[K[19D[?25h
+]2;chmod -x add_role_to_user.py]1;chmod]133;C;[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!4 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[75C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[81D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_role.py        demo_role_cycle.py    README.md             user_get_detail.py
+add_role_to_user.py   delete_role.py        list_user_has_role.py share.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!4 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[75C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[81D[?1h=[?2004hppỷ [1m[31mp[1m[31mỷ[0m[39m[1C[1m[31mp[0m[39m[0m[39m [0m[32mp[39m[32mp[39m[90mython3 list_user_has_role.py[39m[28D[32mp[39m[39my[39mt[39mh[39mo[39mn[39m3[39m [39ml[39mi[39ms[39mt[39m_[39mu[39ms[39me[39mr[39m_[39mh[39ma[39ms[39m_[39mr[39mo[39ml[39me[39m.[39mp[39my[29D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4ml[4mi[4ms[4mt[4m_[4mu[4ms[4me[4mr[4m_[4mh[4ma[4ms[4m_[4mr[4mo[4ml[4me[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mlist_user_has_role.py[24m[K[?25h
+]2;python3 list_user_has_role.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu test các trường hợp liên quan đến list users có role[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login admin[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang tạo role 'puma' với ID=200...[0m
+[0;32m✅ Tạo role 'puma' thành công![0m
+[1;33mℹ️  Role 'puma' có ID: 200[0m
+
+============================================================
+[1;33mℹ️  👥 Bước 3: Add role 'puma' cho các users[0m
+============================================================
+[1;33mℹ️  Đang lấy user_id cho author1@gmail.com...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: author1@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: Pw8zRAOq4PPw[0m
+[1;33mℹ️  Email: author1@gmail.com[0m
+[1;33mℹ️  Full Name: Author 1[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 1[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 4, Role Name: author
+[1;33mℹ️  User author1@gmail.com có ID: Pw8zRAOq4PPw[0m
+[0;32m✅ Gán role thành công cho user Pw8zRAOq4PPw![0m
+[0;32m✅ Đã gán role 'puma' cho author1@gmail.com[0m
+[1;33mℹ️  Đang lấy user_id cho author2@gmail.com...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: author2@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: ENwPyRqgTHmv[0m
+[1;33mℹ️  Email: author2@gmail.com[0m
+[1;33mℹ️  Full Name: Author 2[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 1[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 4, Role Name: author
+[1;33mℹ️  User author2@gmail.com có ID: ENwPyRqgTHmv[0m
+[0;32m✅ Gán role thành công cho user ENwPyRqgTHmv![0m
+[0;32m✅ Đã gán role 'puma' cho author2@gmail.com[0m
+[1;33mℹ️  Đang lấy user_id cho bob@gmail.com...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: bob@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: DQkD72lfcEim[0m
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Full Name: Bob[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 3[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 5, Role Name: reader
+  - Role ID: 4, Role Name: author
+  - Role ID: 3, Role Name: editor
+[1;33mℹ️  User bob@gmail.com có ID: DQkD72lfcEim[0m
+[0;32m✅ Gán role thành công cho user DQkD72lfcEim![0m
+[0;32m✅ Đã gán role 'puma' cho bob@gmail.com[0m
+
+============================================================
+[1;33mℹ️  📋 Bước 4: Lấy danh sách users có role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách users có role 'puma'...[0m
+[0;32m✅ Lấy danh sách users thành công! Tìm thấy 3 users[0m
+
+============================================================
+[1;33mℹ️  📋 Danh sách users có role 'puma'[0m
+============================================================
+1. User ID: Pw8zRAOq4PPw, Email: author1@gmail.com, Roles: author, puma
+2. User ID: ENwPyRqgTHmv, Email: author2@gmail.com, Roles: author, puma
+3. User ID: DQkD72lfcEim, Email: bob@gmail.com, Roles: editor, author, reader, puma
+
+
+============================================================
+[1;33mℹ️  ➖ Bước 5: Remove role 'puma' khỏi các users[0m
+============================================================
+[1;33mℹ️  Đang xóa role 'puma' khỏi author1@gmail.com...[0m
+[0;32m✅ Xóa role khỏi user Pw8zRAOq4PPw thành công![0m
+[1;33mℹ️  Đang xóa role 'puma' khỏi author2@gmail.com...[0m
+[0;32m✅ Xóa role khỏi user ENwPyRqgTHmv thành công![0m
+[1;33mℹ️  Đang xóa role 'puma' khỏi bob@gmail.com...[0m
+[0;32m✅ Xóa role khỏi user DQkD72lfcEim thành công![0m
+
+============================================================
+[1;33mℹ️  📋 Bước 6: Lấy lại danh sách users có role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách users có role 'puma'...[0m
+[0;32m✅ Lấy danh sách users thành công! Tìm thấy 0 users[0m
+
+============================================================
+[1;33mℹ️  📋 Danh sách users có role 'puma' (sau khi xóa)[0m
+============================================================
+[1;33mℹ️  Không có user nào[0m
+
+============================================================
+[1;33mℹ️  🗑️  Bước 7: Xóa role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang xóa role với ID=200...[0m
+[0;32m✅ Xóa role ID 200 thành công![0m
+[0;32m✅ Đã xóa role 'puma' thành công![0m
+
+============================================================
+[1;33mℹ️  ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!4 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[75C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[81D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_role.py        demo_role_cycle.py    README.md             user_get_detail.py
+add_role_to_user.py   delete_role.py        list_user_has_role.py share.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hlls[32ml[32ms[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mls[39m[K[?25h
+]2;ls -G]1;ls]133;C;[1m[36m__pycache__[39;49m[0m           create_role.py        demo_role_cycle.py    README.md             user_get_detail.py
+add_role_to_user.py   delete_role.py        list_user_has_role.py share.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hppython [32mp[32my[32mt[32mh[32mo[32mn[39m[1C[90madd_role_to_user.py[39m[19D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [20D[90m3 list_user_has_role.py[39m[23D[32mn[32m3[39m[32m3[32m [39m[32m3[39m[39m [8D[39md[39m [39m [39m [39m [39m [39m  [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [28Ddemo_role_cycle.py[18Dpython3 [7md[7me[7mm[7mo[7m_[7mr[7mo[7ml[7me[7m_[7mcycle.py[27m[18D[27md[27me[27mm[27mo[27m_[27mr[27mo[27ml[27me[27m_[27mc[27my[27mc[27ml[27me[27m.[27mp[27my[90mlist_us[39m[90mer_has_role.py[39m[21D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [21D[26D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4md[4me[4mm[4mo[4m_[4mr[4mo[4ml[4me[4m_[4mc[4my[4mc[4ml[4me[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mdemo_role_cycle.py[24m[K[?25h
+]2;python3 demo_role_cycle.py]1;python3]133;C;
+================================================================================
+[1;33mℹ️  🚀 Bắt đầu demo chu trình quản lý role[0m
+================================================================================
+
+================================================================================
+[1;33mℹ️  Bước 1: Đăng nhập với admin account[0m
+================================================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+================================================================================
+[1;33mℹ️  Bước 2: Tạo role 'tiger'[0m
+================================================================================
+[1;33mℹ️  Đang tạo role 'tiger'...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 100,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role 'tiger' thành công![0m
+[1;33mℹ️  Role 'tiger' đã được tạo với ID: 100[0m
+
+================================================================================
+[1;33mℹ️  Bước 3: Thêm role 'tiger' cho user 'bob@gmail.com'[0m
+================================================================================
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: bob@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: DQkD72lfcEim[0m
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Full Name: Bob[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 3[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 5, Role Name: reader
+  - Role ID: 4, Role Name: author
+  - Role ID: 3, Role Name: editor
+[1;33mℹ️  User ID của 'bob@gmail.com': DQkD72lfcEim[0m
+[1;33mℹ️  Đang thêm role ID 100 cho user DQkD72lfcEim...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Thêm role cho user thành công"
+}
+[0;32m✅ Thêm role cho user thành công![0m
+
+================================================================================
+[1;33mℹ️  Bước 4: Hiển thị thông tin chi tiết của user 'bob@gmail.com'[0m
+================================================================================
+
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: bob@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: DQkD72lfcEim[0m
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Full Name: Bob[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 4[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 5, Role Name: reader
+  - Role ID: 4, Role Name: author
+  - Role ID: 3, Role Name: editor
+  - Role ID: 100, Role Name: tiger
+
+================================================================================
+[1;33mℹ️  Bước 5: Xóa role 'tiger' khỏi user 'bob@gmail.com'[0m
+================================================================================
+[1;33mℹ️  Đang xóa role ID 100 khỏi user DQkD72lfcEim...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role khỏi user thành công"
+}
+[0;32m✅ Xóa role khỏi user thành công![0m
+
+================================================================================
+[1;33mℹ️  Bước 6: Hiển thị danh sách roles của user 'bob@gmail.com'[0m
+================================================================================
+
+[1;33mℹ️  Đang lấy danh sách roles cho: bob@gmail.com...[0m
+[0;32m✅ Lấy danh sách roles thành công! Tìm thấy 3 roles[0m
+
+================================================================================
+[0;32m✅ Danh sách roles của user bob:[0m
+================================================================================
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Số lượng roles: 3[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 5, Role Name: reader
+  - Role ID: 4, Role Name: author
+  - Role ID: 3, Role Name: editor
+================================================================================
+
+================================================================================
+[1;33mℹ️  Bước 7: Xóa role 'tiger' khỏi database[0m
+================================================================================
+[1;33mℹ️  Đang xóa role ID 100 khỏi database...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role khỏi database thành công![0m
+[1;33mℹ️  Chi tiết: Xóa role thành công[0m
+
+================================================================================
+[0;32m✅ ✅ Demo chu trình quản lý role hoàn thành![0m
+================================================================================
+
+[1;33mℹ️  Các bước đã thực hiện:[0m
+[1;33mℹ️    1. ✅ Đăng nhập với admin account[0m
+[1;33mℹ️    2. ✅ Tạo role 'tiger'[0m
+[1;33mℹ️    3. ✅ Thêm role 'tiger' cho user 'bob@gmail.com'[0m
+[1;33mℹ️    4. ✅ Hiển thị thông tin chi tiết user (bao gồm danh sách roles)[0m
+[1;33mℹ️    5. ✅ Xóa role 'tiger' khỏi user 'bob@gmail.com'[0m
+[1;33mℹ️    6. ✅ Hiển thị danh sách roles của user 'bob@gmail.com'[0m
+[1;33mℹ️    7. ✅ Xóa role 'tiger' khỏi database[0m
+
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_role.py        demo_role_cycle.py    README.md             user_get_detail.py
+add_role_to_user.py   delete_role.py        list_user_has_role.py share.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hppỷho[1m[31mp[1m[31mỷ[1m[31mh[1m[31mo[0m[39m[1m[31mh[0m[39m[0m[39m [1m[31mp[1m[31mỷ[0m[39m[0m[39m [1m[31mp[0m[39m[0m[39m [0m[32mp[39m[32mp[39m[90mython3 demo_role_cycle.py[39m[25D[32mp[32my[39m[90my[90mt[90mh[90mo[90mn[90m3[90m [90md[90me[90mm[90mo[90m_[90mr[90mo[90ml[90me[90m_[90mc[90my[90mc[90ml[90me[90m.[90mp[90my[39m[25D[39mp[39my[39mt[90my[90mt[90mh[90mo[90mn[90m3[90m [90md[90me[90mm[90mo[90m_[90mr[90mo[90ml[90me[90m_[90mc[90my[90mc[90ml[90me[90m.[90mp[90my[39m[25D[39mh[90my[90mt[90mh[90mo[90mn[90m3[90m [90md[90me[90mm[90mo[90m_[90mr[90mo[90ml[90me[90m_[90mc[90my[90mc[90ml[90me[90m.[90mp[90my[39m[25D[39mo[90my[90mt[90mh[90mo[90mn[90m3[90m [90md[90me[90mm[90mo[90m_[90mr[90mo[90ml[90me[90m_[90mc[90my[90mc[90ml[90me[90m.[90mp[90my[39m[25D[39mn[90my[90mt[90mh[90mo[90mn[90m3[90m [90md[90me[90mm[90mo[90m_[90mr[90mo[90ml[90me[90m_[90mc[90my[90mc[90ml[90me[90m.[90mp[90my[39m[25D[39m3[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [24D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m[90m demo_role_cycle.py[39m[19D[32m3[32m [39m[32m3[39m[39m [8D[39ml[39m [39m [39m [39m [39m [39m  [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [25Dlist_user_has_role.py[21Dpython3 [7ml[7mi[7ms[7mt[7m_[7mu[7ms[7me[7mr[7m_[7mh[7ma[7ms[7m_role.py[27m[21D[27ml[27mi[27ms[27mt[27m_[27mu[27ms[27me[27mr[27m_[27mh[27ma[27ms[27m_[27mr[27mo[27ml[27me[27m.[27mp[27my[90mdemo_ro[39m[90mle_cycle.py[39m[18D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [18D[29D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4ml[4mi[4ms[4mt[4m_[4mu[4ms[4me[4mr[4m_[4mh[4ma[4ms[4m_[4mr[4mo[4ml[4me[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mlist_user_has_role.py[24m[K[?25h
+]2;python3 list_user_has_role.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu test các trường hợp liên quan đến list users có role[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login admin[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang tạo role 'puma' với ID=200...[0m
+[0;32m✅ Tạo role 'puma' thành công![0m
+[1;33mℹ️  Role 'puma' có ID: 200[0m
+
+============================================================
+[1;33mℹ️  👥 Bước 3: Add role 'puma' cho các users[0m
+============================================================
+[1;33mℹ️  Đang lấy user_id cho author1@gmail.com...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: author1@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: Pw8zRAOq4PPw[0m
+[1;33mℹ️  Email: author1@gmail.com[0m
+[1;33mℹ️  Full Name: Author 1[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 1[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 4, Role Name: author
+[1;33mℹ️  User author1@gmail.com có ID: Pw8zRAOq4PPw[0m
+[0;32m✅ Gán role thành công cho user Pw8zRAOq4PPw![0m
+[0;32m✅ Đã gán role 'puma' cho author1@gmail.com[0m
+[1;33mℹ️  Đang lấy user_id cho author2@gmail.com...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: author2@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: ENwPyRqgTHmv[0m
+[1;33mℹ️  Email: author2@gmail.com[0m
+[1;33mℹ️  Full Name: Author 2[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 1[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 4, Role Name: author
+[1;33mℹ️  User author2@gmail.com có ID: ENwPyRqgTHmv[0m
+[0;32m✅ Gán role thành công cho user ENwPyRqgTHmv![0m
+[0;32m✅ Đã gán role 'puma' cho author2@gmail.com[0m
+[1;33mℹ️  Đang lấy user_id cho bob@gmail.com...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: bob@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: DQkD72lfcEim[0m
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Full Name: Bob[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 3[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 3, Role Name: editor
+  - Role ID: 4, Role Name: author
+  - Role ID: 5, Role Name: reader
+[1;33mℹ️  User bob@gmail.com có ID: DQkD72lfcEim[0m
+[0;32m✅ Gán role thành công cho user DQkD72lfcEim![0m
+[0;32m✅ Đã gán role 'puma' cho bob@gmail.com[0m
+
+============================================================
+[1;33mℹ️  📋 Bước 4: Lấy danh sách users có role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách users có role 'puma'...[0m
+[0;32m✅ Lấy danh sách users thành công! Tìm thấy 3 users[0m
+
+============================================================
+[1;33mℹ️  📋 Danh sách users có role 'puma'[0m
+============================================================
+1. User ID: Pw8zRAOq4PPw, Email: author1@gmail.com, Roles: author, puma
+2. User ID: ENwPyRqgTHmv, Email: author2@gmail.com, Roles: author, puma
+3. User ID: DQkD72lfcEim, Email: bob@gmail.com, Roles: editor, author, reader, puma
+
+
+============================================================
+[1;33mℹ️  ➖ Bước 5: Remove role 'puma' khỏi các users[0m
+============================================================
+[1;33mℹ️  Đang xóa role 'puma' khỏi author1@gmail.com...[0m
+[0;32m✅ Xóa role khỏi user Pw8zRAOq4PPw thành công![0m
+[1;33mℹ️  Đang xóa role 'puma' khỏi author2@gmail.com...[0m
+[0;32m✅ Xóa role khỏi user ENwPyRqgTHmv thành công![0m
+[1;33mℹ️  Đang xóa role 'puma' khỏi bob@gmail.com...[0m
+[0;32m✅ Xóa role khỏi user DQkD72lfcEim thành công![0m
+
+============================================================
+[1;33mℹ️  📋 Bước 6: Lấy lại danh sách users có role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách users có role 'puma'...[0m
+[0;32m✅ Lấy danh sách users thành công! Tìm thấy 0 users[0m
+
+============================================================
+[1;33mℹ️  📋 Danh sách users có role 'puma' (sau khi xóa)[0m
+============================================================
+[1;33mℹ️  Không có user nào[0m
+
+============================================================
+[1;33mℹ️  🗑️  Bước 7: Xóa role 'puma'[0m
+============================================================
+[1;33mℹ️  Đang xóa role với ID=200...[0m
+[0;32m✅ Xóa role ID 200 thành công![0m
+[0;32m✅ Đã xóa role 'puma' thành công![0m
+
+============================================================
+[1;33mℹ️  ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_delete_role.py delete_role.py        list_user_has_role.py share.py
+add_role_to_user.py   create_role.py        demo_role_cycle.py    README.md             user_get_detail.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hppython3[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m[90m list_user_has_role.py[39m[22D[32m3[32m [39m[32m3[39m[39m [8D[39mc[39m [39m [39m [39m [39m [39m  [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [28Dcreate_delete_role.py[21Dpython3 [7mc[7mr[7me[7ma[7mt[7me[7m_[7md[7me[7ml[7me[7mt[7me[7m_role.py[27m[21D[27mc[27mr[27me[27ma[27mt[27me[27m_[27md[27me[27ml[27me[27mt[27me[27m_[27mr[27mo[27ml[27me[27m.[27mp[27my[90mlist_us[39m[90mer_has_role.py[39m[21D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [21D[29D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mc[4mr[4me[4ma[4mt[4me[4m_[4md[4me[4ml[4me[4mt[4me[4m_[4mr[4mo[4ml[4me[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mcreate_delete_role.py[24m[K[?25h
+]2;python3 create_delete_role.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script tạo và xóa role[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+Traceback (most recent call last):
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/connection.py"[0m, line [35m198[0m, in [35m_new_conn[0m
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/util/connection.py"[0m, line [35m85[0m, in [35mcreate_connection[0m
+    raise err
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/util/connection.py"[0m, line [35m73[0m, in [35mcreate_connection[0m
+    [31msock.connect[0m[1;31m(sa)[0m
+    [31m~~~~~~~~~~~~[0m[1;31m^^^^[0m
+[1;35mConnectionRefusedError[0m: [35m[Errno 61] Connection refused[0m
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/connectionpool.py"[0m, line [35m787[0m, in [35murlopen[0m
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/connectionpool.py"[0m, line [35m493[0m, in [35m_make_request[0m
+    [31mconn.request[0m[1;31m([0m
+    [31m~~~~~~~~~~~~[0m[1;31m^[0m
+        [1;31mmethod,[0m
+        [1;31m^^^^^^^[0m
+    ...<6 lines>...
+        [1;31menforce_content_length=enforce_content_length,[0m
+        [1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [1;31m)[0m
+    [1;31m^[0m
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/connection.py"[0m, line [35m445[0m, in [35mrequest[0m
+    [31mself.endheaders[0m[1;31m()[0m
+    [31m~~~~~~~~~~~~~~~[0m[1;31m^^[0m
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/http/client.py"[0m, line [35m1333[0m, in [35mendheaders[0m
+    [31mself._send_output[0m[1;31m(message_body, encode_chunked=encode_chunked)[0m
+    [31m~~~~~~~~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/http/client.py"[0m, line [35m1093[0m, in [35m_send_output[0m
+    [31mself.send[0m[1;31m(msg)[0m
+    [31m~~~~~~~~~[0m[1;31m^^^^^[0m
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/http/client.py"[0m, line [35m1037[0m, in [35msend[0m
+    [31mself.connect[0m[1;31m()[0m
+    [31m~~~~~~~~~~~~[0m[1;31m^^[0m
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/connection.py"[0m, line [35m276[0m, in [35mconnect[0m
+    self.sock = [31mself._new_conn[0m[1;31m()[0m
+                [31m~~~~~~~~~~~~~~[0m[1;31m^^[0m
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/connection.py"[0m, line [35m213[0m, in [35m_new_conn[0m
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+[1;35murllib3.exceptions.NewConnectionError[0m: [35m<urllib3.connection.HTTPConnection object at 0x1066e4980>: Failed to establish a new connection: [Errno 61] Connection refused[0m
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/requests/adapters.py"[0m, line [35m667[0m, in [35msend[0m
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/connectionpool.py"[0m, line [35m841[0m, in [35murlopen[0m
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/urllib3/util/retry.py"[0m, line [35m519[0m, in [35mincrement[0m
+    [1;31mraise MaxRetryError(_pool, url, reason) from reason[0m  # type: ignore[arg-type]
+    [1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1;35murllib3.exceptions.MaxRetryError[0m: [35mHTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1066e4980>: Failed to establish a new connection: [Errno 61] Connection refused'))[0m
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File [35m"/Users/cuong/CODE/authkit/examples/testscript/create_delete_role.py"[0m, line [35m263[0m, in [35m<module>[0m
+    [31mmain[0m[1;31m()[0m
+    [31m~~~~[0m[1;31m^^[0m
+  File [35m"/Users/cuong/CODE/authkit/examples/testscript/create_delete_role.py"[0m, line [35m203[0m, in [35mmain[0m
+    token, user = [31mlogin[0m[1;31m(config["admin_email"], config["admin_password"])[0m
+                  [31m~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"/Users/cuong/CODE/authkit/examples/testscript/share.py"[0m, line [35m66[0m, in [35mlogin[0m
+    resp = requests.post(
+        f"{base_url}/api/auth/login",
+        json={"email": email, "password": password}
+    )
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/requests/api.py"[0m, line [35m115[0m, in [35mpost[0m
+    return request("post", url, data=data, json=json, **kwargs)
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/requests/api.py"[0m, line [35m59[0m, in [35mrequest[0m
+    return [31msession.request[0m[1;31m(method=method, url=url, **kwargs)[0m
+           [31m~~~~~~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/requests/sessions.py"[0m, line [35m589[0m, in [35mrequest[0m
+    resp = self.send(prep, **send_kwargs)
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/requests/sessions.py"[0m, line [35m703[0m, in [35msend[0m
+    r = adapter.send(request, **kwargs)
+  File [35m"/Users/cuong/miniconda3/lib/python3.13/site-packages/requests/adapters.py"[0m, line [35m700[0m, in [35msend[0m
+    raise ConnectionError(e, request=request)
+[1;35mrequests.exceptions.ConnectionError[0m: [35mHTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1066e4980>: Failed to establish a new connection: [Errno 61] Connection refused'))[0m
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;1]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?1[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;196m❯[0m[38;5;196m[49m[38;5;196m[0m[38;5;196m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hpython3 create_delete_role.py[29D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mc[4mr[4me[4ma[4mt[4me[4m_[4md[4me[4ml[4me[4mt[4me[4m_[4mr[4mo[4ml[4me[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;196m❯[0m[38;5;196m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mcreate_delete_role.py[24m[K[?25h
+]2;python3 create_delete_role.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script tạo và xóa role[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo role id:500, name: 'dragon'[0m
+============================================================
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 500[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 500,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 500,
+  "name": "dragon",
+  "is_system": false
+}
+
+============================================================
+[1;33mℹ️  📋 Bước 3: Liệt kê danh sách role sau khi tạo thành công[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách roles...[0m
+[0;32m✅ Lấy danh sách roles thành công! Tìm thấy 6 roles[0m
+
+============================================================
+[1;33mℹ️  📋 Danh sách roles sau khi tạo[0m
+============================================================
+1. Role ID: 1, Name: super_admin, Type: System
+2. Role ID: 2, Name: admin, Type: User
+3. Role ID: 3, Name: editor, Type: User
+4. Role ID: 4, Name: author, Type: User
+5. Role ID: 5, Name: reader, Type: User
+6. Role ID: 500, Name: dragon, Type: User
+
+
+============================================================
+[1;33mℹ️  🗑️  Bước 4: Xóa role có id=500 hoặc name='dragon'[0m
+============================================================
+
+[1;33mℹ️  Đang xóa role...[0m
+[1;33mℹ️    - Role ID: 500[0m
+[1;33mℹ️    - Role Name: dragon[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Role ID 500 đã được xóa thành công![0m
+[1;33mℹ️  Stored procedure đã tự động:[0m
+[1;33mℹ️    - Xóa tất cả bản ghi trong user_roles có role_id = 500[0m
+[1;33mℹ️    - Xóa role_id khỏi mảng roles trong bảng rules[0m
+[1;33mℹ️    - Xóa bản ghi trong bảng roles[0m
+
+============================================================
+[1;33mℹ️  📋 Bước 5: Liệt kê danh sách role sau khi xóa role thành công[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách roles...[0m
+[0;32m✅ Lấy danh sách roles thành công! Tìm thấy 5 roles[0m
+
+============================================================
+[1;33mℹ️  📋 Danh sách roles sau khi xóa[0m
+============================================================
+1. Role ID: 1, Name: super_admin, Type: System
+2. Role ID: 2, Name: admin, Type: User
+3. Role ID: 3, Name: editor, Type: User
+4. Role ID: 4, Name: author, Type: User
+5. Role ID: 5, Name: reader, Type: User
+
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!14 [38;5;39m?2[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_delete_role.py list_user_has_role.py update_user_roles.py
+add_role_to_user.py   demo_role_cycle.py    share.py              user_get_detail.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!18 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hppỷ[1m[31mp[1m[31mỷ[0m[39m[1m[31mp[0m[39m[0m[39m [0m[32mp[39m[32mp[39m[90mython3 create_delete_role.py[39m[28D[32mp[32my[39m[90my[90mt[90mh[90mo[90mn[90m3[90m [90mc[90mr[90me[90ma[90mt[90me[90m_[90md[90me[90ml[90me[90mt[90me[90m_[90mr[90mo[90ml[90me[90m.[90mp[90my[39m[28D[39mp[39my[39mt[90my[90mt[90mh[90mo[90mn[90m3[90m [90mc[90mr[90me[90ma[90mt[90me[90m_[90md[90me[90ml[90me[90mt[90me[90m_[90mr[90mo[90ml[90me[90m.[90mp[90my[39m[28D[39mh[90my[90mt[90mh[90mo[90mn[90m3[90m [90mc[90mr[90me[90ma[90mt[90me[90m_[90md[90me[90ml[90me[90mt[90me[90m_[90mr[90mo[90ml[90me[90m.[90mp[90my[39m[28D[39mo[90my[90mt[90mh[90mo[90mn[90m3[90m [90mc[90mr[90me[90ma[90mt[90me[90m_[90md[90me[90ml[90me[90mt[90me[90m_[90mr[90mo[90ml[90me[90m.[90mp[90my[39m[28D[39mn[90my[90mt[90mh[90mo[90mn[90m3[90m [90mc[90mr[90me[90ma[90mt[90me[90m_[90md[90me[90ml[90me[90mt[90me[90m_[90mr[90mo[90ml[90me[90m.[90mp[90my[39m[28D[39m3[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [27D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m[90m create_delete_role.py[39m[22D[32m3[32m [39m[32m3[39m[39m [8D[39mu[39m [39m [39m [39m [39m [39m  [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [28Dupdate_user_roles.py[20Dpython3 [7mu[7mp[7md[7ma[7mt[7me[7m_[7mu[7ms[7me[7mr[7m_[7mroles.py[27m[20D[27mu[27mp[27md[27ma[27mt[27me[27m_[27mu[27ms[27me[27mr[27m_[27mr[27mo[27ml[27me[27ms[27m.[27mp[27my[90mcreate_[39m[90mdelete_role.py[39m[21D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [21D[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mupdate_user_roles.py[24m[K[?25h
+]2;python3 update_user_roles.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script cập nhật roles cho user[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo 3 roles mới[0m
+============================================================
+
+[1;33mℹ️  Tạo role: ID=200, Name=tiger[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 200[0m
+[1;33mℹ️    - Name: tiger[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 200,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 200,
+  "name": "tiger",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=300, Name=puma[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 300[0m
+[1;33mℹ️    - Name: puma[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 300,
+    "name": "puma",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 300,
+  "name": "puma",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=400, Name=dragon[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 400[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 400,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 400,
+  "name": "dragon",
+  "is_system": false
+}
+
+============================================================
+[1;33mℹ️  👤 Bước 3: Lấy thông tin chi tiết user bob@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: bob@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: DQkD72lfcEim[0m
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Full Name: Bob[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 3[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 5, Role Name: reader
+  - Role ID: 4, Role Name: author
+  - Role ID: 3, Role Name: editor
+[1;33mℹ️  Bob User ID: DQkD72lfcEim[0m
+
+============================================================
+[1;33mℹ️  📋 Danh sách roles hiện tại của bob[0m
+============================================================
+1. Role ID: 5, Role Name: reader
+2. Role ID: 4, Role Name: author
+3. Role ID: 3, Role Name: editor
+
+
+============================================================
+[1;33mℹ️  🔄 Bước 4: Cập nhật roles cho bob thành ['author', 'reader', 'tiger'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['author', 'reader', 'tiger'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "error": "Roles phải là mảng số (IDs) hoặc mảng chuỗi (names)",
+  "type": "VALIDATION"
+}
+[0;31m❌ Lỗi khi cập nhật roles cho user[0m
+[0;31m❌ Loại lỗi: VALIDATION[0m
+[0;31m❌ Chi tiết: Roles phải là mảng số (IDs) hoặc mảng chuỗi (names)[0m
+[0;31m❌ Không thể cập nhật roles cho bob[0m
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;1]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;196m❯[0m[38;5;196m[49m[38;5;196m[0m[38;5;196m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;196m❯[0m[38;5;196m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_delete_role.py list_user_has_role.py update_user_roles.py
+add_role_to_user.py   demo_role_cycle.py    share.py              user_get_detail.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hlc[32ml[32mc[39m[32mp[32my[39mthon3 update_user_roles.py[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mupdate_user_roles.py[24m[K[?25h
+]2;python3 update_user_roles.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script cập nhật roles cho user[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo 3 roles mới[0m
+============================================================
+
+[1;33mℹ️  Tạo role: ID=200, Name=tiger[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 200[0m
+[1;33mℹ️    - Name: tiger[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 200,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 200,
+  "name": "tiger",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=300, Name=puma[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 300[0m
+[1;33mℹ️    - Name: puma[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 300,
+    "name": "puma",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 300,
+  "name": "puma",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=400, Name=dragon[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 400[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 400,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 400,
+  "name": "dragon",
+  "is_system": false
+}
+
+============================================================
+[1;33mℹ️  👤 Bước 3: Lấy thông tin chi tiết user bob@gmail.com[0m
+============================================================
+
+============================================================
+[1;33mℹ️  🔄 Bước 4: Cập nhật roles cho bob thành ['author', 'reader', 'tiger'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['author', 'reader', 'tiger'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+
+[1;33mℹ️  Đang lấy lại thông tin user để kiểm tra...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: bob@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: DQkD72lfcEim[0m
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Full Name: Bob[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 3[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 4, Role Name: author
+  - Role ID: 5, Role Name: reader
+  - Role ID: 200, Role Name: tiger
+
+============================================================
+[1;33mℹ️  📋 Danh sách roles mới của bob[0m
+============================================================
+1. Role ID: 4, Role Name: author
+2. Role ID: 5, Role Name: reader
+3. Role ID: 200, Role Name: tiger
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['author', 'reader', 'tiger'][0m
+
+============================================================
+[1;33mℹ️  🔄 Bước 5: Cập nhật roles cho bob thành ['tiger', 'puma', 'dragon'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['tiger', 'puma', 'dragon'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+
+[1;33mℹ️  Đang lấy lại thông tin user để kiểm tra...[0m
+[1;33mℹ️  Đang lấy thông tin chi tiết cho: bob@gmail.com...[0m
+[0;32m✅ Lấy thông tin chi tiết user thành công![0m
+[1;33mℹ️  User ID: DQkD72lfcEim[0m
+[1;33mℹ️  Email: bob@gmail.com[0m
+[1;33mℹ️  Full Name: Bob[0m
+[1;33mℹ️  Is Active: True[0m
+[1;33mℹ️  Số lượng roles: 3[0m
+[1;33mℹ️  Danh sách roles:[0m
+  - Role ID: 200, Role Name: tiger
+  - Role ID: 300, Role Name: puma
+  - Role ID: 400, Role Name: dragon
+
+============================================================
+[1;33mℹ️  📋 Danh sách roles mới của bob[0m
+============================================================
+1. Role ID: 200, Role Name: tiger
+2. Role ID: 300, Role Name: puma
+3. Role ID: 400, Role Name: dragon
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['tiger', 'puma', 'dragon'][0m
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_delete_role.py list_user_has_role.py update_user_roles.py
+add_role_to_user.py   demo_role_cycle.py    share.py              user_get_detail.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hpp [32mp[39m[1C[32mp[39m[90mython3 update_user_roles.py[39m[27D[32mp[39m[39my[39mt[39mh[39mo[39mn[39m3[39m [39mu[39mp[39md[39ma[39mt[39me[39m_[39mu[39ms[39me[39mr[39m_[39mr[39mo[39ml[39me[39ms[39m.[39mp[39my[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mupdate_user_roles.py[24m[K[?25h
+]2;python3 update_user_roles.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script cập nhật roles cho user[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo 3 roles mới[0m
+============================================================
+
+[1;33mℹ️  Tạo role: ID=200, Name=tiger[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 200[0m
+[1;33mℹ️    - Name: tiger[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 200,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 200,
+  "name": "tiger",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=300, Name=puma[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 300[0m
+[1;33mℹ️    - Name: puma[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 300,
+    "name": "puma",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 300,
+  "name": "puma",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=400, Name=dragon[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 400[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 400,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 400,
+  "name": "dragon",
+  "is_system": false
+}
+
+============================================================
+[1;33mℹ️  👤 Bước 3: Lấy thông tin chi tiết user bob@gmail.com[0m
+============================================================
+
+============================================================
+[1;33mℹ️  🔄 Bước 4: Cập nhật roles cho bob thành ['author', 'reader', 'tiger'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['author', 'reader', 'tiger'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+
+[1;33mℹ️  Đang lấy lại thông tin user để kiểm tra...[0m
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['author', 'reader', 'tiger'][0m
+
+============================================================
+[1;33mℹ️  🔄 Bước 5: Cập nhật roles cho bob thành ['tiger', 'puma', 'dragon'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['tiger', 'puma', 'dragon'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+
+[1;33mℹ️  Đang lấy lại thông tin user để kiểm tra...[0m
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['tiger', 'puma', 'dragon'][0m
+
+============================================================
+[1;33mℹ️  🗑️  Bước 6: Xóa 3 roles mới tạo: 'tiger', 'puma', 'dragon'[0m
+============================================================
+
+[1;33mℹ️  Đang xóa role: tiger[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'tiger'...[0m
+[1;33mℹ️  Tìm thấy role_id: 200[0m
+
+[1;33mℹ️  Đang xóa role 'tiger' (ID: 200)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: puma[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'puma'...[0m
+[1;33mℹ️  Tìm thấy role_id: 300[0m
+
+[1;33mℹ️  Đang xóa role 'puma' (ID: 300)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: dragon[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'dragon'...[0m
+[1;33mℹ️  Tìm thấy role_id: 400[0m
+
+[1;33mℹ️  Đang xóa role 'dragon' (ID: 400)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_delete_role.py list_user_has_role.py update_user_roles.py
+add_role_to_user.py   demo_role_cycle.py    share.py              user_get_detail.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hlc[32ml[32mc[39m[32mp[32my[39mthon3 update_user_roles.py[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[28D[32ml[32mc[39m[39m [39m [39m [39m [39m  [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [24m [26D[32mp[32my[39mthon3 update_user_roles.py[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mupdate_user_roles.py[24m[K[?25h
+]2;python3 update_user_roles.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script cập nhật roles cho user[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo 3 roles mới[0m
+============================================================
+
+[1;33mℹ️  Tạo role: ID=200, Name=tiger[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 200[0m
+[1;33mℹ️    - Name: tiger[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 200,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 200,
+  "name": "tiger",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=300, Name=puma[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 300[0m
+[1;33mℹ️    - Name: puma[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 300,
+    "name": "puma",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 300,
+  "name": "puma",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=400, Name=dragon[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 400[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 400,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 400,
+  "name": "dragon",
+  "is_system": false
+}
+
+============================================================
+[1;33mℹ️  👤 Bước 3: Lấy thông tin chi tiết user bob@gmail.com[0m
+============================================================
+
+============================================================
+[1;33mℹ️  🔄 Bước 4: Cập nhật roles cho bob thành ['author', 'reader', 'tiger'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['author', 'reader', 'tiger'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+
+[1;33mℹ️  Đang lấy lại thông tin user để kiểm tra...[0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 4, Role Name: author
+  2. Role ID: 5, Role Name: reader
+  3. Role ID: 200, Role Name: tiger
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['author', 'reader', 'tiger'][0m
+
+============================================================
+[1;33mℹ️  🔄 Bước 5: Cập nhật roles cho bob thành ['tiger', 'puma', 'dragon'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['tiger', 'puma', 'dragon'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+
+[1;33mℹ️  Đang lấy lại thông tin user để kiểm tra...[0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 200, Role Name: tiger
+  2. Role ID: 300, Role Name: puma
+  3. Role ID: 400, Role Name: dragon
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['tiger', 'puma', 'dragon'][0m
+
+============================================================
+[1;33mℹ️  🗑️  Bước 6: Xóa 3 roles mới tạo: 'tiger', 'puma', 'dragon'[0m
+============================================================
+
+[1;33mℹ️  Đang xóa role: tiger[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'tiger'...[0m
+[1;33mℹ️  Tìm thấy role_id: 200[0m
+
+[1;33mℹ️  Đang xóa role 'tiger' (ID: 200)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: puma[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'puma'...[0m
+[1;33mℹ️  Tìm thấy role_id: 300[0m
+
+[1;33mℹ️  Đang xóa role 'puma' (ID: 300)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: dragon[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'dragon'...[0m
+[1;33mℹ️  Tìm thấy role_id: 400[0m
+
+[1;33mℹ️  Đang xóa role 'dragon' (ID: 400)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hpython3 update_user_roles.py[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mupdate_user_roles.py[24m[K[?25h
+]2;python3 update_user_roles.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script cập nhật roles cho user[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo 3 roles mới[0m
+============================================================
+
+[1;33mℹ️  Tạo role: ID=200, Name=tiger[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 200[0m
+[1;33mℹ️    - Name: tiger[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 200,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 200,
+  "name": "tiger",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=300, Name=puma[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 300[0m
+[1;33mℹ️    - Name: puma[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 300,
+    "name": "puma",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 300,
+  "name": "puma",
+  "is_system": false
+}
+
+[1;33mℹ️  Tạo role: ID=400, Name=dragon[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 400[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 400,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+[0;32m✅ Tạo role thành công![0m
+
+[1;33mℹ️  Thông tin role đã tạo:[0m
+{
+  "id": 400,
+  "name": "dragon",
+  "is_system": false
+}
+
+============================================================
+[1;33mℹ️  👤 Bước 3: Lấy thông tin chi tiết user bob@gmail.com[0m
+============================================================
+
+============================================================
+[1;33mℹ️  🔄 Bước 4: Cập nhật roles cho bob thành ['author', 'reader', 'tiger'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['author', 'reader', 'tiger'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 4, Role Name: author
+  2. Role ID: 5, Role Name: reader
+  3. Role ID: 200, Role Name: tiger
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['author', 'reader', 'tiger'][0m
+
+============================================================
+[1;33mℹ️  🔄 Bước 5: Cập nhật roles cho bob thành ['tiger', 'puma', 'dragon'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['tiger', 'puma', 'dragon'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 200, Role Name: tiger
+  2. Role ID: 300, Role Name: puma
+  3. Role ID: 400, Role Name: dragon
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['tiger', 'puma', 'dragon'][0m
+
+============================================================
+[1;33mℹ️  🗑️  Bước 6: Xóa 3 roles mới tạo: 'tiger', 'puma', 'dragon'[0m
+============================================================
+
+[1;33mℹ️  Đang xóa role: tiger[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'tiger'...[0m
+[1;33mℹ️  Tìm thấy role_id: 200[0m
+
+[1;33mℹ️  Đang xóa role 'tiger' (ID: 200)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: puma[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'puma'...[0m
+[1;33mℹ️  Tìm thấy role_id: 300[0m
+
+[1;33mℹ️  Đang xóa role 'puma' (ID: 300)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: dragon[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'dragon'...[0m
+[1;33mℹ️  Tìm thấy role_id: 400[0m
+
+[1;33mℹ️  Đang xóa role 'dragon' (ID: 400)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hpython3 update_user_roles.py[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mupdate_user_roles.py[24m[K[?25h
+]2;python3 update_user_roles.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script cập nhật roles cho user[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo 3 roles mới[0m
+============================================================
+
+[1;33mℹ️  Tạo role: ID=200, Name=tiger[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 200[0m
+[1;33mℹ️    - Name: tiger[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 200,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+
+[1;33mℹ️  Tạo role: ID=300, Name=puma[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 300[0m
+[1;33mℹ️    - Name: puma[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 300,
+    "name": "puma",
+    "is_system": false
+  }
+}
+
+[1;33mℹ️  Tạo role: ID=400, Name=dragon[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 400[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 400,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+
+============================================================
+[1;33mℹ️  👤 Bước 3: Lấy thông tin chi tiết user bob@gmail.com[0m
+============================================================
+
+============================================================
+[1;33mℹ️  🔄 Bước 4: Cập nhật roles cho bob thành ['author', 'reader', 'tiger'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['author', 'reader', 'tiger'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 4, Role Name: author
+  2. Role ID: 5, Role Name: reader
+  3. Role ID: 200, Role Name: tiger
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['author', 'reader', 'tiger'][0m
+
+============================================================
+[1;33mℹ️  🔄 Bước 5: Cập nhật roles cho bob thành ['tiger', 'puma', 'dragon'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['tiger', 'puma', 'dragon'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 200, Role Name: tiger
+  2. Role ID: 300, Role Name: puma
+  3. Role ID: 400, Role Name: dragon
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['tiger', 'puma', 'dragon'][0m
+
+============================================================
+[1;33mℹ️  🗑️  Bước 6: Xóa 3 roles mới tạo: 'tiger', 'puma', 'dragon'[0m
+============================================================
+
+[1;33mℹ️  Đang xóa role: tiger[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'tiger'...[0m
+[1;33mℹ️  Tìm thấy role_id: 200[0m
+
+[1;33mℹ️  Đang xóa role 'tiger' (ID: 200)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: puma[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'puma'...[0m
+[1;33mℹ️  Tìm thấy role_id: 300[0m
+
+[1;33mℹ️  Đang xóa role 'puma' (ID: 300)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: dragon[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'dragon'...[0m
+[1;33mℹ️  Tìm thấy role_id: 400[0m
+
+[1;33mℹ️  Đang xóa role 'dragon' (ID: 400)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!19 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hpython3 update_user_roles.py[28D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mu[4mp[4md[4ma[4mt[4me[4m_[4mu[4ms[4me[4mr[4m_[4mr[4mo[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mupdate_user_roles.py[24m[K[?25h
+]2;python3 update_user_roles.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu script cập nhật roles cho user[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  ➕ Bước 2: Tạo 3 roles mới[0m
+============================================================
+
+[1;33mℹ️  Tạo role: ID=200, Name=tiger[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 200[0m
+[1;33mℹ️    - Name: tiger[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 200,
+    "name": "tiger",
+    "is_system": false
+  }
+}
+
+[1;33mℹ️  Tạo role: ID=300, Name=puma[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 300[0m
+[1;33mℹ️    - Name: puma[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 300,
+    "name": "puma",
+    "is_system": false
+  }
+}
+
+[1;33mℹ️  Tạo role: ID=400, Name=dragon[0m
+[1;33mℹ️  Đang tạo role mới...[0m
+[1;33mℹ️    - ID: 400[0m
+[1;33mℹ️    - Name: dragon[0m
+[1;33mℹ️    - Is System: False[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "data": {
+    "id": 400,
+    "name": "dragon",
+    "is_system": false
+  }
+}
+
+============================================================
+[1;33mℹ️  👤 Bước 3: Lấy thông tin chi tiết user bob@gmail.com[0m
+============================================================
+
+============================================================
+[1;33mℹ️  🔄 Bước 4: Cập nhật roles cho bob thành ['author', 'reader', 'tiger'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['author', 'reader', 'tiger'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 4, Role Name: author
+  2. Role ID: 5, Role Name: reader
+  3. Role ID: 200, Role Name: tiger
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['author', 'reader', 'tiger'][0m
+
+============================================================
+[1;33mℹ️  🔄 Bước 5: Cập nhật roles cho bob thành ['tiger', 'puma', 'dragon'][0m
+============================================================
+[1;33mℹ️  Đang cập nhật roles cho user DQkD72lfcEim...[0m
+[1;33mℹ️    - Danh sách roles: ['tiger', 'puma', 'dragon'][0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Cập nhật roles cho user thành công"
+}
+[0;32m✅ Cập nhật roles thành công![0m
+[1;33mℹ️  Danh sách roles của bob@gmail.com:[0m
+  1. Role ID: 200, Role Name: tiger
+  2. Role ID: 300, Role Name: puma
+  3. Role ID: 400, Role Name: dragon
+
+[0;32m✅ ✅ Danh sách roles khớp với mong đợi: ['tiger', 'puma', 'dragon'][0m
+
+============================================================
+[1;33mℹ️  🗑️  Bước 6: Xóa 3 roles mới tạo: 'tiger', 'puma', 'dragon'[0m
+============================================================
+
+[1;33mℹ️  Đang xóa role: tiger[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'tiger'...[0m
+[1;33mℹ️  Tìm thấy role_id: 200[0m
+
+[1;33mℹ️  Đang xóa role 'tiger' (ID: 200)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: puma[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'puma'...[0m
+[1;33mℹ️  Tìm thấy role_id: 300[0m
+
+[1;33mℹ️  Đang xóa role 'puma' (ID: 300)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+[1;33mℹ️  Đang xóa role: dragon[0m
+[1;33mℹ️  Đang tìm role_id từ role_name 'dragon'...[0m
+[1;33mℹ️  Tìm thấy role_id: 400[0m
+
+[1;33mℹ️  Đang xóa role 'dragon' (ID: 400)...[0m
+
+[1;33mℹ️  Response từ server:[0m
+{
+  "message": "Xóa role thành công"
+}
+[0;32m✅ Xóa role thành công[0m
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!22 [38;5;39m?2[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hllc[32ml[32mc[39m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mlc[39m[K[?25h
+]2;clear; ls -G]1;lc]133;C;[H[2J[3J[1m[36m__pycache__[39;49m[0m           create_delete_role.py filter_rules.py       share.py              user_get_detail.py
+add_role_to_user.py   demo_role_cycle.py    list_user_has_role.py update_user_roles.py
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!23 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hppython3[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m[90m update_user_roles.py[39m[21D[32m3[32m [39m[32m3[39m[39m [8D[39mf[39m [39m [39m [39m [39m [39m  [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [27Dfilter_rules.py[15Dpython3 [7mf[7mi[7ml[7mt[7me[7mr[7m_[7mrules.py[27m[15D[27mf[27mi[27ml[27mt[27me[27mr[27m_[27mr[27mu[27ml[27me[27ms[27m.[27mp[27my[90mupdate_[39m[90muser_roles.py[39m[20D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [20D[23D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mf[4mi[4ml[4mt[4me[4mr[4m_[4mr[4mu[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mfilter_rules.py[24m[K[?25h
+]2;python3 filter_rules.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu test các trường hợp lọc rules[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+
+============================================================
+[1;33mℹ️  📋 Bước 2: Liệt kê tất cả các rules (không có tham số lọc)[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách rules...[0m
+[0;32m✅ Lấy danh sách rules thành công! Tìm thấy 30 rules[0m
+
+============================================================
+[1;33mℹ️  📋 Tất cả các rules[0m
+============================================================
+1. ID: POST|/api/auth/login
+   Method: POST, Path: /api/auth/login
+   Type: PUBLIC, Fixed: No
+   Roles: None
+
+2. ID: POST|/api/auth/register
+   Method: POST, Path: /api/auth/register
+   Type: PUBLIC, Fixed: No
+   Roles: None
+
+3. ID: POST|/api/auth/logout
+   Method: POST, Path: /api/auth/logout
+   Type: PUBLIC, Fixed: No
+   Roles: None
+
+4. ID: GET|/api/auth/profile
+   Method: GET, Path: /api/auth/profile
+   Type: ALLOW, Fixed: No
+   Roles: None
+
+5. ID: PUT|/api/auth/profile
+   Method: PUT, Path: /api/auth/profile
+   Type: ALLOW, Fixed: No
+   Roles: None
+
+6. ID: DELETE|/api/auth/profile
+   Method: DELETE, Path: /api/auth/profile
+   Type: ALLOW, Fixed: No
+   Roles: None
+
+7. ID: POST|/api/auth/change-password
+   Method: POST, Path: /api/auth/change-password
+   Type: ALLOW, Fixed: No
+   Roles: None
+
+8. ID: GET|/api/blogs
+   Method: GET, Path: /api/blogs
+   Type: PUBLIC, Fixed: No
+   Roles: None
+
+Traceback (most recent call last):
+  File [35m"/Users/cuong/CODE/authkit/examples/testscript/filter_rules.py"[0m, line [35m99[0m, in [35m<module>[0m
+    [31mmain[0m[1;31m()[0m
+    [31m~~~~[0m[1;31m^^[0m
+  File [35m"/Users/cuong/CODE/authkit/examples/testscript/filter_rules.py"[0m, line [35m33[0m, in [35mmain[0m
+    [31mprint_rules_list[0m[1;31m(all_rules, "Tất cả các rules")[0m
+    [31m~~~~~~~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"/Users/cuong/CODE/authkit/examples/testscript/share.py"[0m, line [35m511[0m, in [35mprint_rules_list[0m
+    roles_str = [31m", ".join[0m[1;31m(roles)[0m if roles else "None"
+                [31m~~~~~~~~~[0m[1;31m^^^^^^^[0m
+[1;35mTypeError[0m: [35msequence item 0: expected str instance, int found[0m
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;1]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!23 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;196m❯[0m[38;5;196m[49m[38;5;196m[0m[38;5;196m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004hpython3 filter_rules.py[23D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4mf[4mi[4ml[4mt[4me[4mr[4m_[4mr[4mu[4ml[4me[4ms[4m.[4mp[4my[24m[?1l>[?2004l[?25l[0m[27m[24m[J]133;A[0m[49m[27m[24m[38;5;196m❯[0m[38;5;196m[49m[39m[27m[24m ]133;B[32mpython3[39m [4mfilter_rules.py[24m[K[?25h
+]2;python3 filter_rules.py]1;python3]133;C;
+[1;33mℹ️  Bắt đầu test các trường hợp lọc rules[0m
+
+============================================================
+[1;33mℹ️  🔐 Bước 1: Login với admin@gmail.com[0m
+============================================================
+[1;33mℹ️  Đang đăng nhập với email: admin@gmail.com...[0m
+[0;32m✅ Đăng nhập thành công![0m
+[1;33mℹ️  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6I...[0m
+[1;33mℹ️  User ID: SSC9KDZMaO7Z, Email: admin@gmail.com[0m
+[1;33mℹ️  Đang lấy danh sách roles để map role IDs sang role names...[0m
+[0;32m✅ Đã lấy được 5 roles[0m
+
+============================================================
+[1;33mℹ️  📋 Bước 2: Liệt kê tất cả các rules (không có tham số lọc)[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách rules...[0m
+[0;32m✅ Lấy danh sách rules thành công! Tìm thấy 30 rules[0m
+
+============================================================
+[1;33mℹ️  📋 Tất cả các rules[0m
+============================================================
+POST|/api/auth/login  , PUBLIC
+POST|/api/auth/register  , PUBLIC
+POST|/api/auth/logout  , PUBLIC
+GET|/api/auth/profile  , ALLOW
+PUT|/api/auth/profile  , ALLOW
+DELETE|/api/auth/profile  , ALLOW
+POST|/api/auth/change-password  , ALLOW
+GET|/api/blogs  , PUBLIC
+GET|/api/blogs/*  , ALLOW("reader", "author", "editor", "admin") , fixed
+POST|/api/blogs  , ALLOW("author", "editor", "admin")
+PUT|/api/blogs/*  , ALLOW("author", "editor", "admin")
+DELETE|/api/blogs/*  , FORBID("reader", "author")
+GET|/api/blogs/my  , FORBID("editor", "admin")
+GET|/api/roles  , ALLOW("admin") , fixed
+POST|/api/roles  , ALLOW("admin") , fixed
+DELETE|/api/roles/*  , ALLOW("admin") , fixed
+GET|/api/roles/*/users  , ALLOW("admin") , fixed
+POST|/api/users/*/roles/*  , ALLOW("admin") , fixed
+DELETE|/api/users/*/roles/*  , ALLOW("admin") , fixed
+GET|/api/users/*/roles/*/check  , ALLOW("admin") , fixed
+GET|/api/rules  , ALLOW("admin") , fixed
+POST|/api/demo/login-with-username  , PUBLIC
+GET|/api/demo/token-info  , ALLOW
+GET|/api/routeregistry  , PUBLIC , fixed
+GET|/api/foo  , FORBID
+GET|/api/rules/*  , ALLOW("admin") , fixed
+GET|/api/bar  , FORBID("reader", "editor", "admin")
+GET|/api/users/detail  , ALLOW("admin") , fixed
+PUT|/api/users/*/roles  , ALLOW("admin", "super_admin") , fixed
+PUT|/api/rules  , ALLOW("admin") , fixed
+
+
+============================================================
+[1;33mℹ️  🔍 Bước 3: Lọc các rule có method là 'GET'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách rules...[0m
+[1;33mℹ️    - Method: GET[0m
+[0;32m✅ Lấy danh sách rules thành công! Tìm thấy 14 rules[0m
+
+============================================================
+[1;33mℹ️  📋 Rules có method GET[0m
+============================================================
+GET|/api/auth/profile  , ALLOW
+GET|/api/blogs  , PUBLIC
+GET|/api/blogs/*  , ALLOW("reader", "author", "editor", "admin") , fixed
+GET|/api/blogs/my  , FORBID("editor", "admin")
+GET|/api/roles  , ALLOW("admin") , fixed
+GET|/api/roles/*/users  , ALLOW("admin") , fixed
+GET|/api/users/*/roles/*/check  , ALLOW("admin") , fixed
+GET|/api/rules  , ALLOW("admin") , fixed
+GET|/api/demo/token-info  , ALLOW
+GET|/api/routeregistry  , PUBLIC , fixed
+GET|/api/foo  , FORBID
+GET|/api/rules/*  , ALLOW("admin") , fixed
+GET|/api/bar  , FORBID("reader", "editor", "admin")
+GET|/api/users/detail  , ALLOW("admin") , fixed
+
+
+============================================================
+[1;33mℹ️  🔍 Bước 4: Lọc các rule có method là 'PUT'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách rules...[0m
+[1;33mℹ️    - Method: PUT[0m
+[0;32m✅ Lấy danh sách rules thành công! Tìm thấy 4 rules[0m
+
+============================================================
+[1;33mℹ️  📋 Rules có method PUT[0m
+============================================================
+PUT|/api/auth/profile  , ALLOW
+PUT|/api/blogs/*  , ALLOW("author", "editor", "admin")
+PUT|/api/users/*/roles  , ALLOW("admin", "super_admin") , fixed
+PUT|/api/rules  , ALLOW("admin") , fixed
+
+
+============================================================
+[1;33mℹ️  🔍 Bước 5: Lọc các rule có method là 'POST' và path chứa 'blog'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách rules...[0m
+[1;33mℹ️    - Method: POST[0m
+[1;33mℹ️    - Path chứa: blog[0m
+[0;32m✅ Lấy danh sách rules thành công! Tìm thấy 1 rules[0m
+
+============================================================
+[1;33mℹ️  📋 Rules có method POST và path chứa 'blog'[0m
+============================================================
+POST|/api/blogs  , ALLOW("author", "editor", "admin")
+
+
+============================================================
+[1;33mℹ️  🔍 Bước 6: Lọc các rule có method là 'GET' và type là 'PUBLIC'[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách rules...[0m
+[1;33mℹ️    - Method: GET[0m
+[1;33mℹ️    - Type: PUBLIC[0m
+[0;32m✅ Lấy danh sách rules thành công! Tìm thấy 2 rules[0m
+
+============================================================
+[1;33mℹ️  📋 Rules có method GET và type PUBLIC[0m
+============================================================
+GET|/api/blogs  , PUBLIC
+GET|/api/routeregistry  , PUBLIC , fixed
+
+
+============================================================
+[1;33mℹ️  🔍 Bước 7: Lọc các rule có method là 'POST' và fixed = true[0m
+============================================================
+[1;33mℹ️  Đang lấy danh sách rules...[0m
+[1;33mℹ️    - Method: POST[0m
+[1;33mℹ️    - Fixed: True[0m
+[0;32m✅ Lấy danh sách rules thành công! Tìm thấy 2 rules[0m
+
+============================================================
+[1;33mℹ️  📋 Rules có method POST và fixed = true[0m
+============================================================
+POST|/api/roles  , ALLOW("admin") , fixed
+POST|/api/users/*/roles/*  , ALLOW("admin") , fixed
+
+
+============================================================
+[0;32m✅ ✅ Hoàn thành tất cả các bước![0m
+============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                    ]2;trinhminhcuong@M1:~/CODE/authkit/examples/testscript]1;..es/testscript]7;file://M1.local/Users/cuong/CODE/authkit/examples/testscript\]133;D;0]1337;RemoteHost=trinhminhcuong@M1.local]1337;CurrentDir=/Users/cuong/CODE/authkit/examples/testscript[0m[27m[24m[J[0m[49m[39m]133;A[0m[49m[38;5;31m[1m[38;5;31m[38;5;39m~[0m[38;5;39m[49m[38;5;31m/CODE/[1m[38;5;31m[38;5;39mauthkit[0m[38;5;39m[49m[38;5;31m/examples/[1m[38;5;31m[38;5;39mtestscript[0m[38;5;39m[49m[38;5;31m[0m[38;5;31m[49m[38;5;31m[0m[38;5;31m[49m [0m[38;5;31m[49m[38;5;178m[38;5;76mdev [38;5;76m*5 [38;5;178m!23 [38;5;39m?3[0m[38;5;39m[49m[38;5;178m[0m[38;5;178m[49m [0m[38;5;178m[49m[38;5;76m❯[0m[38;5;76m[49m[38;5;76m[0m[38;5;76m[49m[30m[0m[30m[49m[39m [0m[49m[39m]133;B[K[74C[0m[49m[38;5;37m base[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[38;5;37m[0m[38;5;37m[49m[39m[80D[?1h=[?2004h

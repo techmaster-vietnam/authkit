@@ -187,3 +187,35 @@ func (h *BaseRoleHandler[TUser, TRole]) ListUsersHasRole(c *fiber.Ctx) error {
 		"data": users,
 	})
 }
+
+// UpdateUserRoles handles update user roles request
+// PUT /api/users/:userId/roles
+func (h *BaseRoleHandler[TUser, TRole]) UpdateUserRoles(c *fiber.Ctx) error {
+	userID := c.Params("userId")
+	if userID == "" {
+		return goerrorkit.NewValidationError("User ID không hợp lệ", map[string]interface{}{
+			"user_id": c.Params("userId"),
+		})
+	}
+
+	var req service.BaseUpdateUserRolesRequest
+	if err := c.BodyParser(&req); err != nil {
+		return goerrorkit.NewValidationError("Dữ liệu không hợp lệ", map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	// Lấy role IDs của user đang login từ context
+	currentUserRoleIDs, ok := middleware.GetRoleIDsFromContext(c)
+	if !ok {
+		currentUserRoleIDs = []uint{}
+	}
+
+	if err := h.roleService.UpdateUserRoles(userID, req, currentUserRoleIDs); err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Cập nhật roles cho user thành công",
+	})
+}

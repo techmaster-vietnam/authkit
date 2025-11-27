@@ -401,3 +401,181 @@ def display_user_roles(user_detail: Optional[Dict], title: str = "Danh sách rol
     
     print()
     return role_names
+
+def filter_rules(token: str, method: str = None, path: str = None, type_param: str = None, fixed: bool = None, verbose: bool = True) -> Optional[list]:
+    """
+    Lọc và lấy danh sách rules theo các tiêu chí
+    
+    Args:
+        token: JWT token để xác thực
+        method: Method để lọc (GET, POST, PUT, DELETE) - tùy chọn
+        path: Chuỗi để tìm trong path (LIKE search) - tùy chọn
+        type_param: Type để lọc (PUBLIC, ALLOW, FORBID) - tùy chọn
+        fixed: Fixed để lọc (True hoặc False) - tùy chọn
+        verbose: Nếu True, in ra thông tin chi tiết. Mặc định là True
+    
+    Returns:
+        List các rules hoặc None nếu thất bại
+    """
+    try:
+        if verbose:
+            info("Đang lấy danh sách rules...")
+            if method:
+                info(f"  - Method: {method}")
+            if path:
+                info(f"  - Path chứa: {path}")
+            if type_param:
+                info(f"  - Type: {type_param}")
+            if fixed is not None:
+                info(f"  - Fixed: {fixed}")
+        
+        # Xây dựng query parameters
+        params = {}
+        if method:
+            params["method"] = method
+        if path:
+            params["path"] = path
+        if type_param:
+            params["type"] = type_param
+        if fixed is not None:
+            params["fixed"] = "true" if fixed else "false"
+        
+        resp = requests.get(
+            f"{_BASE_URL}/api/rules",
+            params=params,
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        # Kiểm tra status code
+        if resp.status_code != 200:
+            error(f"Request thất bại với status code: {resp.status_code}")
+            try:
+                error_data = resp.json()
+                handle_error_response(error_data, "lấy danh sách rules")
+            except:
+                error(f"Response: {resp.text}")
+            return None
+        
+        data = resp.json()
+        
+        # Kiểm tra response có lỗi không
+        if "error" in data:
+            handle_error_response(data, "lấy danh sách rules")
+            return None
+        
+        # Kiểm tra có data không
+        if "data" not in data:
+            error("Response không hợp lệ:")
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+            return None
+        
+        rules = data.get("data", [])
+        if verbose:
+            success(f"Lấy danh sách rules thành công! Tìm thấy {len(rules)} rules")
+        
+        return rules
+        
+    except requests.exceptions.RequestException as e:
+        error(f"Lỗi khi gọi API: {str(e)}")
+        return None
+    except Exception as e:
+        error(f"Lỗi không mong đợi: {str(e)}")
+        return None
+
+def get_role_names_map(token: str) -> Dict[int, str]:
+    """
+    Lấy map role_id -> role_name từ API
+    
+    Args:
+        token: JWT token để xác thực
+    
+    Returns:
+        Dictionary mapping role_id -> role_name
+    """
+    try:
+        resp = requests.get(
+            f"{_BASE_URL}/api/roles",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        
+        role_map = {}
+        if "data" in data:
+            for role in data["data"]:
+                role_id = role.get("id")
+                role_name = role.get("name")
+                if role_id is not None and role_name:
+                    role_map[role_id] = role_name
+        return role_map
+    except Exception as e:
+        # Nếu không lấy được, trả về dict rỗng
+        return {}
+
+def print_rules_list(token: str, rules: Optional[list], title: str = "Danh sách rules", role_names_map: Dict[int, str] = None) -> None:
+    """
+    Hiển thị danh sách rules theo format: ID  , TYPE("role1", "role2") , fixed, service_name
+    
+    Args:
+        token: JWT token để lấy role names (tùy chọn, chỉ dùng nếu role_names_map không được truyền)
+        rules: List các rules từ filter_rules
+        title: Tiêu đề để hiển thị
+        role_names_map: Map role_id -> role_name để tái sử dụng (tùy chọn, nếu không có sẽ gọi API)
+    """
+    print()
+    print("=" * 60)
+    info(f"📋 {title}")
+    print("=" * 60)
+    
+    if not rules:
+        info("Không có rule nào")
+        print()
+        return
+    
+    # Lấy role names map: ưu tiên dùng tham số truyền vào, nếu không có hoặc rỗng thì gọi API
+    if role_names_map is None or len(role_names_map) == 0:
+        role_names_map = {}
+        if token:
+            role_names_map = get_role_names_map(token)
+    
+    for rule in rules:
+        rule_id = rule.get("id", "N/A")
+        rule_type = rule.get("type", "N/A")
+        fixed = rule.get("fixed", False)
+        service_name = rule.get("service_name") or ""
+        roles = rule.get("roles", [])
+        
+        # Convert role IDs sang role names
+        role_names = []
+        for role_id in roles:
+            if role_id in role_names_map:
+                role_names.append(f'"{role_names_map[role_id]}"')
+            else:
+                # Nếu không tìm thấy name, dùng ID
+                role_names.append(f'"{role_id}"')
+        
+        # Format roles string
+        roles_str = ", ".join(role_names) if role_names else ""
+        type_with_roles = f'{rule_type}({roles_str})' if roles_str else rule_type
+        
+        # Format theo yêu cầu: ID  , TYPE("role1", "role2") , fixed, service_name
+        # Nếu fixed = false thì không hiển thị "fixed"
+        # Nếu service_name rỗng thì không hiển thị
+        output = f"{rule_id}  , {type_with_roles}"
+        
+        # Thêm fixed nếu có
+        if fixed:
+            output += " , fixed"
+        
+        # Thêm service_name nếu có
+        if service_name:
+            if fixed:
+                # Nếu đã có fixed, dùng dấu phẩy không có space trước
+                output += f", {service_name}"
+            else:
+                # Nếu chưa có fixed, dùng format giống sau type
+                output += f" , {service_name}"
+        
+        print(output)
+    
+    print()

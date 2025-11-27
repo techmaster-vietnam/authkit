@@ -5,6 +5,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// RuleFilter represents filter parameters for listing rules
+type RuleFilter struct {
+	Method  string  // GET, POST, PUT, DELETE
+	Path    string  // Path chứa chuỗi (ví dụ: "blog")
+	Type    string  // PUBLIC, ALLOW, FORBID
+	Fixed   *bool   // true hoặc false (pointer để phân biệt không có giá trị và false)
+	Service string  // Service name để tìm kiếm trên cột service_name (case-insensitive)
+}
+
 // RuleRepository handles rule database operations
 type RuleRepository struct {
 	db          *gorm.DB
@@ -42,35 +51,20 @@ func (r *RuleRepository) GetByID(id string) (*models.Rule, error) {
 	return &rule, err
 }
 
-// GetByMethodAndPath gets a rule by method and path
-// In microservice mode (serviceName set), also filters by service_name
-// In single-app mode (serviceName empty), only matches rules without service_name
-func (r *RuleRepository) GetByMethodAndPath(method, path string) (*models.Rule, error) {
-	var rule models.Rule
-	query := r.db.Where("method = ? AND path = ?", method, path)
-	// Filter by service_name if set
-	if r.serviceName != "" {
-		query = query.Where("service_name = ?", r.serviceName)
-	} else {
-		// In single-app mode, only match rules without service_name (NULL)
-		query = query.Where("service_name IS NULL")
-	}
-	err := query.First(&rule).Error
-	return &rule, err
-}
-
 // Update updates a rule
 func (r *RuleRepository) Update(rule *models.Rule) error {
 	return r.db.Save(rule).Error
 }
 
-// Delete hard deletes a rule
+// Delete hard deletes a rule by ID
+// Chỉ được sử dụng trong quá trình sync routes để cleanup rules cũ
+// Không expose qua API để tránh xóa nhầm rules
 func (r *RuleRepository) Delete(id string) error {
-	return r.db.Unscoped().Delete(&models.Rule{}, id).Error
+	return r.db.Unscoped().Where("id = ?", id).Delete(&models.Rule{}).Error
 }
 
-// List lists all rules (filtered by service_name if set)
-func (r *RuleRepository) List() ([]models.Rule, error) {
+// List lists all rules (filtered by service_name if set and optional filters)
+func (r *RuleRepository) List(filter RuleFilter) ([]models.Rule, error) {
 	var rules []models.Rule
 	query := r.db
 	// Filter by service_name if set (backward compatible: if empty, no filter)
@@ -81,6 +75,25 @@ func (r *RuleRepository) List() ([]models.Rule, error) {
 		// Check both NULL and empty string for backward compatibility
 		query = query.Where("service_name IS NULL OR service_name = ''")
 	}
+
+	// Apply filters (AND logic)
+	if filter.Method != "" {
+		query = query.Where("method = ?", filter.Method)
+	}
+	if filter.Path != "" {
+		query = query.Where("path LIKE ?", "%"+filter.Path+"%")
+	}
+	if filter.Type != "" {
+		query = query.Where("type = ?", filter.Type)
+	}
+	if filter.Fixed != nil {
+		query = query.Where("fixed = ?", *filter.Fixed)
+	}
+	if filter.Service != "" {
+		// Case-insensitive search using LOWER() for PostgreSQL compatibility
+		query = query.Where("LOWER(service_name) = LOWER(?)", filter.Service)
+	}
+
 	err := query.Find(&rules).Error
 	return rules, err
 }

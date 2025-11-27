@@ -2,13 +2,17 @@ package service
 
 import (
 	"errors"
-	"fmt"
+	"reflect"
 
 	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/repository"
 	"github.com/techmaster-vietnam/goerrorkit"
 	"gorm.io/gorm"
 )
+
+// RuleFilter represents filter parameters for listing rules
+// Alias của repository.RuleFilter để giữ interface service layer
+type RuleFilter = repository.RuleFilter
 
 // RuleService handles rule business logic
 type RuleService struct {
@@ -24,98 +28,12 @@ func NewRuleService(ruleRepo *repository.RuleRepository, roleRepo *repository.Ro
 	}
 }
 
-// AddRuleRequest represents add rule request
-type AddRuleRequest struct {
-	Method string   `json:"method"`
-	Path   string   `json:"path"`
-	Type   string   `json:"type"` // PUBLIC, ALLOW, FORBID
-	Roles  []string `json:"roles"`
-}
-
 // UpdateRuleRequest represents update rule request
 type UpdateRuleRequest struct {
-	Type  string   `json:"type"`
-	Roles []string `json:"roles"`
-}
-
-// AddRule creates a new rule
-func (s *RuleService) AddRule(req AddRuleRequest) (*models.Rule, error) {
-	// Validate input
-	if req.Method == "" {
-		return nil, goerrorkit.NewValidationError("Method là bắt buộc", map[string]interface{}{
-			"field": "method",
-		})
-	}
-	if req.Path == "" {
-		return nil, goerrorkit.NewValidationError("Path là bắt buộc", map[string]interface{}{
-			"field": "path",
-		})
-	}
-
-	ruleType := models.AccessType(req.Type)
-	if ruleType != models.AccessPublic && ruleType != models.AccessAllow &&
-		ruleType != models.AccessForbid {
-		return nil, goerrorkit.NewValidationError("Type phải là PUBLIC, ALLOW hoặc FORBID", map[string]interface{}{
-			"field":    "type",
-			"received": req.Type,
-			"allowed":  []string{"PUBLIC", "ALLOW", "FORBID"},
-		})
-	}
-
-	// Check if rule already exists
-	_, err := s.ruleRepo.GetByMethodAndPath(req.Method, req.Path)
-	if err == nil {
-		return nil, goerrorkit.NewBusinessError(409, "Rule đã tồn tại cho method và path này").WithData(map[string]interface{}{
-			"method": req.Method,
-			"path":   req.Path,
-		})
-	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi kiểm tra rule")
-	}
-
-	// Convert role names to role IDs
-	roleIDs := make([]uint, 0)
-	if len(req.Roles) > 0 {
-		roleNameToIDMap, err := s.roleRepo.GetIDsByNames(req.Roles)
-		if err != nil {
-			return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi convert role names sang IDs").
-				WithData(map[string]interface{}{
-					"role_names": req.Roles,
-				})
-		}
-		// Convert map to slice, skip roles that don't exist
-		for _, roleName := range req.Roles {
-			if roleID, exists := roleNameToIDMap[roleName]; exists {
-				roleIDs = append(roleIDs, roleID)
-			}
-		}
-	}
-
-	// Generate ID from Method and Path
-	ruleID := fmt.Sprintf("%s|%s", req.Method, req.Path)
-
-	// Get service name from repository (empty in single-app mode)
-	serviceName := s.ruleRepo.GetServiceName()
-	// Truncate to max 20 characters if longer
-	if len(serviceName) > 20 {
-		serviceName = serviceName[:20]
-	}
-
-	rule := &models.Rule{
-		ID:          ruleID,
-		Method:      req.Method,
-		Path:        req.Path,
-		Type:        ruleType,
-		Roles:       models.FromUintSlice(roleIDs), // Store role IDs instead of names
-		ServiceName: serviceName,                   // Auto-set from repository (empty = NULL in DB)
-	}
-
-	if err := s.ruleRepo.Create(rule); err != nil {
-		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi tạo rule")
-	}
-
-	return rule, nil
+	ID          string      `json:"id"`          // ID của rule (ví dụ: "POST|/api/auth/login")
+	Type        string      `json:"type"`        // PUBLIC, ALLOW, hoặc FORBID
+	Roles       interface{} `json:"roles"`       // []uint (IDs) hoặc []string (names) hoặc mảng rỗng
+	Description string      `json:"description"` // Mô tả rule
 }
 
 // UpdateRule updates a rule
@@ -130,6 +48,15 @@ func (s *RuleService) UpdateRule(ruleID string, req UpdateRuleRequest) (*models.
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy rule")
 	}
 
+	// Kiểm tra rule.fixed = true thì không cho phép cập nhật
+	if rule.Fixed {
+		return nil, goerrorkit.NewBusinessError(403, "Không thể cập nhật rule này vì rule.fixed = true. Rule này được quyết định từ code Golang và không thể thay đổi từ database").WithData(map[string]interface{}{
+			"rule_id": ruleID,
+			"fixed":   rule.Fixed,
+		})
+	}
+
+	// Validate và cập nhật Type
 	if req.Type != "" {
 		ruleType := models.AccessType(req.Type)
 		if ruleType != models.AccessPublic && ruleType != models.AccessAllow &&
@@ -143,25 +70,129 @@ func (s *RuleService) UpdateRule(ruleID string, req UpdateRuleRequest) (*models.
 		rule.Type = ruleType
 	}
 
+	// Parse và validate roles (hỗ trợ cả []uint và []string)
 	if req.Roles != nil {
-		// Convert role names to role IDs
-		roleIDs := make([]uint, 0)
-		if len(req.Roles) > 0 {
-			roleNameToIDMap, err := s.roleRepo.GetIDsByNames(req.Roles)
-			if err != nil {
-				return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi convert role names sang IDs").
-					WithData(map[string]interface{}{
-						"role_names": req.Roles,
-					})
+		var roleIDs []uint
+		rolesValue := reflect.ValueOf(req.Roles)
+		if !rolesValue.IsValid() || rolesValue.Kind() != reflect.Slice {
+			return nil, goerrorkit.NewValidationError("Roles phải là một mảng", map[string]interface{}{
+				"field": "roles",
+			})
+		}
+
+		// Xử lý mảng rỗng
+		if rolesValue.Len() == 0 {
+			roleIDs = []uint{}
+		} else {
+			// Kiểm tra phần tử đầu tiên để xác định loại (uint hay string)
+			firstElem := rolesValue.Index(0)
+			// Xử lý trường hợp interface{} (khi JSON được parse)
+			elemKind := firstElem.Kind()
+			if elemKind == reflect.Interface {
+				// Unwrap interface để lấy kiểu thực tế
+				if firstElem.Elem().IsValid() {
+					elemKind = firstElem.Elem().Kind()
+				}
 			}
-			// Convert map to slice, skip roles that don't exist
-			for _, roleName := range req.Roles {
-				if roleID, exists := roleNameToIDMap[roleName]; exists {
-					roleIDs = append(roleIDs, roleID)
+
+			needValidateIDs := false // Flag để biết có cần validate IDs không
+			switch elemKind {
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				// Mảng số (IDs) - cần validate tồn tại
+				roleIDs = make([]uint, rolesValue.Len())
+				for i := 0; i < rolesValue.Len(); i++ {
+					elem := rolesValue.Index(i)
+					if elem.Kind() == reflect.Interface && elem.Elem().IsValid() {
+						elem = elem.Elem()
+					}
+					roleIDs[i] = uint(elem.Uint())
+				}
+				needValidateIDs = true
+			case reflect.String:
+				// Mảng chuỗi (names) - cần convert sang IDs và validate tồn tại
+				roleNames := make([]string, rolesValue.Len())
+				for i := 0; i < rolesValue.Len(); i++ {
+					elem := rolesValue.Index(i)
+					if elem.Kind() == reflect.Interface && elem.Elem().IsValid() {
+						elem = elem.Elem()
+					}
+					roleNames[i] = elem.String()
+				}
+				// Lấy role IDs từ names
+				roleNameToIDMap, err := s.roleRepo.GetIDsByNames(roleNames)
+				if err != nil {
+					return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy role IDs từ names").
+						WithData(map[string]interface{}{
+							"role_names": roleNames,
+						})
+				}
+				// Kiểm tra tất cả names có tồn tại không
+				missingRoles := make([]string, 0)
+				for _, name := range roleNames {
+					if _, exists := roleNameToIDMap[name]; !exists {
+						missingRoles = append(missingRoles, name)
+					}
+				}
+				if len(missingRoles) > 0 {
+					return nil, goerrorkit.NewBusinessError(404, "Một số roles không tồn tại trong bảng roles").WithData(map[string]interface{}{
+						"missing_roles": missingRoles,
+					})
+				}
+				// Convert sang mảng IDs
+				roleIDs = make([]uint, 0, len(roleNames))
+				for _, name := range roleNames {
+					roleIDs = append(roleIDs, roleNameToIDMap[name])
+				}
+				// Không cần validate lại vì đã kiểm tra names tồn tại
+			case reflect.Float64:
+				// Xử lý trường hợp JSON parse số thành float64 - cần validate tồn tại
+				roleIDs = make([]uint, rolesValue.Len())
+				for i := 0; i < rolesValue.Len(); i++ {
+					elem := rolesValue.Index(i)
+					if elem.Kind() == reflect.Interface && elem.Elem().IsValid() {
+						elem = elem.Elem()
+					}
+					roleIDs[i] = uint(elem.Float())
+				}
+				needValidateIDs = true
+			default:
+				return nil, goerrorkit.NewValidationError("Roles phải là mảng số (IDs) hoặc mảng chuỗi (names)", map[string]interface{}{
+					"field": "roles",
+				})
+			}
+
+			// Kiểm tra tất cả role IDs có tồn tại trong database không (chỉ khi cần)
+			if needValidateIDs && len(roleIDs) > 0 {
+				roles, err := s.roleRepo.GetByIDs(roleIDs)
+				if err != nil {
+					return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi kiểm tra roles tồn tại")
+				}
+				// Tạo map để kiểm tra nhanh
+				existingRoleIDs := make(map[uint]bool)
+				for _, role := range roles {
+					existingRoleIDs[role.ID] = true
+				}
+				// Tìm các role IDs không tồn tại
+				missingRoleIDs := make([]uint, 0)
+				for _, roleID := range roleIDs {
+					if !existingRoleIDs[roleID] {
+						missingRoleIDs = append(missingRoleIDs, roleID)
+					}
+				}
+				if len(missingRoleIDs) > 0 {
+					return nil, goerrorkit.NewBusinessError(404, "Một số roles không tồn tại trong bảng roles").WithData(map[string]interface{}{
+						"missing_role_ids": missingRoleIDs,
+					})
 				}
 			}
 		}
-		rule.Roles = models.FromUintSlice(roleIDs) // Store role IDs instead of names
+
+		rule.Roles = models.FromUintSlice(roleIDs)
+	}
+
+	// Cập nhật description nếu có
+	if req.Description != "" {
+		rule.Description = req.Description
 	}
 
 	if err := s.ruleRepo.Update(rule); err != nil {
@@ -171,24 +202,20 @@ func (s *RuleService) UpdateRule(ruleID string, req UpdateRuleRequest) (*models.
 	return rule, nil
 }
 
-// RemoveRule removes a rule
-func (s *RuleService) RemoveRule(ruleID string) error {
-	if err := s.ruleRepo.Delete(ruleID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return goerrorkit.NewBusinessError(404, "Không tìm thấy rule").WithData(map[string]interface{}{
-				"rule_id": ruleID,
-			})
-		}
-		return goerrorkit.WrapWithMessage(err, "Lỗi khi xóa rule")
-	}
-	return nil
-}
-
-// ListRules lists all rules
-func (s *RuleService) ListRules() ([]models.Rule, error) {
-	rules, err := s.ruleRepo.List()
+// ListRules lists all rules with optional filters
+func (s *RuleService) ListRules(filter RuleFilter) ([]models.Rule, error) {
+	rules, err := s.ruleRepo.List(filter)
 	if err != nil {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách rule")
 	}
 	return rules, nil
+}
+
+// GetByID gets a rule by ID
+func (s *RuleService) GetByID(ruleID string) (*models.Rule, error) {
+	rule, err := s.ruleRepo.GetByID(ruleID)
+	if err != nil {
+		return nil, err
+	}
+	return rule, nil
 }

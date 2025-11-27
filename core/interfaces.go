@@ -42,6 +42,12 @@ type RoleRepositoryInterface[TRole RoleInterface] interface {
 	Update(role TRole) error
 	Delete(id uint) error
 	GetIDsByNames(names []string) (map[string]uint, error)
+	UpdateUserRoles(userID string, roleIDs []uint) error
+	// Cache methods để tối ưu chuyển đổi giữa role_id và role_name
+	GetRoleNameByID(id uint) (string, bool)
+	GetRoleIDByName(name string) (uint, bool)
+	GetNamesByIDs(ids []uint) map[uint]string
+	RefreshRoleCache() error
 	DB() interface{} // Trả về *gorm.DB nhưng dùng interface{} để tránh circular dependency
 }
 

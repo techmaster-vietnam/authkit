@@ -134,6 +134,12 @@ func setupRoutes(
 		Description("Kiểm tra user có role").
 		Register()
 
+	users.Put("/:userId/roles", ak.RoleHandler.UpdateUserRoles).
+		Allow("admin", "super_admin").
+		Fixed().
+		Description("Cập nhật danh sách roles cho user (chỉ admin và super_admin được phép)").
+		Register()
+
 	// User detail route (admin and super_admin only)
 	users.Get("/detail", ak.AuthHandler.GetUserDetail).
 		Allow("admin").
@@ -142,26 +148,23 @@ func setupRoutes(
 		Register()
 
 	// Rule routes (admin only)
+	// Lưu ý: Rules được đồng bộ trực tiếp từ cấu hình routes trong code (setupRoutes.go)
+	// qua hàm SyncRoutesToDatabase(). Do đó không cần API để tạo/xóa rule.
 	rules := apiRouter.Group("/rules")
 	rules.Get("/", ak.RuleHandler.ListRules).
 		Allow("admin").
 		Fixed().
 		Description("Danh sách rules").
 		Register()
-	rules.Post("/", ak.RuleHandler.AddRule).
+	rules.Get("/:id", ak.RuleHandler.GetByID).
 		Allow("admin").
 		Fixed().
-		Description("Tạo rule mới").
+		Description("Lấy thông tin rule theo ID (ID có dạng: GET|/api/blogs/*, cần URL encode khi gọi REST API)").
 		Register()
-	rules.Put("/:id", ak.RuleHandler.UpdateRule).
+	rules.Put("/", ak.RuleHandler.UpdateRule).
 		Allow("admin").
 		Fixed().
-		Description("Cập nhật rule").
-		Register()
-	rules.Delete("/:id", ak.RuleHandler.RemoveRule).
-		Allow("admin").
-		Fixed().
-		Description("Xóa rule").
+		Description("Cập nhật rule (chỉ cho phép cập nhật Type và Roles, không thể tạo/xóa)").
 		Register()
 
 	// Demo routes - demonstrate new features

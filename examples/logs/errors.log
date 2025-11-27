@@ -1,0 +1,112 @@
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T14:52:19+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T15:20:04+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T15:24:38+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T15:37:37+07:00"
+}
+{
+  "data": {
+    "field": "roles"
+  },
+  "error_type": "VALIDATION",
+  "file": "base_role_service.go:448",
+  "function": "service.(*BaseRoleService[...]).UpdateUserRoles",
+  "level": "error",
+  "message": "Roles phải là mảng số (IDs) hoặc mảng chuỗi (names)",
+  "path": "PUT /api/users/DQkD72lfcEim/roles",
+  "timestamp": "2025-11-27T15:38:11+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T15:41:43+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T16:03:02+07:00"
+}
+{
+  "cause": "ERROR: unterminated /* comment at or near \"/*/roles\" (SQLSTATE 42601)",
+  "data": {
+    "method": "GET",
+    "path": "/api/users/*/roles",
+    "rule_id": "GET|/api/users/*/roles"
+  },
+  "error_type": "SYSTEM",
+  "file": "sync.go:48",
+  "function": "router.SyncRoutesToDatabase",
+  "level": "error",
+  "message": "Failed to delete obsolete rule GET|/api/users/*/roles",
+  "path": "ak.SyncRoutes",
+  "timestamp": "2025-11-27T16:03:03+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T16:27:57+07:00"
+}
+{
+  "cause": "ERROR: unterminated /* comment at or near \"/*/roles\" (SQLSTATE 42601)",
+  "data": {
+    "method": "GET",
+    "path": "/api/users/*/roles",
+    "rule_id": "GET|/api/users/*/roles"
+  },
+  "error_type": "SYSTEM",
+  "file": "sync.go:48",
+  "function": "router.SyncRoutesToDatabase",
+  "level": "error",
+  "message": "Failed to delete obsolete rule GET|/api/users/*/roles",
+  "path": "ak.SyncRoutes",
+  "timestamp": "2025-11-27T16:27:58+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T16:28:05+07:00"
+}
+{
+  "cause": "ERROR: unterminated /* comment at or near \"/*/roles\" (SQLSTATE 42601)",
+  "data": {
+    "method": "GET",
+    "path": "/api/users/*/roles",
+    "rule_id": "GET|/api/users/*/roles"
+  },
+  "error_type": "SYSTEM",
+  "file": "sync.go:48",
+  "function": "router.SyncRoutesToDatabase",
+  "level": "error",
+  "message": "Failed to delete obsolete rule GET|/api/users/*/roles",
+  "path": "ak.SyncRoutes",
+  "timestamp": "2025-11-27T16:28:06+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T16:29:42+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T16:49:33+07:00"
+}
+{
+  "level": "info",
+  "message": "✓ GoErrorKit logger initialized",
+  "timestamp": "2025-11-27T17:02:49+07:00"
+}

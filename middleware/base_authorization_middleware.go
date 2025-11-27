@@ -24,9 +24,8 @@ type BaseAuthorizationMiddleware[TUser core.UserInterface, TRole core.RoleInterf
 	cacheMutex                  sync.RWMutex
 	lastRefresh                 time.Time
 	cacheTTL                    time.Duration
-	superAdminID                *uint           // Cached super_admin role ID (nil if not loaded yet)
-	roleNameToIDMap             map[string]uint // Cached role name -> ID mapping for X-Role-Context
-	roleNameCacheMutex          sync.RWMutex    // Mutex for role name cache
+	// Role cache đã được chuyển sang BaseRoleRepository để tránh trùng lặp
+	// Middleware sẽ sử dụng roleRepo.GetRoleIDByName() và roleRepo.GetRoleNameByID()
 }
 
 // NewBaseAuthorizationMiddleware tạo mới BaseAuthorizationMiddleware với generic types
@@ -42,9 +41,6 @@ func NewBaseAuthorizationMiddleware[TUser core.UserInterface, TRole core.RoleInt
 		cacheTTL:                    100 * time.Minute, // Cache rules for 100 minutes
 		exactRulesMap:               make(map[string][]models.Rule),
 		patternRulesByMethodAndSegs: make(map[string]map[int][]models.Rule),
-		superAdminID:                nil,
-		roleNameToIDMap:             make(map[string]uint),
-		roleNameCacheMutex:          sync.RWMutex{},
 	}
 
 	return mw
@@ -102,16 +98,25 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) Authorize() fiber.Handler {
 			userRoleIDs[roleID] = true
 		}
 
-		// Check for super admin role (bypass all rules) - using cached ID
-		if m.getSuperAdminID() != nil && userRoleIDs[*m.getSuperAdminID()] {
-			return c.Next()
+		// Check for super admin role (bypass all rules) - using repository cache
+		if m.roleRepo != nil {
+			superAdminID, exists := m.roleRepo.GetRoleIDByName("super_admin")
+			if exists && userRoleIDs[superAdminID] {
+				return c.Next()
+			}
 		}
 
 		// Check for optional X-Role-Context header
 		roleContext := c.Get("X-Role-Context")
 		if roleContext != "" {
-			roleContextID, err := m.getRoleIDByName(roleContext)
-			if err != nil {
+			if m.roleRepo == nil {
+				return goerrorkit.NewAuthError(500, "Role repository không được khởi tạo").WithData(map[string]interface{}{
+					"requested_role": roleContext,
+				})
+			}
+			// Sử dụng repository cache để lấy role ID
+			roleContextID, exists := m.roleRepo.GetRoleIDByName(roleContext)
+			if !exists {
 				return goerrorkit.NewAuthError(403, "Không có quyền sử dụng role context này").WithData(map[string]interface{}{
 					"requested_role": roleContext,
 					"error":          "Role không tồn tại",
@@ -340,56 +345,6 @@ func (m *BaseAuthorizationMiddleware[TUser, TRole]) refreshCache() {
 // InvalidateCache invalidates the cache
 func (m *BaseAuthorizationMiddleware[TUser, TRole]) InvalidateCache() {
 	m.refreshCache()
-}
-
-// getSuperAdminID returns cached super_admin role ID (lazy loads if not cached)
-func (m *BaseAuthorizationMiddleware[TUser, TRole]) getSuperAdminID() *uint {
-	// Check cache first
-	m.roleNameCacheMutex.RLock()
-	if m.superAdminID != nil {
-		defer m.roleNameCacheMutex.RUnlock()
-		return m.superAdminID
-	}
-	m.roleNameCacheMutex.RUnlock()
-
-	// Not cached, lazy load from DB
-	superAdmin, err := m.roleRepo.GetByName("super_admin")
-	if err != nil {
-		// Role không tồn tại hoặc lỗi DB - trả về nil để skip super_admin check
-		return nil
-	}
-
-	// Update cache
-	m.roleNameCacheMutex.Lock()
-	superAdminID := superAdmin.GetID()
-	m.superAdminID = &superAdminID
-	m.roleNameToIDMap["super_admin"] = superAdminID
-	m.roleNameCacheMutex.Unlock()
-
-	return m.superAdminID
-}
-
-// getRoleIDByName gets role ID by name with caching
-func (m *BaseAuthorizationMiddleware[TUser, TRole]) getRoleIDByName(roleName string) (uint, error) {
-	// Check cache first
-	m.roleNameCacheMutex.RLock()
-	if roleID, exists := m.roleNameToIDMap[roleName]; exists {
-		m.roleNameCacheMutex.RUnlock()
-		return roleID, nil
-	}
-	m.roleNameCacheMutex.RUnlock()
-
-	// Not in cache, query DB
-	role, err := m.roleRepo.GetByName(roleName)
-	if err != nil {
-		return 0, err
-	}
-
-	// Update cache
-	roleID := role.GetID()
-	m.roleNameCacheMutex.Lock()
-	m.roleNameToIDMap[roleName] = roleID
-	m.roleNameCacheMutex.Unlock()
-
-	return roleID, nil
+	// Note: Role cache được quản lý bởi BaseRoleRepository và tự động refresh
+	// khi có thay đổi roles (Create/Update/Delete), không cần refresh ở đây
 }
