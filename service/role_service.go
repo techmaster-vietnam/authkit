@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/techmaster-vietnam/authkit/core"
 	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/repository"
 	"github.com/techmaster-vietnam/goerrorkit"
@@ -12,12 +13,19 @@ import (
 
 // RoleService handles role business logic
 type RoleService struct {
-	roleRepo *repository.RoleRepository
+	roleRepo         *repository.RoleRepository
+	cacheInvalidator core.CacheInvalidator // Optional: để invalidate rules cache khi role bị xóa
 }
 
 // NewRoleService creates a new role service
 func NewRoleService(roleRepo *repository.RoleRepository) *RoleService {
 	return &RoleService{roleRepo: roleRepo}
+}
+
+// SetCacheInvalidator sets cache invalidator để service có thể invalidate rules cache
+// Nên được gọi sau khi khởi tạo service nếu cần invalidate cache khi role thay đổi
+func (s *RoleService) SetCacheInvalidator(invalidator core.CacheInvalidator) {
+	s.cacheInvalidator = invalidator
 }
 
 // AddRoleRequest represents add role request
@@ -105,6 +113,13 @@ func (s *RoleService) RemoveRole(roleID uint) error {
 	if err := s.roleRepo.Delete(roleID); err != nil {
 		return goerrorkit.WrapWithMessage(err, "Lỗi khi xóa role")
 	}
+
+	// Invalidate rules cache vì stored procedure đã xóa role_id khỏi rules.roles array
+	// Cần refresh cache để phản ánh thay đổi này
+	if s.cacheInvalidator != nil {
+		s.cacheInvalidator.InvalidateRulesCache()
+	}
+
 	return nil
 }
 

@@ -51,7 +51,9 @@ func (h *BaseRuleHandler[TUser, TRole]) UpdateRule(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Invalidate cache after updating rule
+	// Note: RuleService đã tự động invalidate cache thông qua cacheInvalidator
+	// Việc gọi lại ở đây chỉ để đảm bảo backward compatibility
+	// Nếu RuleService đã được inject cacheInvalidator, việc gọi này là redundant nhưng không gây hại
 	h.authorizationMiddleware.InvalidateCache()
 
 	return c.JSON(fiber.Map{

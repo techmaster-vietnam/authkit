@@ -123,7 +123,7 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 	}
 
 	// Auto migrate với custom models
-	if err := b.db.AutoMigrate(&b.userModel, &b.roleModel, &models.Rule{}); err != nil {
+	if err := b.db.AutoMigrate(&b.userModel, &b.roleModel, &models.Rule{}, &models.RefreshToken{}); err != nil {
 		return nil, err
 	}
 
@@ -131,18 +131,25 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 	userRepo := repository.NewBaseUserRepository[TUser](b.db)
 	roleRepo := repository.NewBaseRoleRepository[TRole](b.db)
 	ruleRepo := repository.NewRuleRepository(b.db, b.config.ServiceName)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(b.db)
+
+	// Initialize middleware với generic types (cần khởi tạo trước để inject vào services)
+	authMiddleware := middleware.NewBaseAuthMiddleware(b.config, userRepo)
+	authzMiddleware := middleware.NewBaseAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
 
 	// Initialize services với JWT customizer nếu có
-	authService := service.NewBaseAuthService(userRepo, roleRepo, b.config)
+	authService := service.NewBaseAuthService(userRepo, roleRepo, refreshTokenRepo, b.config)
 	if b.jwtCustomizer != nil {
 		authService.SetJWTCustomizer(b.jwtCustomizer)
 	}
 	roleService := service.NewBaseRoleService(roleRepo, userRepo)
 	ruleService := service.NewRuleService(ruleRepo, repository.NewRoleRepository(b.db))
 
-	// Initialize middleware với generic types
-	authMiddleware := middleware.NewBaseAuthMiddleware(b.config, userRepo)
-	authzMiddleware := middleware.NewBaseAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
+	// Inject cache invalidator vào services để tự động invalidate cache khi cần
+	// Tạo wrapper để implement CacheInvalidator interface
+	cacheInvalidator := &cacheInvalidatorWrapper[TUser, TRole]{authzMiddleware: authzMiddleware}
+	roleService.SetCacheInvalidator(cacheInvalidator)
+	ruleService.SetCacheInvalidator(cacheInvalidator)
 
 	// Initialize handlers với generic types
 	authHandler := handlers.NewBaseAuthHandler(authService)
@@ -171,8 +178,14 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 }
 
 // SyncRoutes sync routes từ registry vào database
+// Tự động invalidate rules cache sau khi sync thành công
 func (ak *AuthKit[TUser, TRole]) SyncRoutes() error {
-	return router.SyncRoutesToDatabase(ak.RouteRegistry, ak.RuleRepo, repository.NewRoleRepository(ak.DB), ak.Config.ServiceName)
+	if err := router.SyncRoutesToDatabase(ak.RouteRegistry, ak.RuleRepo, repository.NewRoleRepository(ak.DB), ak.Config.ServiceName); err != nil {
+		return err
+	}
+	// Tự động invalidate cache sau khi sync routes thành công
+	ak.InvalidateCache()
+	return nil
 }
 
 // InvalidateCache invalidates authorization middleware cache
@@ -300,4 +313,16 @@ func GetRoleIDsFromContext(c *fiber.Ctx) ([]uint, bool) {
 // Đây là wrapper function để tránh conflict với package config của ứng dụng chính
 func LoadConfig() *Config {
 	return config.LoadConfig()
+}
+
+// cacheInvalidatorWrapper wraps BaseAuthorizationMiddleware để implement CacheInvalidator interface
+type cacheInvalidatorWrapper[TUser UserInterface, TRole RoleInterface] struct {
+	authzMiddleware *BaseAuthorizationMiddleware[TUser, TRole]
+}
+
+// InvalidateRulesCache invalidates rules cache trong authorization middleware
+func (w *cacheInvalidatorWrapper[TUser, TRole]) InvalidateRulesCache() {
+	if w.authzMiddleware != nil {
+		w.authzMiddleware.InvalidateCache()
+	}
 }

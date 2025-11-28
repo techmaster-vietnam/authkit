@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -218,4 +220,15 @@ func ValidateTokenAndExtractRoleIDs(tokenString, secret string) (userID string, 
 		return "", "", nil, err
 	}
 	return "", "", nil, err2
+}
+
+// GenerateRefreshToken tạo một refresh token ngẫu nhiên
+// Refresh token là một chuỗi ngẫu nhiên dài, không phải JWT
+// Sử dụng crypto/rand để đảm bảo tính ngẫu nhiên và bảo mật
+func GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32) // 32 bytes = 256 bits
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(b), nil
 }

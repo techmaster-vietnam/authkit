@@ -360,6 +360,29 @@ func (m *MockUserRepository[TUser]) DB() interface{} {
 	return nil // Not needed for tests
 }
 
+// MockCacheInvalidator là mock cache invalidator cho testing
+type MockCacheInvalidator struct {
+	InvalidateRulesCacheCalled bool
+	CallCount                  int
+}
+
+func NewMockCacheInvalidator() *MockCacheInvalidator {
+	return &MockCacheInvalidator{
+		InvalidateRulesCacheCalled: false,
+		CallCount:                  0,
+	}
+}
+
+func (m *MockCacheInvalidator) InvalidateRulesCache() {
+	m.InvalidateRulesCacheCalled = true
+	m.CallCount++
+}
+
+func (m *MockCacheInvalidator) Reset() {
+	m.InvalidateRulesCacheCalled = false
+	m.CallCount = 0
+}
+
 // Helper function để tạo test roles
 func createTestRole(id uint, name string, isSystem bool) *models.BaseRole {
 	return &models.BaseRole{
@@ -974,6 +997,192 @@ func TestBaseRoleService_ListUsersHasRole(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestBaseRoleService_RemoveRole_CacheInvalidator(t *testing.T) {
+	systemRole := createTestRole(1, "system_role", true)
+	normalRole := createTestRole(2, "normal_role", false)
+
+	tests := []struct {
+		name                     string
+		roleID                   uint
+		setupRepo                func() *MockRoleRepository[*models.BaseRole]
+		setupCacheInvalidator    func() *MockCacheInvalidator
+		expectedError            bool
+		expectedCacheInvalidated bool
+		expectedInvalidateCount  int
+	}{
+		{
+			name:   "Xóa role thành công với cache invalidator - phải gọi InvalidateRulesCache",
+			roleID: 2,
+			setupRepo: func() *MockRoleRepository[*models.BaseRole] {
+				repo := NewMockRoleRepository[*models.BaseRole]()
+				repo.Create(normalRole)
+				return repo
+			},
+			setupCacheInvalidator: func() *MockCacheInvalidator {
+				return NewMockCacheInvalidator()
+			},
+			expectedError:            false,
+			expectedCacheInvalidated: true,
+			expectedInvalidateCount:  1,
+		},
+		{
+			name:   "Xóa role thành công không có cache invalidator - không lỗi",
+			roleID: 2,
+			setupRepo: func() *MockRoleRepository[*models.BaseRole] {
+				repo := NewMockRoleRepository[*models.BaseRole]()
+				repo.Create(normalRole)
+				return repo
+			},
+			setupCacheInvalidator: func() *MockCacheInvalidator {
+				return nil // Không có cache invalidator
+			},
+			expectedError:            false,
+			expectedCacheInvalidated: false,
+			expectedInvalidateCount:  0,
+		},
+		{
+			name:   "Xóa system role thất bại - không gọi InvalidateRulesCache",
+			roleID: 1,
+			setupRepo: func() *MockRoleRepository[*models.BaseRole] {
+				repo := NewMockRoleRepository[*models.BaseRole]()
+				repo.Create(systemRole)
+				return repo
+			},
+			setupCacheInvalidator: func() *MockCacheInvalidator {
+				return NewMockCacheInvalidator()
+			},
+			expectedError:            true,
+			expectedCacheInvalidated: false,
+			expectedInvalidateCount:  0,
+		},
+		{
+			name:   "Xóa role không tồn tại - không gọi InvalidateRulesCache",
+			roleID: 999,
+			setupRepo: func() *MockRoleRepository[*models.BaseRole] {
+				return NewMockRoleRepository[*models.BaseRole]()
+			},
+			setupCacheInvalidator: func() *MockCacheInvalidator {
+				return NewMockCacheInvalidator()
+			},
+			expectedError:            true,
+			expectedCacheInvalidated: false,
+			expectedInvalidateCount:  0,
+		},
+		{
+			name:   "Xóa nhiều role liên tiếp - cache invalidator được gọi đúng số lần",
+			roleID: 2,
+			setupRepo: func() *MockRoleRepository[*models.BaseRole] {
+				repo := NewMockRoleRepository[*models.BaseRole]()
+				repo.Create(normalRole)
+				repo.Create(createTestRole(3, "another_role", false))
+				return repo
+			},
+			setupCacheInvalidator: func() *MockCacheInvalidator {
+				return NewMockCacheInvalidator()
+			},
+			expectedError:            false,
+			expectedCacheInvalidated: true,
+			expectedInvalidateCount:  1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup
+			mockRepo := tt.setupRepo()
+			mockUserRepo := NewMockUserRepository[*models.BaseUser]()
+			mockCacheInvalidator := tt.setupCacheInvalidator()
+
+			service := &BaseRoleService[*models.BaseUser, *models.BaseRole]{
+				roleRepo: mockRepo,
+				userRepo: mockUserRepo,
+			}
+			// Chỉ set cacheInvalidator nếu không phải nil
+			// Trong Go, một interface với nil pointer value vẫn không phải là nil interface
+			if mockCacheInvalidator != nil {
+				service.SetCacheInvalidator(mockCacheInvalidator)
+			}
+
+			// Execute
+			err := service.RemoveRole(tt.roleID)
+
+			// Assert error
+			if tt.expectedError {
+				if err == nil {
+					t.Errorf("Expected error but got nil")
+					return
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error, got: %v", err)
+					return
+				}
+			}
+
+			// Assert cache invalidator
+			if mockCacheInvalidator != nil {
+				if mockCacheInvalidator.InvalidateRulesCacheCalled != tt.expectedCacheInvalidated {
+					t.Errorf("Expected InvalidateRulesCacheCalled = %v, got %v",
+						tt.expectedCacheInvalidated, mockCacheInvalidator.InvalidateRulesCacheCalled)
+				}
+				if mockCacheInvalidator.CallCount != tt.expectedInvalidateCount {
+					t.Errorf("Expected InvalidateRulesCache call count = %d, got %d",
+						tt.expectedInvalidateCount, mockCacheInvalidator.CallCount)
+				}
+			} else {
+				// Nếu không có cache invalidator, đảm bảo không có lỗi
+				if tt.expectedCacheInvalidated {
+					t.Errorf("Test setup error: expectedCacheInvalidated is true but cacheInvalidator is nil")
+				}
+			}
+		})
+	}
+}
+
+func TestBaseRoleService_SetCacheInvalidator(t *testing.T) {
+	mockRepo := NewMockRoleRepository[*models.BaseRole]()
+	mockUserRepo := NewMockUserRepository[*models.BaseUser]()
+	mockCacheInvalidator := NewMockCacheInvalidator()
+
+	service := &BaseRoleService[*models.BaseUser, *models.BaseRole]{
+		roleRepo: mockRepo,
+		userRepo: mockUserRepo,
+	}
+
+	// Kiểm tra ban đầu không có cache invalidator
+	if service.cacheInvalidator != nil {
+		t.Errorf("Expected cacheInvalidator to be nil initially, got %v", service.cacheInvalidator)
+	}
+
+	// Set cache invalidator
+	service.SetCacheInvalidator(mockCacheInvalidator)
+
+	// Kiểm tra cache invalidator đã được set
+	if service.cacheInvalidator == nil {
+		t.Errorf("Expected cacheInvalidator to be set, got nil")
+	}
+	if service.cacheInvalidator != mockCacheInvalidator {
+		t.Errorf("Expected cacheInvalidator to be the same instance")
+	}
+
+	// Kiểm tra cache invalidator hoạt động khi xóa role
+	normalRole := createTestRole(2, "normal_role", false)
+	mockRepo.Create(normalRole)
+
+	err := service.RemoveRole(2)
+	if err != nil {
+		t.Errorf("Expected no error when removing role, got: %v", err)
+	}
+
+	// Kiểm tra cache invalidator đã được gọi
+	if !mockCacheInvalidator.InvalidateRulesCacheCalled {
+		t.Errorf("Expected InvalidateRulesCache to be called, but it wasn't")
+	}
+	if mockCacheInvalidator.CallCount != 1 {
+		t.Errorf("Expected InvalidateRulesCache to be called once, got %d", mockCacheInvalidator.CallCount)
 	}
 }
 

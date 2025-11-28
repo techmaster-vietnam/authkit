@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/techmaster-vietnam/authkit/core"
 	"github.com/techmaster-vietnam/authkit/middleware"
 	"github.com/techmaster-vietnam/authkit/service"
+	"github.com/techmaster-vietnam/authkit/utils"
 	"github.com/techmaster-vietnam/goerrorkit"
 )
 
@@ -23,6 +26,7 @@ func NewBaseAuthHandler[TUser core.UserInterface, TRole core.RoleInterface](
 
 // Login handles login request
 // POST /api/auth/login
+// Trả về access token trong JSON và refresh token trong cookie HttpOnly
 func (h *BaseAuthHandler[TUser, TRole]) Login(c *fiber.Ctx) error {
 	var req service.BaseLoginRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -36,14 +40,105 @@ func (h *BaseAuthHandler[TUser, TRole]) Login(c *fiber.Ctx) error {
 		return err
 	}
 
+	// Set refresh token vào cookie với các thuộc tính bảo mật
+	// HttpOnly: JavaScript không thể truy cập (chống XSS)
+	// Secure: Chỉ gửi qua HTTPS (production) - có thể config qua COOKIE_SECURE env
+	// SameSite=Strict: Chống CSRF
+	// Path: Chỉ gửi cookie khi request đến /api/auth/*
+	cookieSecure := h.authService.GetConfig().Server.CookieSecure
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    resp.RefreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour), // 7 ngày
+		HTTPOnly: true,
+		Secure:   cookieSecure,
+		SameSite: "Strict",
+		Path:     "/api/auth",
+	})
+
+	// Chỉ trả về access token và user trong JSON response
+	// Refresh token không được trả về trong JSON để bảo mật
 	return c.JSON(fiber.Map{
-		"data": resp,
+		"data": fiber.Map{
+			"token": resp.Token,
+			"user":  resp.User,
+		},
+	})
+}
+
+// Refresh handles refresh token request
+// POST /api/auth/refresh
+// Lấy refresh token từ cookie và trả về access token mới
+func (h *BaseAuthHandler[TUser, TRole]) Refresh(c *fiber.Ctx) error {
+	// Lấy refresh token từ cookie
+	refreshToken := c.Cookies("refresh_token")
+	if refreshToken == "" {
+		return goerrorkit.NewAuthError(401, "Refresh token không được cung cấp")
+	}
+
+	// Refresh access token
+	cookieSecure := h.authService.GetConfig().Server.CookieSecure
+	resp, err := h.authService.Refresh(refreshToken)
+	if err != nil {
+		// Nếu refresh token không hợp lệ, xóa cookie
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    "",
+			Expires:  time.Now().Add(-1 * time.Hour), // Xóa cookie
+			HTTPOnly: true,
+			Secure:   cookieSecure,
+			SameSite: "Strict",
+			Path:     "/api/auth",
+		})
+		return err
+	}
+
+	// Set refresh token mới vào cookie (rotation)
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    resp.RefreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour), // 7 ngày
+		HTTPOnly: true,
+		Secure:   cookieSecure,
+		SameSite: "Strict",
+		Path:     "/api/auth",
+	})
+
+	// Trả về access token mới
+	return c.JSON(fiber.Map{
+		"data": fiber.Map{
+			"token": resp.Token,
+		},
 	})
 }
 
 // Logout handles logout request
 // POST /api/auth/logout
+// Xóa refresh token từ database và cookie
 func (h *BaseAuthHandler[TUser, TRole]) Logout(c *fiber.Ctx) error {
+	// Lấy refresh token từ cookie
+	refreshToken := c.Cookies("refresh_token")
+
+	// Xóa refresh token từ database
+	if refreshToken != "" {
+		if err := h.authService.Logout(refreshToken); err != nil {
+			// Log error nhưng vẫn tiếp tục xóa cookie
+			_ = err
+		}
+	}
+
+	// Xóa cookie
+	cookieSecure := h.authService.GetConfig().Server.CookieSecure
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Expires:  time.Now().Add(-1 * time.Hour), // Xóa cookie
+		HTTPOnly: true,
+		Secure:   cookieSecure,
+		SameSite: "Strict",
+		Path:     "/api/auth",
+	})
+
 	return c.JSON(fiber.Map{
 		"message": "Đăng xuất thành công",
 	})
@@ -51,12 +146,66 @@ func (h *BaseAuthHandler[TUser, TRole]) Logout(c *fiber.Ctx) error {
 
 // Register handles registration request
 // POST /api/auth/register
+// Hỗ trợ các trường custom từ request body (ví dụ: mobile, address)
 func (h *BaseAuthHandler[TUser, TRole]) Register(c *fiber.Ctx) error {
-	var req service.BaseRegisterRequest
-	if err := c.BodyParser(&req); err != nil {
+	// Parse request body vào map để lấy cả các trường custom
+	var requestMap map[string]interface{}
+	if err := c.BodyParser(&requestMap); err != nil {
 		return goerrorkit.NewValidationError("Dữ liệu không hợp lệ", map[string]interface{}{
 			"error": err.Error(),
 		})
+	}
+
+	// Extract các trường cơ bản
+	req := service.BaseRegisterRequest{
+		CustomFields: make(map[string]interface{}),
+	}
+
+	if email, ok := requestMap["email"].(string); ok {
+		// Validate email format
+		if err := utils.ValidateEmail(email); err != nil {
+			return err
+		}
+		req.Email = email
+	} else {
+		// Email không tồn tại hoặc không phải string
+		return goerrorkit.NewValidationError("Email là bắt buộc và phải là chuỗi", map[string]interface{}{
+			"field": "email",
+		})
+	}
+	if password, ok := requestMap["password"].(string); ok {
+		// Validate password format theo config
+		if err := utils.ValidatePassword(password, h.authService.GetConfig().Password); err != nil {
+			return err
+		}
+		req.Password = password
+	} else {
+		// Password không tồn tại hoặc không phải string
+		return goerrorkit.NewValidationError("Mật khẩu là bắt buộc và phải là chuỗi", map[string]interface{}{
+			"field": "password",
+		})
+	}
+	if fullName, ok := requestMap["full_name"].(string); ok {
+		req.FullName = fullName
+	}
+
+	// Các trường còn lại (không phải email, password, full_name) là custom fields
+	// Loại trừ các trường đặc biệt không nên được set trực tiếp
+	excludedFields := map[string]bool{
+		"email":      true,
+		"password":   true,
+		"full_name":  true,
+		"id":         true, // Không cho phép set ID
+		"created_at": true,
+		"updated_at": true,
+		"deleted_at": true,
+		"roles":      true, // Roles được quản lý riêng
+	}
+
+	for key, value := range requestMap {
+		if !excludedFields[key] {
+			req.CustomFields[key] = value
+		}
 	}
 
 	user, err := h.authService.Register(req)

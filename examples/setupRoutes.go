@@ -40,6 +40,10 @@ func setupRoutes(
 		Public().
 		Description("Đăng xuất người dùng").
 		Register()
+	auth.Post("/refresh", ak.AuthHandler.Refresh).
+		Public().
+		Description("Làm mới access token bằng refresh token từ cookie").
+		Register()
 
 	// Protected auth routes
 	auth.Get("/profile", ak.AuthHandler.GetProfile).

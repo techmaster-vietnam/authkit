@@ -105,16 +105,21 @@ const payload = JSON.parse(atob(payloadB64));
 
 ### 7.1.5. Luồng hoạt động
 
+**Login Flow:**
+
 ```
 1. Client → POST /api/auth/login
    Body: { "email": "user@example.com", "password": "123456" }
 
 2. Server → Validate credentials
-   → Generate JWT token với claims
-   → Response: { "token": "eyJhbGciOiJIUzI1NiIs..." }
+   → Generate access token (JWT) với claims
+   → Generate refresh token (random string)
+   → Lưu refresh token hash vào database
+   → Response: { "token": "eyJhbGciOiJIUzI1NiIs...", "user": {...} }
+   → Set cookie: refresh_token (HttpOnly, Secure, SameSite=Strict)
 
-3. Client → Lưu token vào localStorage
-   localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIs...')
+3. Client → Lưu access token vào memory/localStorage
+   → Refresh token tự động lưu trong cookie (browser quản lý)
 
 4. Client → GET /api/blogs
    Header: Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
@@ -128,42 +133,109 @@ const payload = JSON.parse(atob(payloadB64));
 6. Request xong → Context bị xóa (token không được lưu)
 ```
 
-**Đặc điểm:**
-- Token được tạo ở **server** khi login
-- Token được trả về cho **client** (browser)
-- Client lưu token (localStorage/cookie)
-- Client gửi token kèm mỗi request
-- Server validate token mỗi request (không lưu token)
+**Refresh Flow (khi access token hết hạn):**
 
 ```
-1. Client → POST /api/auth/login
-   Body: { "email": "user@example.com", "password": "123456" }
+1. Client → POST /api/auth/refresh
+   Cookie: refresh_token (tự động gửi)
 
-2. Server → Validate credentials
-   → Generate JWT token với claims
-   → Response: { "token": "eyJhbGciOiJIUzI1NiIs..." }
+2. Server → Extract refresh token từ cookie
+   → Validate refresh token trong database
+   → Generate access token mới
+   → Generate refresh token mới (rotation)
+   → Xóa refresh token cũ, lưu token mới
+   → Response: { "token": "new_access_token" }
+   → Update cookie: refresh_token (mới)
 
-3. Client → Lưu token vào localStorage
-   localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIs...')
-
-4. Client → GET /api/blogs
-   Header: Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-
-5. Server → Extract token từ header
-   → Validate token (không lưu token)
-   → Extract claims từ token
-   → Lưu vào context (chỉ trong request này)
-   → Xử lý request
-
-6. Request xong → Context bị xóa (token không được lưu)
+3. Client → Sử dụng access token mới cho các request tiếp theo
 ```
 
 **Đặc điểm:**
-- Token được tạo ở **server** khi login
-- Token được trả về cho **client** (browser)
-- Client lưu token (localStorage/cookie)
-- Client gửi token kèm mỗi request
-- Server validate token mỗi request (không lưu token)
+- Access token: Ngắn hạn, gửi trong `Authorization` header
+- Refresh token: Dài hạn, lưu trong cookie HttpOnly
+- Token rotation: Mỗi lần refresh tạo token mới, xóa token cũ
+- Stateless: Server không lưu session, chỉ validate token mỗi request
+
+**Làm sao Client biết được khi nào access token hết hạn?**
+
+JWT token chứa thông tin expiration time (`exp`) trong payload. Client có thể **decode token** (không cần secret key) để đọc thông tin này:
+
+**Cách 1: Decode JWT token (Khuyến nghị)**
+
+Vì JWT token chỉ là Base64-encoded (không phải encrypted), client có thể decode để lấy expiration time:
+
+```javascript
+// Ví dụ JavaScript/TypeScript
+function getTokenExpiration(token) {
+  try {
+    // Tách 3 phần của JWT
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+    
+    // Decode payload (phần thứ 2)
+    const payload = JSON.parse(atob(parts[1]));
+    
+    // Lấy expiration time (Unix timestamp)
+    const exp = payload.exp;
+    
+    // Chuyển sang Date object
+    return new Date(exp * 1000);
+  } catch (error) {
+    return null;
+  }
+}
+
+// Sử dụng
+const token = "eyJhbGciOiJIUzI1NiIs..."; // Token từ login response
+const expirationDate = getTokenExpiration(token);
+const now = new Date();
+const timeUntilExpiry = expirationDate - now; // milliseconds
+
+console.log(`Token hết hạn vào: ${expirationDate}`);
+console.log(`Còn lại: ${Math.floor(timeUntilExpiry / 1000 / 60)} phút`);
+```
+
+**Cách 2: Sử dụng thư viện JWT**
+
+```javascript
+// Sử dụng thư viện jsonwebtoken hoặc jose
+import jwt from 'jsonwebtoken';
+
+const token = "eyJhbGciOiJIUzI1NiIs...";
+const decoded = jwt.decode(token); // Decode không verify signature
+const expirationDate = new Date(decoded.exp * 1000);
+```
+
+**Cách 3: Tự động refresh trước khi hết hạn**
+
+Client nên refresh token trước khi hết hạn một khoảng thời gian (ví dụ: 5 phút):
+
+```javascript
+function shouldRefreshToken(token) {
+  const expirationDate = getTokenExpiration(token);
+  if (!expirationDate) return false;
+  
+  const now = new Date();
+  const timeUntilExpiry = expirationDate - now;
+  const fiveMinutes = 5 * 60 * 1000; // 5 phút
+  
+  // Refresh nếu còn lại < 5 phút
+  return timeUntilExpiry < fiveMinutes;
+}
+
+// Kiểm tra trước mỗi API call
+if (shouldRefreshToken(currentToken)) {
+  await refreshAccessToken();
+}
+```
+
+**Lưu ý:**
+- Client **KHÔNG CẦN** secret key để decode token và đọc `exp`
+- Chỉ cần secret key khi **verify signature** (server làm việc này)
+- Field `exp` trong token là Unix timestamp (seconds since epoch)
+- Mặc định access token hết hạn sau `JWT_EXPIRATION_HOURS` giờ (thường là 24h)
 
 ### 7.1.5.1. Implementation Details - Thuật toán và Thư viện
 
@@ -563,7 +635,224 @@ func (h *AuthHandler) LoginWithCustomClaims(c *fiber.Ctx) error {
 
 ---
 
-## 7.2. Password Hashing Implementation
+## 7.2. Refresh Token Implementation
+
+### 7.2.1. Tổng quan
+
+AuthKit sử dụng **dual-token strategy** để cân bằng giữa bảo mật và trải nghiệm người dùng:
+
+- **Access Token (JWT)**: Ngắn hạn (mặc định 24h), chứa user info và roles, gửi trong `Authorization` header
+- **Refresh Token**: Dài hạn (mặc định 7 ngày), lưu trong cookie HttpOnly, chỉ dùng để refresh access token
+
+**Luồng hoạt động:**
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant H as Handler
+    participant S as AuthService
+    participant DB as Database
+    
+    C->>H: POST /api/auth/login<br/>{email, password}
+    H->>S: Login(req)
+    S->>DB: Validate credentials
+    S->>S: Generate access token (JWT)
+    S->>S: Generate refresh token (random)
+    S->>DB: Save refresh token (hashed)
+    S-->>H: {token, refreshToken, user}
+    H->>H: Set cookie: refresh_token
+    H-->>C: 200 OK {token, user}<br/>Cookie: refresh_token
+    
+    Note over C: Access token hết hạn
+    
+    C->>H: POST /api/auth/refresh<br/>Cookie: refresh_token
+    H->>S: Refresh(refreshToken)
+    S->>DB: Validate refresh token
+    S->>S: Generate new access token
+    S->>S: Generate new refresh token (rotation)
+    S->>DB: Delete old, save new token
+    S-->>H: {token, refreshToken}
+    H->>H: Update cookie
+    H-->>C: 200 OK {token}<br/>Cookie: refresh_token (new)
+```
+
+### 7.2.2. Refresh Token Model
+
+```go
+type RefreshToken struct {
+    ID        uint           `gorm:"primaryKey;autoIncrement"`
+    Token     string         `gorm:"type:varchar(255);uniqueIndex;not null"` // SHA256 hash
+    UserID    string         `gorm:"type:varchar(12);not null;index"`
+    ExpiresAt time.Time      `gorm:"not null;index"`
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    DeletedAt gorm.DeletedAt `gorm:"index"` // Soft delete để revoke
+}
+```
+
+**Đặc điểm:**
+- Token được **hash (SHA256)** trước khi lưu vào database
+- Index trên `user_id` và `expires_at` để tối ưu queries
+- Soft delete để có thể revoke và audit
+
+### 7.2.3. Token Generation và Storage
+
+**Generate Refresh Token:**
+
+```go
+func GenerateRefreshToken() (string, error) {
+    b := make([]byte, 32) // 32 bytes = 256 bits
+    if _, err := rand.Read(b); err != nil {
+        return "", err
+    }
+    return base64.URLEncoding.EncodeToString(b), nil
+}
+```
+
+**Hash Token trước khi lưu:**
+
+```go
+func HashToken(token string) string {
+    hash := sha256.Sum256([]byte(token))
+    return hex.EncodeToString(hash[:])
+}
+```
+
+**Lý do hash:**
+- ✅ Bảo mật: Nếu database bị leak, attacker không thể dùng plain tokens
+- ✅ Privacy: Không lưu plain token trong database
+- ✅ One-way: Không thể reverse hash về token gốc
+
+### 7.2.4. Cookie Configuration
+
+Refresh token được set vào cookie với các thuộc tính bảo mật:
+
+```go
+c.Cookie(&fiber.Cookie{
+    Name:     "refresh_token",
+    Value:    refreshToken,
+    Expires:  time.Now().Add(7 * 24 * time.Hour),
+    HTTPOnly: true,  // JavaScript không thể truy cập (chống XSS)
+    Secure:   true,  // Chỉ gửi qua HTTPS (production)
+    SameSite: "Strict", // Chống CSRF
+    Path:     "/api/auth", // Chỉ gửi khi request đến /api/auth/*
+})
+```
+
+**Bảo mật:**
+- **HttpOnly**: Ngăn JavaScript truy cập (chống XSS attacks)
+- **Secure**: Chỉ gửi qua HTTPS (production)
+- **SameSite=Strict**: Chống CSRF attacks
+- **Path**: Giới hạn phạm vi gửi cookie
+
+### 7.2.5. Refresh Token Rotation
+
+Mỗi lần refresh, hệ thống tạo refresh token mới và xóa token cũ:
+
+```go
+func (s *BaseAuthService) Refresh(refreshToken string) (*BaseRefreshResponse, error) {
+    // 1. Validate refresh token
+    tokenRecord, err := s.refreshTokenRepo.GetByToken(refreshToken)
+    if err != nil || tokenRecord.IsExpired() {
+        return nil, errors.New("invalid refresh token")
+    }
+    
+    // 2. Generate new access token
+    newAccessToken := generateAccessToken(user)
+    
+    // 3. Generate new refresh token (rotation)
+    newRefreshToken, _ := utils.GenerateRefreshToken()
+    
+    // 4. Delete old token, save new token
+    s.refreshTokenRepo.DeleteByToken(refreshToken)
+    s.refreshTokenRepo.Create(newRefreshToken, userID, expiresAt)
+    
+    return &BaseRefreshResponse{
+        Token:        newAccessToken,
+        RefreshToken: newRefreshToken,
+    }, nil
+}
+```
+
+**Lợi ích rotation:**
+- ✅ Giảm rủi ro nếu refresh token bị lộ (token cũ bị vô hiệu hóa ngay)
+- ✅ Phát hiện token reuse (nếu token cũ được dùng lại → có thể bị compromise)
+- ✅ Tự động cleanup tokens không dùng
+
+### 7.2.6. Logout và Revocation
+
+**Logout xóa refresh token:**
+
+```go
+func (h *BaseAuthHandler) Logout(c *fiber.Ctx) error {
+    refreshToken := c.Cookies("refresh_token")
+    
+    // Xóa từ database
+    if refreshToken != "" {
+        h.authService.Logout(refreshToken)
+    }
+    
+    // Xóa cookie
+    c.Cookie(&fiber.Cookie{
+        Name:     "refresh_token",
+        Value:    "",
+        Expires:  time.Now().Add(-1 * time.Hour),
+        HTTPOnly: true,
+        Secure:   true,
+        SameSite: "Strict",
+        Path:     "/api/auth",
+    })
+    
+    return c.JSON(fiber.Map{"message": "Đăng xuất thành công"})
+}
+```
+
+**Revocation scenarios:**
+- Logout: Xóa refresh token hiện tại
+- Change password: Xóa tất cả refresh tokens của user
+- Account deactivation: Xóa tất cả refresh tokens
+- Security breach: Có thể revoke tất cả tokens của user
+
+### 7.2.7. Configuration
+
+**Environment Variables:**
+
+```bash
+# Access token expiration (mặc định: 24 giờ)
+JWT_EXPIRATION_HOURS=24
+
+# Refresh token expiration (mặc định: 7 ngày)
+REFRESH_TOKEN_EXPIRATION_DAYS=7
+```
+
+**Config Structure:**
+
+```go
+type JWTConfig struct {
+    Secret            string        // Secret key để ký JWT
+    Expiration        time.Duration // Access token expiration
+    RefreshExpiration time.Duration // Refresh token expiration
+}
+```
+
+### 7.2.8. Best Practices
+
+**✅ Nên làm:**
+- Access token ngắn hạn (15-30 phút cho production)
+- Refresh token rotation mỗi lần refresh
+- Hash refresh token trước khi lưu database
+- HttpOnly + Secure + SameSite cho cookie
+- Revoke tokens khi logout/đổi mật khẩu
+
+**❌ Không nên:**
+- Lưu refresh token trong localStorage (dễ bị XSS)
+- Gửi refresh token trong Authorization header (chỉ dùng cookie)
+- Trả về refresh token trong JSON response (chỉ set cookie)
+- Dùng refresh token làm access token
+
+---
+
+## 7.3. Password Hashing Implementation
 
 ### 7.2.1. Bcrypt Hashing
 
@@ -611,7 +900,7 @@ func CheckPasswordHash(password, hash string) bool {
 
 ---
 
-## 7.3. Rule Matching Algorithm Implementation
+## 7.4. Rule Matching Algorithm Implementation
 
 ### 7.3.1. Cache Data Structures
 
@@ -762,7 +1051,7 @@ func (m *BaseAuthorizationMiddleware) matchPath(pattern, path string) bool {
 
 ---
 
-## 7.4. Cache Refresh Implementation
+## 7.5. Cache Refresh Implementation
 
 ### 7.4.1. Cache Refresh Process
 
@@ -831,7 +1120,7 @@ func (m *BaseAuthorizationMiddleware) InvalidateCache() {
 
 ---
 
-## 7.5. User ID Generation
+## 7.6. User ID Generation
 
 ### 7.5.1. ID Generation Algorithm
 
@@ -871,7 +1160,7 @@ func GenerateID() (string, error) {
 
 ---
 
-## 7.6. Tóm tắt Implementation Details
+## 7.7. Tóm tắt Implementation Details
 
 ### ✅ Key Implementation Points
 
@@ -880,22 +1169,28 @@ func GenerateID() (string, error) {
    - Algorithm confusion prevention với explicit method check
    - HMAC-SHA256 signing với secret key
 
-2. **Password Hashing**
+2. **Refresh Token**
+   - Dual-token strategy (access + refresh)
+   - SHA256 hash trước khi lưu database
+   - Cookie-based với HttpOnly + Secure + SameSite
+   - Token rotation mỗi lần refresh
+
+3. **Password Hashing**
    - bcrypt với DefaultCost (10 rounds)
    - Tự động salt generation và embedding
    - One-way hashing không thể reverse
 
-3. **Rule Matching**
+4. **Rule Matching**
    - O(1) exact match lookup
    - Optimized pattern matching với nested maps
    - Segment-by-segment matching thay vì regex
 
-4. **Cache Management**
+5. **Cache Management**
    - Thread-safe với `sync.RWMutex`
    - Atomic cache refresh
    - Manual invalidation sau rule changes
 
-5. **ID Generation**
+6. **ID Generation**
    - Cryptographically secure random generation
    - 12-character alphanumeric IDs
    - Low collision probability

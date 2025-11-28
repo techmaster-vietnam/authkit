@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 
+	"github.com/techmaster-vietnam/authkit/core"
 	"github.com/techmaster-vietnam/authkit/models"
 	"github.com/techmaster-vietnam/authkit/repository"
 	"github.com/techmaster-vietnam/goerrorkit"
@@ -16,8 +17,9 @@ type RuleFilter = repository.RuleFilter
 
 // RuleService handles rule business logic
 type RuleService struct {
-	ruleRepo *repository.RuleRepository
-	roleRepo *repository.RoleRepository
+	ruleRepo         *repository.RuleRepository
+	roleRepo         *repository.RoleRepository
+	cacheInvalidator core.CacheInvalidator // Optional: để invalidate rules cache khi rule thay đổi
 }
 
 // NewRuleService creates a new rule service
@@ -26,6 +28,12 @@ func NewRuleService(ruleRepo *repository.RuleRepository, roleRepo *repository.Ro
 		ruleRepo: ruleRepo,
 		roleRepo: roleRepo,
 	}
+}
+
+// SetCacheInvalidator sets cache invalidator để service có thể invalidate rules cache
+// Nên được gọi sau khi khởi tạo service nếu cần invalidate cache khi rule thay đổi
+func (s *RuleService) SetCacheInvalidator(invalidator core.CacheInvalidator) {
+	s.cacheInvalidator = invalidator
 }
 
 // UpdateRuleRequest represents update rule request
@@ -197,6 +205,11 @@ func (s *RuleService) UpdateRule(ruleID string, req UpdateRuleRequest) (*models.
 
 	if err := s.ruleRepo.Update(rule); err != nil {
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi cập nhật rule")
+	}
+
+	// Invalidate rules cache sau khi cập nhật rule thành công
+	if s.cacheInvalidator != nil {
+		s.cacheInvalidator.InvalidateRulesCache()
 	}
 
 	return rule, nil

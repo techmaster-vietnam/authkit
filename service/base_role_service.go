@@ -15,8 +15,9 @@ import (
 // BaseRoleService là generic role service
 // TUser phải implement UserInterface, TRole phải implement RoleInterface
 type BaseRoleService[TUser core.UserInterface, TRole core.RoleInterface] struct {
-	roleRepo core.RoleRepositoryInterface[TRole]
-	userRepo core.UserRepositoryInterface[TUser]
+	roleRepo         core.RoleRepositoryInterface[TRole]
+	userRepo         core.UserRepositoryInterface[TUser]
+	cacheInvalidator core.CacheInvalidator // Optional: để invalidate rules cache khi role bị xóa
 }
 
 // NewBaseRoleService tạo mới BaseRoleService với generic types
@@ -28,6 +29,12 @@ func NewBaseRoleService[TUser core.UserInterface, TRole core.RoleInterface](
 		roleRepo: roleRepo,
 		userRepo: userRepo,
 	}
+}
+
+// SetCacheInvalidator sets cache invalidator để service có thể invalidate rules cache
+// Nên được gọi sau khi khởi tạo service nếu cần invalidate cache khi role thay đổi
+func (s *BaseRoleService[TUser, TRole]) SetCacheInvalidator(invalidator core.CacheInvalidator) {
+	s.cacheInvalidator = invalidator
 }
 
 // BaseAddRoleRequest represents add role request
@@ -146,6 +153,13 @@ func (s *BaseRoleService[TUser, TRole]) RemoveRole(roleID uint) error {
 	if err := s.roleRepo.Delete(roleID); err != nil {
 		return goerrorkit.WrapWithMessage(err, "Lỗi khi xóa role")
 	}
+
+	// Invalidate rules cache vì stored procedure đã xóa role_id khỏi rules.roles array
+	// Cần refresh cache để phản ánh thay đổi này
+	if s.cacheInvalidator != nil {
+		s.cacheInvalidator.InvalidateRulesCache()
+	}
+
 	return nil
 }
 
