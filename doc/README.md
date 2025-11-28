@@ -195,12 +195,16 @@ Tài liệu về unit tests cho authorization middleware không cần kết nố
 - **Test Coverage**: Coverage hiện tại và lý do
 - **Mở rộng Tests**: Hướng dẫn tạo integration tests với database
 
-### 12. [Unit Tests cho Authorization Middleware Integration](./12_authorization_integration_test.md)
-Tài liệu về integration tests cho authorization middleware với kết nối PostgreSQL:
-- **Integration Tests**: Test với database thực sự
-- **Test Scenarios**: Các test cases với real repositories và database
-- **Setup và Teardown**: Cách setup test database và cleanup
-- **Best Practices**: Do's và Don'ts cho integration tests
+### 12. [Password Reset - Đặt lại mật khẩu](./12-password-reset.md)
+Tài liệu về tính năng Password Reset cho phép người dùng đặt lại mật khẩu mà không cần password cũ:
+- **Luồng hoạt động**: Request reset token → Nhận token → Reset password
+- **NotificationSender Interface**: Implement email/SMS để gửi reset token
+  - EmailNotificationSender, SMSNotificationSender, CombinedNotificationSender
+  - TestNotificationSender cho development/testing
+- **API Endpoints**: Request password reset và reset password
+- **Bảo mật**: Token expiration, one-time use, email enumeration protection
+- **Debug trong Development**: Sử dụng TestNotificationSender, console logging, Python script testing
+- **Production Implementation**: Ví dụ với SMTP và Twilio
 
 ---
 
@@ -232,6 +236,9 @@ Tài liệu về integration tests cho authorization middleware với kết nố
 
 ### Testing
 - **[Unit Tests cho Authorization Middleware](./11_authorization_unittest.md)**: Unit tests không cần database
+
+### Tính năng bổ sung
+- **[Password Reset](./12-password-reset.md)**: Đặt lại mật khẩu không cần password cũ với email/SMS notification
 
 ---
 

@@ -10,3 +10,15 @@
   "path": "GET /api/auth/profile/coolfoo%40gmail.com",
   "timestamp": "2025-11-28T17:09:14+07:00"
 }
+{
+  "data": {
+    "email": "bob@gmail.com"
+  },
+  "error_type": "BUSINESS",
+  "file": "base_auth_service.go:200",
+  "function": "service.(*BaseAuthService[...]).Register",
+  "level": "error",
+  "message": "Email đã tồn tại",
+  "path": "POST /api/auth/register",
+  "timestamp": "2025-11-28T23:38:50+07:00"
+}
