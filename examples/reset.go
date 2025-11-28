@@ -30,6 +30,8 @@ func resetDatabase(db *gorm.DB) error {
 	fmt.Println("Dropping all tables...")
 	dropTablesSQL := `
 		DROP TABLE IF EXISTS blogs CASCADE;
+		DROP TABLE IF EXISTS password_reset_tokens CASCADE;
+		DROP TABLE IF EXISTS refresh_tokens CASCADE;
 		DROP TABLE IF EXISTS user_roles CASCADE;
 		DROP TABLE IF EXISTS rules CASCADE;
 		DROP TABLE IF EXISTS roles CASCADE;

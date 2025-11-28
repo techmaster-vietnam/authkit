@@ -38,7 +38,7 @@ func initRoles(db *gorm.DB) error {
 		system bool // Thêm field này
 	}{
 		{id: 1, name: "super_admin", system: true},
-		{id: 2, name: "admin"},
+		{id: 2, name: "admin", system: true},
 		{id: 3, name: "editor"},
 		{id: 4, name: "author"},
 		{id: 5, name: "reader"},
@@ -92,7 +92,7 @@ func initUsers(db *gorm.DB) error {
 		roles    []string
 	}{
 		{
-			email:    "cuong@techmaster.vn",
+			email:    "superadmin@gmail.com",
 			password: superAdminPassword,
 			fullName: "Super Admin User",
 			mobile:   "0902209011",

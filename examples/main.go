@@ -30,7 +30,8 @@ func main() {
 		MaxFileSize:   10,
 		MaxBackups:    5,
 		MaxAge:        30,
-		LogLevel:      "info",
+		LogLevel:      "trace",
+		FileLogLevel:  "error",
 	})
 
 	// 2. Configure stack trace for this application
@@ -131,6 +132,16 @@ func main() {
 
 	blogHandler := NewBlogHandler()   // Application-specific handler
 	demoHandler := NewDemoHandler(ak) // Demo handler for new features
+
+	// Optional: Set notification sender để gửi email/tin nhắn khi reset password
+	// Xem notification_sender_example.go để biết cách implement
+	//
+	// Cho môi trường test: sử dụng TestNotificationSender để lưu token vào file JSON
+	// Python script có thể đọc token từ file này để test
+	ak.AuthService.SetNotificationSender(NewTestNotificationSender("testscript/reset_tokens.json"))
+
+	// Cho production: sử dụng EmailNotificationSender hoặc SMSNotificationSender
+	// ak.AuthService.SetNotificationSender(NewEmailNotificationSender())
 
 	// 11. Setup routes với fluent API
 	setupRoutes(app, ak, blogHandler, demoHandler)

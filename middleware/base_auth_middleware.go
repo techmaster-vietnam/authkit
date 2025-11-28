@@ -41,8 +41,27 @@ func (m *BaseAuthMiddleware[TUser]) RequireAuth() fiber.Handler {
 		// Validate token and extract role IDs (supports both standard and flexible token formats)
 		userID, _, roleIDs, err := utils.ValidateTokenAndExtractRoleIDs(token, m.config.JWT.Secret)
 		if err != nil {
+			errMsg := err.Error()
+			isExpired := strings.Contains(strings.ToLower(errMsg), "expired")
+			
+			// Token hết hạn là trạng thái bình thường trong authentication flow
+			// Client có thể refresh token để lấy token mới
+			// Không log vào file errors.log vì đây là behavior bình thường
+			if isExpired {
+				// Return error trực tiếp từ Fiber để không trigger logging của goerrorkit
+				// Format response nhất quán với goerrorkit
+				return c.Status(401).JSON(fiber.Map{
+					"error": "Token đã hết hạn",
+					"type":  "AUTH",
+					"data": map[string]interface{}{
+						"error": errMsg,
+					},
+				})
+			}
+			
+			// Các lỗi khác (invalid signature, malformed token) vẫn log như bình thường
 			return goerrorkit.NewAuthError(401, "Token không hợp lệ").WithData(map[string]interface{}{
-				"error": err.Error(),
+				"error": errMsg,
 			})
 		}
 

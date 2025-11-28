@@ -39,3 +39,6 @@ dist/
 sample/
 
 *.log
+
+# Test files
+examples/testscript/reset_tokens.json

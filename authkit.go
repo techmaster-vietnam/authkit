@@ -28,8 +28,9 @@ type (
 
 // Interfaces - Export interfaces
 type (
-	UserInterface = core.UserInterface
-	RoleInterface = core.RoleInterface
+	UserInterface        = core.UserInterface
+	RoleInterface       = core.RoleInterface
+	NotificationSender  = core.NotificationSender
 )
 
 // JWTCustomizer là callback function để tùy chỉnh JWT claims
@@ -123,7 +124,7 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 	}
 
 	// Auto migrate với custom models
-	if err := b.db.AutoMigrate(&b.userModel, &b.roleModel, &models.Rule{}, &models.RefreshToken{}); err != nil {
+	if err := b.db.AutoMigrate(&b.userModel, &b.roleModel, &models.Rule{}, &models.RefreshToken{}, &models.PasswordResetToken{}); err != nil {
 		return nil, err
 	}
 
@@ -132,13 +133,14 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 	roleRepo := repository.NewBaseRoleRepository[TRole](b.db)
 	ruleRepo := repository.NewRuleRepository(b.db, b.config.ServiceName)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(b.db)
+	passwordResetTokenRepo := repository.NewPasswordResetTokenRepository(b.db)
 
 	// Initialize middleware với generic types (cần khởi tạo trước để inject vào services)
 	authMiddleware := middleware.NewBaseAuthMiddleware(b.config, userRepo)
 	authzMiddleware := middleware.NewBaseAuthorizationMiddleware(ruleRepo, roleRepo, userRepo)
 
 	// Initialize services với JWT customizer nếu có
-	authService := service.NewBaseAuthService(userRepo, roleRepo, refreshTokenRepo, b.config)
+	authService := service.NewBaseAuthService(userRepo, roleRepo, refreshTokenRepo, passwordResetTokenRepo, b.config)
 	if b.jwtCustomizer != nil {
 		authService.SetJWTCustomizer(b.jwtCustomizer)
 	}
@@ -152,7 +154,7 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 	ruleService.SetCacheInvalidator(cacheInvalidator)
 
 	// Initialize handlers với generic types
-	authHandler := handlers.NewBaseAuthHandler(authService)
+	authHandler := handlers.NewBaseAuthHandler(authService, roleRepo)
 	roleHandler := handlers.NewBaseRoleHandler(roleService)
 	ruleHandler := handlers.NewBaseRuleHandler(ruleService, authzMiddleware)
 

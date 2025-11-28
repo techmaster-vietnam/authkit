@@ -8,7 +8,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/techmaster-vietnam/goerrorkit v0.1.6
+	github.com/techmaster-vietnam/goerrorkit v0.1.8
 	golang.org/x/crypto v0.44.0
 	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5

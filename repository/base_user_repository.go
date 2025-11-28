@@ -35,6 +35,13 @@ func (r *BaseUserRepository[T]) GetByEmail(email string) (T, error) {
 	return user, err
 }
 
+// GetByMobile lấy user theo mobile
+func (r *BaseUserRepository[T]) GetByMobile(mobile string) (T, error) {
+	var user T
+	err := r.db.Preload("Roles").Where("mobile = ?", mobile).First(&user).Error
+	return user, err
+}
+
 // Update cập nhật user
 func (r *BaseUserRepository[T]) Update(user T) error {
 	return r.db.Save(&user).Error
@@ -44,6 +51,12 @@ func (r *BaseUserRepository[T]) Update(user T) error {
 func (r *BaseUserRepository[T]) Delete(id string) error {
 	var user T
 	return r.db.Where("id = ?", id).Delete(&user).Error
+}
+
+// HardDelete hard delete user (permanently remove from database)
+func (r *BaseUserRepository[T]) HardDelete(id string) error {
+	var user T
+	return r.db.Unscoped().Where("id = ?", id).Delete(&user).Error
 }
 
 // List lấy danh sách users với pagination
@@ -64,4 +77,3 @@ func (r *BaseUserRepository[T]) List(offset, limit int) ([]T, int64, error) {
 func (r *BaseUserRepository[T]) DB() interface{} {
 	return r.db
 }
-

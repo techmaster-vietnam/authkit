@@ -62,3 +62,14 @@ type UserRepositoryInterface[TUser UserInterface] interface {
 	List(offset, limit int) ([]TUser, int64, error)
 	DB() interface{} // Trả về *gorm.DB nhưng dùng interface{} để tránh circular dependency
 }
+
+// NotificationSender là interface để gửi email hoặc tin nhắn xác thực
+// Người dùng có thể implement interface này để tích hợp với hệ thống email/SMS của họ
+type NotificationSender interface {
+	// SendPasswordResetToken gửi password reset token đến user qua email hoặc tin nhắn
+	// email: Email của user cần reset password
+	// token: Reset token (plain text, sẽ được hash khi lưu vào DB)
+	// expiresIn: Thời gian token còn hiệu lực (ví dụ: "1 giờ")
+	// Returns: error nếu gửi thất bại
+	SendPasswordResetToken(email string, token string, expiresIn string) error
+}

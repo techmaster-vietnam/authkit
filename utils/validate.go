@@ -178,3 +178,18 @@ func ValidatePassword(password string, cfg config.PasswordConfig) error {
 
 	return nil
 }
+
+// IsMobile kiểm tra xem string có phải là số điện thoại không
+// Mobile thường chỉ chứa số (0-9) và có độ dài từ 10-15 ký tự
+func IsMobile(str string) bool {
+	if len(str) < 10 || len(str) > 15 {
+		return false
+	}
+	// Kiểm tra tất cả ký tự đều là số
+	for _, char := range str {
+		if char < '0' || char > '9' {
+			return false
+		}
+	}
+	return true
+}
