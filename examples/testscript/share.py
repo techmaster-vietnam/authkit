@@ -17,6 +17,8 @@ def get_config() -> Dict[str, str]:
         "base_url":"http://localhost:3000",
         "admin_email": "admin@gmail.com",
         "admin_password": "123456",
+        "super_admin_email": "superadmin@gmail.com",
+        "super_admin_password": "123456",
     }
 
 # Biến toàn cục read-only cho base_url
@@ -26,6 +28,7 @@ _BASE_URL: str = get_config()["base_url"]
 RED = '\033[0;31m'
 GREEN = '\033[0;32m'
 YELLOW = '\033[1;33m'
+BLUE = '\033[0;34m'
 RESET = '\033[0m'
 
 def info(msg: str): 
@@ -150,11 +153,11 @@ def get_role_id_by_name(token: str, role_name: str) -> Optional[int]:
 
 def get_user_detail(token: str, identifier: str, verbose: bool = True) -> Optional[Dict]:
     """
-    Lấy thông tin chi tiết người dùng theo ID hoặc email
+    Lấy thông tin chi tiết người dùng theo ID, email hoặc mobile
     
     Args:
         token: JWT token để xác thực
-        identifier: ID hoặc email của user cần lấy thông tin
+        identifier: ID, email hoặc mobile của user cần lấy thông tin
         verbose: Nếu True, in ra thông tin chi tiết. Mặc định là True
     
     Returns:
@@ -164,9 +167,11 @@ def get_user_detail(token: str, identifier: str, verbose: bool = True) -> Option
     if verbose:
         info(f"Đang lấy thông tin chi tiết cho: {identifier}...")
     try:
+        # URL encode identifier để đảm bảo an toàn khi truyền trong URL path
+        from urllib.parse import quote
+        encoded_identifier = quote(identifier, safe='')
         resp = requests.get(
-            f"{_BASE_URL}/api/users/detail",
-            params={"identifier": identifier},
+            f"{_BASE_URL}/api/auth/profile/{encoded_identifier}",
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -222,13 +227,186 @@ def get_user_detail(token: str, identifier: str, verbose: bool = True) -> Option
         error(f"Lỗi không mong đợi: {str(e)}")
         return None
 
-def get_user_roles(token: str, identifier: str) -> Optional[list]:
+def print_section(title: str):
     """
-    Lấy danh sách roles của user theo ID hoặc email
+    In tiêu đề section với format đẹp
+    
+    Args:
+        title: Tiêu đề section cần in
+    """
+    print()
+    print("=" * 80)
+    print(f"{BLUE}{title}{RESET}")
+    print("=" * 80)
+    print()
+
+
+def login_with_error_handling(email: str, password: str, account_name: str = None) -> str:
+    """
+    Login với error handling tự động
+    
+    Args:
+        email: Email để đăng nhập
+        password: Mật khẩu
+        account_name: Tên account để hiển thị trong error message (mặc định là email)
+    
+    Returns:
+        Token nếu thành công
+    
+    Raises:
+        SystemExit: Nếu login thất bại
+    """
+    if account_name is None:
+        account_name = email
+    
+    try:
+        token, _ = login(email, password)
+        return token
+    except SystemExit:
+        error(f"Không thể đăng nhập với {account_name} account")
+        sys.exit(1)
+    except Exception as e:
+        error(f"Lỗi khi đăng nhập: {str(e)}")
+        sys.exit(1)
+
+def login_account(account_type: str = "super_admin") -> Tuple[bool, Optional[str], Optional[str]]:
+    """
+    Login với account từ config (super_admin hoặc admin) mà không exit chương trình
+    Hàm dùng chung để login với các account đặc biệt từ config
+    
+    Args:
+        account_type: Loại account ("super_admin" hoặc "admin")
+    
+    Returns:
+        Tuple (success, token, error_message)
+        - success: True nếu login thành công, False nếu lỗi
+        - token: JWT token nếu thành công, None nếu lỗi
+        - error_message: Thông báo lỗi nếu có, None nếu thành công
+    """
+    config = get_config()
+    
+    if account_type == "super_admin":
+        email_key = "super_admin_email"
+        password_key = "super_admin_password"
+        account_name = "super_admin"
+        default_email = "superadmin@gmail.com"
+    elif account_type == "admin":
+        email_key = "admin_email"
+        password_key = "admin_password"
+        account_name = "admin"
+        default_email = "admin@gmail.com"
+    else:
+        return False, None, f"Account type không hợp lệ: {account_type}. Chỉ hỗ trợ 'super_admin' hoặc 'admin'"
+    
+    email = config.get(email_key, default_email)
+    password = config.get(password_key, "123456")
+    
+    try:
+        token, _ = login(email, password)
+        return True, token, None
+    except SystemExit:
+        return False, None, f"Không thể đăng nhập với {account_name} ({email}). Vui lòng kiểm tra password."
+    except Exception as e:
+        return False, None, f"Lỗi không mong đợi: {str(e)}"
+
+
+def get_profile(token: str, verbose: bool = True) -> Optional[Dict]:
+    """
+    Lấy thông tin profile của chính mình
     
     Args:
         token: JWT token để xác thực
-        identifier: ID hoặc email của user cần lấy roles
+        verbose: Nếu True, in ra thông tin chi tiết. Mặc định là True
+    
+    Returns:
+        Dictionary chứa thông tin user, hoặc None nếu thất bại
+    """
+    if verbose:
+        info("Đang lấy thông tin profile của chính mình...")
+    
+    try:
+        resp = requests.get(
+            f"{_BASE_URL}/api/auth/profile",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        # Kiểm tra status code
+        if resp.status_code != 200:
+            error(f"Request thất bại với status code: {resp.status_code}")
+            try:
+                error_data = resp.json()
+                handle_error_response(error_data, "lấy thông tin profile")
+            except:
+                error(f"Response: {resp.text}")
+            return None
+        
+        data = resp.json()
+        
+        # Kiểm tra response có lỗi không
+        if "error" in data:
+            handle_error_response(data, "lấy thông tin profile")
+            return None
+        
+        # Kiểm tra có data không
+        if "data" not in data:
+            error("Response không hợp lệ:")
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+            return None
+        
+        if verbose:
+            success("Lấy thông tin profile thành công!")
+        
+        user = data.get("data", {})
+        
+        # In ra thông tin user (chỉ khi verbose=True)
+        if verbose:
+            info(f"User ID: {user.get('id', 'N/A')}")
+            info(f"Email: {user.get('email', 'N/A')}")
+            info(f"Full Name: {user.get('full_name', 'N/A')}")
+            info(f"Mobile: {user.get('mobile', 'N/A')}")
+            info(f"Address: {user.get('address', 'N/A')}")
+            info(f"Is Active: {user.get('is_active', 'N/A')}")
+        
+        return user
+        
+    except requests.exceptions.RequestException as e:
+        error(f"Lỗi khi gọi API: {str(e)}")
+        return None
+    except Exception as e:
+        error(f"Lỗi không mong đợi: {str(e)}")
+        return None
+
+
+def get_profile_by_identifier(token: str, identifier: str, verbose: bool = True) -> Optional[Dict]:
+    """
+    Lấy thông tin profile theo identifier (id, email, hoặc mobile)
+    Chỉ dành cho admin và super_admin
+    Sử dụng hàm get_user_detail để tận dụng code chung
+    
+    Args:
+        token: JWT token để xác thực
+        identifier: ID, email, hoặc mobile của user cần lấy thông tin
+        verbose: Nếu True, in ra thông tin chi tiết. Mặc định là True
+    
+    Returns:
+        Dictionary chứa thông tin user, hoặc None nếu thất bại
+    """
+    user_detail = get_user_detail(token, identifier, verbose)
+    
+    if user_detail:
+        # Trả về user object từ user_detail để tương thích
+        return user_detail.get("user", {})
+    
+    return None
+
+
+def get_user_roles(token: str, identifier: str) -> Optional[list]:
+    """
+    Lấy danh sách roles của user theo ID, email hoặc mobile
+    
+    Args:
+        token: JWT token để xác thực
+        identifier: ID, email hoặc mobile của user cần lấy roles
     
     Returns:
         List các roles dưới dạng [[role_id, role_name], ...], hoặc None nếu thất bại
@@ -236,9 +414,11 @@ def get_user_roles(token: str, identifier: str) -> Optional[list]:
     # Gọi API để lấy user detail
     info(f"Đang lấy danh sách roles cho: {identifier}...")
     try:
+        # URL encode identifier để đảm bảo an toàn khi truyền trong URL path
+        from urllib.parse import quote
+        encoded_identifier = quote(identifier, safe='')
         resp = requests.get(
-            f"{_BASE_URL}/api/users/detail",
-            params={"identifier": identifier},
+            f"{_BASE_URL}/api/auth/profile/{encoded_identifier}",
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -579,3 +759,122 @@ def print_rules_list(token: str, rules: Optional[list], title: str = "Danh sách
         print(output)
     
     print()
+
+def login_safe(email: str, password: str) -> Tuple[bool, Optional[str], Optional[str]]:
+    """
+    Login mà không exit chương trình, trả về tuple để xử lý lỗi
+    
+    Args:
+        email: Email để login
+        password: Password để login
+    
+    Returns:
+        Tuple (success, token, error_message)
+        - success: True nếu login thành công, False nếu lỗi
+        - token: JWT token nếu thành công, None nếu lỗi
+        - error_message: Thông báo lỗi nếu có, None nếu thành công
+    """
+    try:
+        token, _ = login(email, password)
+        return True, token, None
+    except SystemExit:
+        return False, None, "Đăng nhập thất bại"
+    except Exception as e:
+        return False, None, f"Lỗi không mong đợi: {str(e)}"
+
+def delete_user(token: str, user_id: str) -> Tuple[bool, Optional[str]]:
+    """
+    Hard delete user bằng token (thường là super_admin hoặc admin)
+    
+    Args:
+        token: JWT token để xác thực
+        user_id: ID của user cần xóa
+    
+    Returns:
+        Tuple (success, error_message)
+        - success: True nếu xóa thành công, False nếu lỗi
+        - error_message: Thông báo lỗi nếu có, None nếu thành công
+    """
+    try:
+        info(f"Đang xóa user ID: {user_id}...")
+        resp = requests.delete(
+            f"{_BASE_URL}/api/auth/profile/{user_id}",
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=10
+        )
+        
+        # Parse response
+        try:
+            resp_data = resp.json()
+        except json.JSONDecodeError:
+            return False, f"Response không phải JSON. Status: {resp.status_code}"
+        
+        # Kiểm tra lỗi
+        if resp.status_code != 200:
+            error_msg = "Lỗi xóa user không xác định"
+            
+            # Thử lấy từ "error" object (nếu là dict)
+            error_obj = resp_data.get("error")
+            if isinstance(error_obj, dict):
+                error_msg = error_obj.get("message", error_msg)
+            elif isinstance(error_obj, str):
+                error_msg = error_obj
+            
+            # Thử lấy từ top level "message" (format của goerrorkit)
+            if "message" in resp_data:
+                error_msg = resp_data.get("message", error_msg)
+            
+            return False, error_msg
+        
+        success(f"Xóa user ID {user_id} thành công!")
+        return True, None
+        
+    except requests.exceptions.RequestException as e:
+        return False, f"Lỗi kết nối: {str(e)}"
+    except Exception as e:
+        return False, f"Lỗi không mong đợi: {str(e)}"
+
+def confirm_reset(action_description: str = "reset dữ liệu", warning_message: str = None) -> bool:
+    """
+    Đợi người dùng xác nhận có muốn reset dữ liệu hay không
+    Hàm dùng chung để xác nhận các thao tác reset/xóa dữ liệu
+    
+    Args:
+        action_description: Mô tả hành động sẽ thực hiện (ví dụ: "xóa các user", "reset roles")
+        warning_message: Thông báo cảnh báo tùy chỉnh. Nếu None, sẽ dùng thông báo mặc định
+    
+    Returns:
+        True nếu người dùng xác nhận, False nếu không
+    """
+    print()
+    print("=" * 80)
+    info(f"XÁC NHẬN {action_description.upper()}")
+    print("=" * 80)
+    print()
+    print(f"Bạn có muốn {action_description} không?")
+    
+    if warning_message:
+        print(f"⚠️  {warning_message}")
+    else:
+        print("⚠️  Lưu ý: Đây là thao tác HARD DELETE, không thể hoàn tác!")
+    print()
+    
+    while True:
+        try:
+            response = input("Nhập 'y' hoặc 'yes' để xác nhận, 'n' hoặc 'no' để hủy: ").strip().lower()
+            
+            if response in ['y', 'yes']:
+                return True
+            elif response in ['n', 'no']:
+                return False
+            else:
+                error("Vui lòng nhập 'y'/'yes' hoặc 'n'/'no'")
+                print()
+        except KeyboardInterrupt:
+            print()
+            info("Đã hủy bởi người dùng.")
+            return False
+        except EOFError:
+            print()
+            info("Đã hủy bởi người dùng.")
+            return False

@@ -11,7 +11,11 @@ except ImportError:
     print("❌ Cần cài đặt requests: pip install requests")
     sys.exit(1)
 
-from share import info, success, error, get_base_url
+from share import (
+    info, success, error, get_base_url, print_section,
+    get_user_detail, confirm_reset, login_account,
+    login_safe, delete_user
+)
 
 # Định nghĩa cấu trúc user
 UserData = Dict[str, str]
@@ -60,25 +64,22 @@ def register_user(user_data: UserData) -> Tuple[bool, Optional[Dict], Optional[s
         
         # Kiểm tra lỗi
         if resp.status_code != 201:
-            # Lấy thông báo lỗi từ response
-            # goerrorkit có thể trả về error ở nhiều format khác nhau
+            # Sử dụng handle_error_response để format error message
             error_msg = "Lỗi không xác định"
-            error_details = {}
             
             # Thử lấy từ "error" object (nếu là dict)
             error_obj = resp_data.get("error")
             if isinstance(error_obj, dict):
                 error_msg = error_obj.get("message", error_msg)
-                error_details = error_obj.get("data", {})
             elif isinstance(error_obj, str):
-                # Nếu error là string
                 error_msg = error_obj
             
             # Thử lấy từ top level "message" (format của goerrorkit)
             if "message" in resp_data:
                 error_msg = resp_data.get("message", error_msg)
             
-            # Thử lấy từ top level "data" (chi tiết validation)
+            # Thử lấy chi tiết validation từ top level "data"
+            error_details = {}
             if "data" in resp_data and isinstance(resp_data.get("data"), dict):
                 error_details = resp_data.get("data", {})
             
@@ -101,67 +102,42 @@ def register_user(user_data: UserData) -> Tuple[bool, Optional[Dict], Optional[s
     except Exception as e:
         return False, None, f"Lỗi không xác định: {str(e)}"
 
-def test_login(email: str, password: str) -> Tuple[bool, Optional[str], Optional[str]]:
+def display_registered_users(token: str, user_ids: List[str]) -> None:
     """
-    Test login với email và password
+    Hiển thị danh sách các user đã đăng ký thành công
     
     Args:
-        email: Email để login
-        password: Password để login
-    
-    Returns:
-        Tuple (success, token, error_message)
-        - success: True nếu login thành công, False nếu lỗi
-        - token: JWT token nếu thành công, None nếu lỗi
-        - error_message: Thông báo lỗi nếu có, None nếu thành công
+        token: JWT token để xác thực
+        user_ids: Danh sách user IDs cần hiển thị
     """
-    base_url = get_base_url()
+    print_section("DANH SÁCH USER ĐÃ ĐĂNG KÝ THÀNH CÔNG")
     
-    try:
-        info(f"Đang test login với email: {email}...")
-        resp = requests.post(
-            f"{base_url}/api/auth/login",
-            json={"email": email, "password": password},
-            timeout=10
-        )
+    if not user_ids:
+        info("Không có user nào được đăng ký thành công.")
+        print()
+        return
+    
+    print(f"Tổng số: {len(user_ids)} user(s)")
+    print()
+    print("-" * 80)
+    
+    for idx, user_id in enumerate(user_ids, 1):
+        print(f"\n[{idx}/{len(user_ids)}] User ID: {user_id}")
+        user_detail = get_user_detail(token, user_id, verbose=False)
         
-        # Parse response
-        try:
-            resp_data = resp.json()
-        except json.JSONDecodeError:
-            return False, None, f"Response không phải JSON. Status: {resp.status_code}"
+        if user_detail:
+            user = user_detail.get("user", {})
+            print(f"   Email: {user.get('email', 'N/A')}")
+            print(f"   Full Name: {user.get('full_name', 'N/A')}")
+            print(f"   Mobile: {user.get('mobile', 'N/A')}")
+            print(f"   Address: {user.get('address', 'N/A')}")
+            print(f"   Is Active: {user.get('is_active', 'N/A')}")
+        else:
+            error(f"   Không thể lấy thông tin user ID: {user_id}")
         
-        # Kiểm tra lỗi
-        if resp.status_code != 200:
-            # Lấy thông báo lỗi từ response (tương tự như register_user)
-            error_msg = "Lỗi đăng nhập không xác định"
-            
-            # Thử lấy từ "error" object (nếu là dict)
-            error_obj = resp_data.get("error")
-            if isinstance(error_obj, dict):
-                error_msg = error_obj.get("message", error_msg)
-            elif isinstance(error_obj, str):
-                # Nếu error là string
-                error_msg = error_obj
-            
-            # Thử lấy từ top level "message" (format của goerrorkit)
-            if "message" in resp_data:
-                error_msg = resp_data.get("message", error_msg)
-            
-            return False, None, error_msg
-        
-        # Lấy token
-        token = resp_data.get("data", {}).get("token")
-        if not token:
-            return False, None, "Không tìm thấy token trong response"
-        
-        success(f"Login thành công! Token: {token[:50]}...")
-        return True, token, None
-        
-    except requests.exceptions.RequestException as e:
-        return False, None, f"Lỗi kết nối: {str(e)}"
-    except Exception as e:
-        return False, None, f"Lỗi không xác định: {str(e)}"
+        print("-" * 80)
+    
+    print()
 
 def main():
     """Hàm main để test đăng ký user"""
@@ -249,11 +225,7 @@ def main():
         }
     ]
     
-    print()
-    print("=" * 80)
-    info("Bắt đầu script test đăng ký user")
-    print("=" * 80)
-    print()
+    print_section("Bắt đầu script test đăng ký user")
     info(f"Tổng số test cases: {len(test_users)}")
     print()
     
@@ -262,6 +234,9 @@ def main():
     error_count = 0
     login_success_count = 0
     login_fail_count = 0
+    
+    # Mảng lưu ID của các user đăng ký thành công
+    registered_user_ids: List[str] = []
     
     # Quét từng bản ghi
     for idx, user_data in enumerate(test_users, 1):
@@ -281,6 +256,11 @@ def main():
         if register_success:
             success_count += 1
             
+            # Lưu user ID vào mảng nếu đăng ký thành công
+            if user_info and user_info.get('id'):
+                user_id = user_info.get('id')
+                registered_user_ids.append(user_id)
+            
             # Hiển thị thông tin user đã đăng ký
             if user_info:
                 print(f"   User ID: {user_info.get('id', 'N/A')}")
@@ -292,7 +272,7 @@ def main():
             print()
             
             # Test login sau khi đăng ký thành công
-            login_success, token, login_error = test_login(
+            login_success, token, login_error = login_safe(
                 user_data.get("email", ""),
                 user_data.get("password", "")
             )
@@ -309,12 +289,8 @@ def main():
         print()
     
     # Báo cáo kết quả tổng hợp
-    print("=" * 80)
-    print("=" * 80)
-    info("KẾT QUẢ TỔNG HỢP")
-    print("=" * 80)
-    print("=" * 80)
     print()
+    print_section("KẾT QUẢ TỔNG HỢP")
     
     print(f"📊 Tổng số test cases: {len(test_users)}")
     print()
@@ -335,8 +311,57 @@ def main():
     if error_count > 0:
         error(f"Tổng cộng có {error_count} user đăng ký thất bại (có thể do validation hoặc email trùng).")
     
-    print("=" * 80)
-    print("=" * 80)
+    print()
+    
+    # Hiển thị danh sách và xóa user đã đăng ký thành công bằng super_admin
+    if registered_user_ids:
+        print()
+        print("=" * 80)
+        print("=" * 80)
+        
+        # Login với super_admin để lấy thông tin user
+        login_success, super_admin_token, login_error = login_account("super_admin")
+        
+        if not login_success:
+            error(f"Không thể đăng nhập với super_admin: {login_error}")
+            print("Không thể hiển thị danh sách user và xóa users.")
+        else:
+            # Hiển thị danh sách user đã đăng ký
+            display_registered_users(super_admin_token, registered_user_ids)
+            
+            # Đợi người dùng xác nhận trước khi xóa
+            if confirm_reset("xóa tất cả các user đã đăng ký ở trên"):
+                print()
+                print_section("BẮT ĐẦU XÓA CÁC USER ĐÃ ĐĂNG KÝ")
+                info(f"Tổng số user sẽ bị xóa: {len(registered_user_ids)}")
+                print()
+                
+                # Xóa từng user
+                delete_success_count = 0
+                delete_fail_count = 0
+                
+                for user_id in registered_user_ids:
+                    delete_success, delete_error = delete_user(super_admin_token, user_id)
+                    if delete_success:
+                        delete_success_count += 1
+                    else:
+                        delete_fail_count += 1
+                        error(f"Xóa user ID {user_id} thất bại: {delete_error}")
+                    print()
+                
+                # Báo cáo kết quả xóa
+                print()
+                print_section("KẾT QUẢ XÓA USERS")
+                print(f"   ✅ Xóa thành công: {delete_success_count}")
+                print(f"   ❌ Xóa thất bại: {delete_fail_count}")
+                print()
+            else:
+                print()
+                info("Đã hủy việc xóa users. Các user đã đăng ký vẫn còn trong hệ thống.")
+                print()
+    else:
+        info("Không có user nào được đăng ký thành công để xóa.")
+        print()
 
 if __name__ == "__main__":
     main()
