@@ -25,13 +25,13 @@ type JWTCustomizer[TUser core.UserInterface] func(user TUser, roleIDs []uint) ut
 // BaseAuthService là generic auth service
 // TUser phải implement UserInterface, TRole phải implement RoleInterface
 type BaseAuthService[TUser core.UserInterface, TRole core.RoleInterface] struct {
-	userRepo                *repository.BaseUserRepository[TUser]
-	roleRepo                *repository.BaseRoleRepository[TRole]
-	refreshTokenRepo        *repository.RefreshTokenRepository
-	passwordResetTokenRepo  *repository.PasswordResetTokenRepository
-	config                  *config.Config
-	jwtCustomizer           JWTCustomizer[TUser]
-	notificationSender      core.NotificationSender // Callback để gửi email/tin nhắn
+	userRepo               *repository.BaseUserRepository[TUser]
+	roleRepo               *repository.BaseRoleRepository[TRole]
+	refreshTokenRepo       *repository.RefreshTokenRepository
+	passwordResetTokenRepo *repository.PasswordResetTokenRepository
+	config                 *config.Config
+	jwtCustomizer          JWTCustomizer[TUser]
+	notificationSender     core.NotificationSender // Callback để gửi email/tin nhắn
 }
 
 // NewBaseAuthService tạo mới BaseAuthService với generic types
@@ -49,7 +49,7 @@ func NewBaseAuthService[TUser core.UserInterface, TRole core.RoleInterface](
 		passwordResetTokenRepo: passwordResetTokenRepo,
 		config:                 cfg,
 		jwtCustomizer:          nil,
-		notificationSender:    nil,
+		notificationSender:     nil,
 	}
 }
 
@@ -922,4 +922,168 @@ func (s *BaseAuthService[TUser, TRole]) ResetPassword(token string, newPassword 
 	_ = s.refreshTokenRepo.DeleteByUserID(user.GetID())
 
 	return nil
+}
+
+// BaseListUsersResponse represents paginated list users response
+// Hỗ trợ cả trường hợp có và không có pagination
+type BaseListUsersResponse[TUser core.UserInterface] struct {
+	Users             []TUser `json:"users"`
+	Total             int64   `json:"total"`
+	Page              *int    `json:"page,omitempty"`        // nil khi không dùng pagination
+	PageSize          *int    `json:"page_size,omitempty"`   // nil khi không dùng pagination
+	TotalPages        *int    `json:"total_pages,omitempty"` // nil khi không dùng pagination
+	PaginationEnabled bool    `json:"pagination_enabled"`    // true nếu đang dùng pagination
+}
+
+// ListUsersOptions chứa các tùy chọn cho ListUsers
+type ListUsersOptions struct {
+	Page                int    // Số trang (bắt đầu từ 1)
+	PageSize            int    // Số lượng items mỗi trang
+	EnablePagination     *bool  // nil = auto, true = bật, false = tắt
+	PaginationThreshold int    // Ngưỡng để tự động bật pagination (mặc định 100)
+	MaxPageSize         int    // Giới hạn tối đa page_size khi có pagination (mặc định 100)
+	SortBy              string // Trường để sort (email, full_name, hoặc custom field)
+	Order               string // Thứ tự sort: "asc" hoặc "desc" (mặc định "asc")
+}
+
+// ListUsers lấy danh sách users với pagination và filter linh hoạt
+// Hỗ trợ:
+// - Tự động bật pagination khi số lượng user > threshold
+// - Tự động tắt pagination khi số lượng user <= threshold
+// - Cho phép client bật/tắt pagination thủ công
+// - Tham số hóa được số bản ghi trả về trong một page
+func (s *BaseAuthService[TUser, TRole]) ListUsers(page, pageSize int, filter interface{}) (*BaseListUsersResponse[TUser], error) {
+	// Sử dụng options với giá trị mặc định
+	options := ListUsersOptions{
+		Page:                page,
+		PageSize:            pageSize,
+		EnablePagination:    nil, // nil = auto mode
+		PaginationThreshold: 50,  // Mặc định: nếu total <= 100 thì không pagination
+		MaxPageSize:         50,  // Mặc định: max 100 items/page khi có pagination
+	}
+	return s.ListUsersWithOptions(options, filter)
+}
+
+// ListUsersWithOptions lấy danh sách users với các tùy chọn chi tiết
+func (s *BaseAuthService[TUser, TRole]) ListUsersWithOptions(options ListUsersOptions, filter interface{}) (*BaseListUsersResponse[TUser], error) {
+	// Set giá trị mặc định cho options
+	if options.PaginationThreshold <= 0 {
+		options.PaginationThreshold = 50
+	}
+	if options.MaxPageSize <= 0 {
+		options.MaxPageSize = 50
+	}
+
+	// Convert filter to *repository.UserFilter nếu cần
+	var userFilter *repository.UserFilter
+	if filter != nil {
+		if f, ok := filter.(*repository.UserFilter); ok {
+			userFilter = f
+			// Thêm sort options vào filter nếu có (ưu tiên options nếu có)
+			if options.SortBy != "" {
+				userFilter.SortBy = options.SortBy
+				userFilter.Order = options.Order
+				// Validate order
+				if userFilter.Order != "asc" && userFilter.Order != "desc" {
+					userFilter.Order = "asc" // Fallback về "asc" nếu không hợp lệ
+				}
+			} else if userFilter.SortBy != "" {
+				// Nếu filter đã có sort nhưng options không có, validate order trong filter
+				if userFilter.Order != "asc" && userFilter.Order != "desc" {
+					userFilter.Order = "asc" // Fallback về "asc" nếu không hợp lệ
+				}
+			}
+		} else {
+			userFilter = nil
+		}
+	} else if options.SortBy != "" {
+		// Nếu không có filter nhưng có sort, tạo filter mới chỉ để sort
+		userFilter = &repository.UserFilter{
+			SortBy: options.SortBy,
+			Order:  options.Order,
+			Custom: make(map[string]string),
+		}
+		// Validate order
+		if userFilter.Order != "asc" && userFilter.Order != "desc" {
+			userFilter.Order = "asc" // Fallback về "asc" nếu không hợp lệ
+		}
+	}
+
+	// Bước 1: Đếm tổng số users (cần thiết để quyết định có dùng pagination không)
+	// Sử dụng List với limit = 1 để lấy total (repository đã có count query tối ưu)
+	var total int64
+	_, total, err := s.userRepo.List(0, 1, userFilter)
+	if err != nil {
+		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi đếm số lượng users")
+	}
+
+	// Bước 2: Quyết định có dùng pagination không
+	usePagination := false
+	if options.EnablePagination != nil {
+		// Client chỉ định rõ ràng
+		usePagination = *options.EnablePagination
+	} else {
+		// Auto mode: tự động quyết định dựa trên threshold
+		usePagination = total > int64(options.PaginationThreshold)
+	}
+
+	// Bước 3: Validate và xử lý pagination params
+	var page, pageSize int
+	var offset int
+	var totalPages int
+
+	if usePagination {
+		// Có pagination
+		page = options.Page
+		if page < 1 {
+			page = 1
+		}
+		pageSize = options.PageSize
+		if pageSize < 1 {
+			pageSize = 10 // Default page size
+		}
+		if pageSize > options.MaxPageSize {
+			pageSize = options.MaxPageSize // Giới hạn max page size
+		}
+		offset = (page - 1) * pageSize
+		totalPages = int((total + int64(pageSize) - 1) / int64(pageSize))
+	} else {
+		// Không pagination: lấy tất cả records
+		page = 0
+		pageSize = 0 // 0 = unlimited
+		offset = 0
+		totalPages = 0
+	}
+
+	// Bước 4: Lấy users từ repository
+	var users []TUser
+	if usePagination {
+		users, _, err = s.userRepo.List(offset, pageSize, userFilter)
+	} else {
+		// Không pagination: lấy tất cả (sử dụng limit rất lớn)
+		// Sử dụng total + 1 để đảm bảo lấy hết (hoặc có thể dùng limit = 0 nếu GORM hỗ trợ)
+		limit := int(total) + 1000 // Thêm buffer để đảm bảo lấy hết trong trường hợp có thêm records mới
+		if limit > 100000 {
+			limit = 100000 // Giới hạn tối đa để tránh query quá lớn
+		}
+		users, _, err = s.userRepo.List(0, limit, userFilter)
+	}
+	if err != nil {
+		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách users")
+	}
+
+	// Bước 5: Tạo response
+	response := &BaseListUsersResponse[TUser]{
+		Users:             users,
+		Total:             total,
+		PaginationEnabled: usePagination,
+	}
+
+	if usePagination {
+		response.Page = &page
+		response.PageSize = &pageSize
+		response.TotalPages = &totalPages
+	}
+
+	return response, nil
 }

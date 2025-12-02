@@ -44,15 +44,36 @@ func (r *UserRepository) Delete(id string) error {
 	return r.db.Delete(&models.User{}, id).Error
 }
 
-// List lists all users with pagination
-func (r *UserRepository) List(offset, limit int) ([]models.User, int64, error) {
+// List lists all users with pagination and filter
+func (r *UserRepository) List(offset, limit int, filter interface{}) ([]models.User, int64, error) {
 	var users []models.User
 	var total int64
 
-	if err := r.db.Model(&models.User{}).Count(&total).Error; err != nil {
+	// Build query
+	query := r.db.Model(&models.User{})
+
+	// Apply filter nếu có
+	if filter != nil {
+		if userFilter, ok := filter.(*UserFilter); ok {
+			// Filter email
+			if userFilter.Email != "" {
+				query = query.Where("email LIKE ?", "%"+userFilter.Email+"%")
+			}
+			// Filter full_name
+			if userFilter.FullName != "" {
+				query = query.Where("full_name LIKE ?", "%"+userFilter.FullName+"%")
+			}
+			// Custom fields filter không áp dụng cho UserRepository (non-generic)
+			// Vì UserRepository chỉ làm việc với models.User (không có custom fields)
+		}
+	}
+
+	// Count total với filters
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := r.db.Preload("Roles").Offset(offset).Limit(limit).Find(&users).Error
+	// Get users với pagination
+	err := query.Preload("Roles").Offset(offset).Limit(limit).Find(&users).Error
 	return users, total, err
 }

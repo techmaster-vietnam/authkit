@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Script test các endpoint profile:
-- GET /api/auth/profile - Xem profile của chính mình
-- GET /api/auth/profile/:id - Xem profile theo identifier (id, email, mobile) - chỉ admin/super_admin
+- GET /api/user/profile - Xem profile của chính mình
+- GET /api/user/:id - Xem profile theo identifier (id, email, mobile) - chỉ admin/super_admin
 
 Script này kết hợp chức năng từ user_get_profile.py và user_get_detail.py
 """

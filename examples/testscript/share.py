@@ -171,7 +171,7 @@ def get_user_detail(token: str, identifier: str, verbose: bool = True) -> Option
         from urllib.parse import quote
         encoded_identifier = quote(identifier, safe='')
         resp = requests.get(
-            f"{_BASE_URL}/api/auth/profile/{encoded_identifier}",
+            f"{_BASE_URL}/api/user/{encoded_identifier}",
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -326,7 +326,7 @@ def get_profile(token: str, verbose: bool = True) -> Optional[Dict]:
     
     try:
         resp = requests.get(
-            f"{_BASE_URL}/api/auth/profile",
+            f"{_BASE_URL}/api/user/profile",
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -418,7 +418,7 @@ def get_user_roles(token: str, identifier: str) -> Optional[list]:
         from urllib.parse import quote
         encoded_identifier = quote(identifier, safe='')
         resp = requests.get(
-            f"{_BASE_URL}/api/auth/profile/{encoded_identifier}",
+            f"{_BASE_URL}/api/user/{encoded_identifier}",
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -798,7 +798,7 @@ def delete_user(token: str, user_id: str) -> Tuple[bool, Optional[str]]:
     try:
         info(f"Đang xóa user ID: {user_id}...")
         resp = requests.delete(
-            f"{_BASE_URL}/api/auth/profile/{user_id}",
+            f"{_BASE_URL}/api/user/{user_id}",
             headers={"Authorization": f"Bearer {token}"},
             timeout=10
         )
@@ -833,6 +833,195 @@ def delete_user(token: str, user_id: str) -> Tuple[bool, Optional[str]]:
         return False, f"Lỗi kết nối: {str(e)}"
     except Exception as e:
         return False, f"Lỗi không mong đợi: {str(e)}"
+
+def get_rule_by_id(token: str, rule_id: str, verbose: bool = True) -> Optional[Dict]:
+    """
+    Lấy thông tin rule theo ID
+    
+    Args:
+        token: JWT token để xác thực
+        rule_id: ID của rule (ví dụ: "GET|/api/bar")
+        verbose: Nếu True, in ra thông tin chi tiết. Mặc định là True
+    
+    Returns:
+        Dictionary chứa thông tin rule, hoặc None nếu thất bại
+    """
+    try:
+        if verbose:
+            info(f"Đang lấy thông tin rule: {rule_id}...")
+        
+        # URL encode rule_id để đảm bảo an toàn khi truyền trong URL path
+        from urllib.parse import quote
+        encoded_rule_id = quote(rule_id, safe='')
+        
+        resp = requests.get(
+            f"{_BASE_URL}/api/rules/{encoded_rule_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        # Kiểm tra status code
+        if resp.status_code != 200:
+            error(f"Request thất bại với status code: {resp.status_code}")
+            try:
+                error_data = resp.json()
+                handle_error_response(error_data, "lấy thông tin rule")
+            except:
+                error(f"Response: {resp.text}")
+            return None
+        
+        data = resp.json()
+        
+        # Kiểm tra response có lỗi không
+        if "error" in data:
+            handle_error_response(data, "lấy thông tin rule")
+            return None
+        
+        # Kiểm tra có data không
+        if "data" not in data:
+            error("Response không hợp lệ:")
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+            return None
+        
+        if verbose:
+            success("Lấy thông tin rule thành công!")
+        
+        rule = data.get("data", {})
+        return rule
+        
+    except requests.exceptions.RequestException as e:
+        error(f"Lỗi khi gọi API: {str(e)}")
+        return None
+    except Exception as e:
+        error(f"Lỗi không mong đợi: {str(e)}")
+        return None
+
+def update_rule(token: str, rule_id: str, rule_type: str = None, roles: list = None, description: str = None, verbose: bool = True) -> Tuple[bool, Optional[Dict]]:
+    """
+    Cập nhật rule
+    
+    Args:
+        token: JWT token để xác thực
+        rule_id: ID của rule (ví dụ: "GET|/api/bar")
+        rule_type: Type của rule (PUBLIC, ALLOW, FORBID) - tùy chọn
+        roles: Danh sách role names hoặc role IDs - tùy chọn
+        description: Mô tả rule - tùy chọn
+        verbose: Nếu True, in ra thông tin chi tiết. Mặc định là True
+    
+    Returns:
+        Tuple (success, rule_data)
+        - success: True nếu thành công, False nếu thất bại
+        - rule_data: Dictionary chứa thông tin rule sau khi cập nhật, hoặc None nếu thất bại
+    """
+    try:
+        if verbose:
+            info(f"Đang cập nhật rule: {rule_id}...")
+            if rule_type:
+                info(f"  - Type: {rule_type}")
+            if roles:
+                info(f"  - Roles: {roles}")
+            if description:
+                info(f"  - Description: {description}")
+        
+        # Xây dựng request body
+        body = {"id": rule_id}
+        if rule_type:
+            body["type"] = rule_type
+        if roles is not None:
+            body["roles"] = roles
+        if description:
+            body["description"] = description
+        
+        resp = requests.put(
+            f"{_BASE_URL}/api/rules",
+            json=body,
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        resp_data = resp.json()
+        
+        if verbose:
+            print()
+            info("Response từ server:")
+            print(json.dumps(resp_data, indent=2, ensure_ascii=False))
+        
+        if resp.status_code >= 400 or "error" in resp_data:
+            handle_error_response(resp_data, "cập nhật rule")
+            return False, None
+        
+        if verbose:
+            success("Cập nhật rule thành công!")
+        
+        rule = resp_data.get("data", {})
+        return True, rule
+        
+    except requests.exceptions.RequestException as e:
+        error(f"Lỗi khi gọi API: {str(e)}")
+        return False, None
+    except Exception as e:
+        error(f"Lỗi không mong đợi: {str(e)}")
+        return False, None
+
+def print_rule_detail(token: str, rule: Optional[Dict], title: str = "Thông tin rule", role_names_map: Dict[int, str] = None) -> None:
+    """
+    Hiển thị thông tin chi tiết của một rule
+    
+    Args:
+        token: JWT token để lấy role names (tùy chọn, chỉ dùng nếu role_names_map không được truyền)
+        rule: Dictionary chứa thông tin rule
+        title: Tiêu đề để hiển thị
+        role_names_map: Map role_id -> role_name để tái sử dụng (tùy chọn, nếu không có sẽ gọi API)
+    """
+    print()
+    print("=" * 80)
+    info(f"📋 {title}")
+    print("=" * 80)
+    
+    if not rule:
+        error("Không có thông tin rule")
+        print()
+        return
+    
+    # Lấy role names map: ưu tiên dùng tham số truyền vào, nếu không có hoặc rỗng thì gọi API
+    if role_names_map is None or len(role_names_map) == 0:
+        role_names_map = {}
+        if token:
+            role_names_map = get_role_names_map(token)
+    
+    rule_id = rule.get("id", "N/A")
+    rule_method = rule.get("method", "N/A")
+    rule_path = rule.get("path", "N/A")
+    rule_type = rule.get("type", "N/A")
+    fixed = rule.get("fixed", False)
+    service_name = rule.get("service_name") or ""
+    description = rule.get("description") or ""
+    roles = rule.get("roles", [])
+    
+    print(f"ID: {rule_id}")
+    print(f"Method: {rule_method}")
+    print(f"Path: {rule_path}")
+    print(f"Type: {rule_type}")
+    print(f"Fixed: {fixed}")
+    if service_name:
+        print(f"Service Name: {service_name}")
+    if description:
+        print(f"Description: {description}")
+    
+    # Convert role IDs sang role names
+    role_names = []
+    for role_id in roles:
+        if role_id in role_names_map:
+            role_names.append(role_names_map[role_id])
+        else:
+            # Nếu không tìm thấy name, dùng ID
+            role_names.append(str(role_id))
+    
+    if role_names:
+        print(f"Roles: {', '.join(role_names)}")
+    else:
+        print("Roles: (không có)")
+    
+    print()
+    print("=" * 80)
 
 def confirm_reset(action_description: str = "reset dữ liệu", warning_message: str = None) -> bool:
     """

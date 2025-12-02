@@ -3,12 +3,12 @@
 Test các endpoint:
 - POST /api/auth/register - Đăng ký user
 - POST /api/auth/login - Đăng nhập
-- PUT /api/auth/profile - Cập nhật profile của chính mình
+- PUT /api/user/profile - Cập nhật profile của chính mình
 - POST /api/auth/logout - Đăng xuất
-- GET /api/auth/profile/:id - Lấy thông tin profile theo identifier (admin/super_admin)
-- PUT /api/auth/profile/:id - Cập nhật profile theo ID (admin/super_admin)
+- GET /api/user/:id - Lấy thông tin profile theo identifier (admin/super_admin)
+- PUT /api/user/:id - Cập nhật profile theo ID (admin/super_admin)
 - PUT /api/users/:userId/roles - Cập nhật roles cho user
-- DELETE /api/auth/profile/:id - Xóa user (super_admin)
+- DELETE /api/user/:id - Xóa user (super_admin)
 """
 import json
 import sys
@@ -152,7 +152,7 @@ def update_profile(token: str, profile_data: Dict[str, str]) -> Tuple[bool, Opti
         info(f"  - Address: {profile_data.get('address', 'N/A')}")
         
         resp = requests.put(
-            f"{base_url}/api/auth/profile",
+            f"{base_url}/api/user/profile",
             json=profile_data,
             headers={"Authorization": f"Bearer {token}"},
             timeout=10
@@ -202,7 +202,7 @@ def update_profile_by_id(token: str, user_id: str, profile_data: Dict[str, str])
         # URL encode user_id để đảm bảo an toàn
         encoded_user_id = quote(str(user_id), safe='')
         resp = requests.put(
-            f"{base_url}/api/auth/profile/{encoded_user_id}",
+            f"{base_url}/api/user/{encoded_user_id}",
             json=profile_data,
             headers={"Authorization": f"Bearer {token}"},
             timeout=10

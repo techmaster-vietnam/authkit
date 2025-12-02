@@ -62,6 +62,7 @@ type AuthKit[TUser UserInterface, TRole RoleInterface] struct {
 
 	// Handlers
 	AuthHandler *BaseAuthHandler[TUser, TRole]
+	UserHandler *BaseUserHandler[TUser, TRole]
 	RoleHandler *BaseRoleHandler[TUser, TRole]
 	RuleHandler *BaseRuleHandler[TUser, TRole]
 
@@ -155,6 +156,7 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 
 	// Initialize handlers với generic types
 	authHandler := handlers.NewBaseAuthHandler(authService, roleRepo)
+	userHandler := handlers.NewBaseUserHandler(authService, roleRepo)
 	roleHandler := handlers.NewBaseRoleHandler(roleService)
 	ruleHandler := handlers.NewBaseRuleHandler(ruleService, authzMiddleware)
 
@@ -173,6 +175,7 @@ func (b *AuthKitBuilder[TUser, TRole]) Initialize() (*AuthKit[TUser, TRole], err
 		AuthMiddleware:          authMiddleware,
 		AuthorizationMiddleware: authzMiddleware,
 		AuthHandler:             authHandler,
+		UserHandler:             userHandler,
 		RoleHandler:             roleHandler,
 		RuleHandler:             ruleHandler,
 		RouteRegistry:           routeRegistry,
@@ -261,6 +264,7 @@ type (
 // Handlers - Export generic handler types
 type (
 	BaseAuthHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseAuthHandler[TUser, TRole]
+	BaseUserHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseUserHandler[TUser, TRole]
 	BaseRoleHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseRoleHandler[TUser, TRole]
 	BaseRuleHandler[TUser core.UserInterface, TRole core.RoleInterface] = handlers.BaseRuleHandler[TUser, TRole]
 )

@@ -348,12 +348,26 @@ func (m *MockUserRepository[TUser]) Delete(id string) error {
 	return nil
 }
 
-func (m *MockUserRepository[TUser]) List(offset, limit int) ([]TUser, int64, error) {
+func (m *MockUserRepository[TUser]) List(offset, limit int, filter interface{}) ([]TUser, int64, error) {
 	result := make([]TUser, 0, len(m.users))
 	for _, user := range m.users {
 		result = append(result, user)
 	}
-	return result, int64(len(m.users)), nil
+	// Apply pagination
+	total := int64(len(result))
+	if offset > len(result) {
+		return []TUser{}, total, nil
+	}
+	end := offset + limit
+	if end > len(result) {
+		end = len(result)
+	}
+	if offset < len(result) {
+		result = result[offset:end]
+	} else {
+		result = []TUser{}
+	}
+	return result, total, nil
 }
 
 func (m *MockUserRepository[TUser]) DB() interface{} {

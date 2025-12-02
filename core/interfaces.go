@@ -59,7 +59,7 @@ type UserRepositoryInterface[TUser UserInterface] interface {
 	Create(user TUser) error
 	Update(user TUser) error
 	Delete(id string) error
-	List(offset, limit int) ([]TUser, int64, error)
+	List(offset, limit int, filter interface{}) ([]TUser, int64, error) // filter có thể là *repository.UserFilter hoặc nil
 	DB() interface{} // Trả về *gorm.DB nhưng dùng interface{} để tránh circular dependency
 }
 

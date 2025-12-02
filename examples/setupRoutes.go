@@ -60,40 +60,48 @@ func setupRoutes(
 		Register()
 
 	// Protected auth routes
-	auth.Get("/profile", ak.AuthHandler.GetProfile).
-		Allow().
-		Fixed().
-		Description("Lấy thông tin profile của chính mình").
-		Register()
-	auth.Get("/profile/:id", ak.AuthHandler.GetProfileByID).
-		Allow("admin", "super_admin").
-		Fixed().
-		Description("Lấy thông tin profile theo identifier (id, email, hoặc mobile) kèm danh sách roles - chỉ dành cho admin và super_admin").
-		Register()
-	auth.Put("/profile", ak.AuthHandler.UpdateProfile).
-		Allow().
-		Fixed().
-		Description("Cập nhật thông tin profile của chính mình (chỉ user đang đăng nhập mới có thể cập nhật profile của chính mình)").
-		Register()
-	auth.Put("/profile/:id", ak.AuthHandler.UpdateProfileByID).
-		Allow("admin", "super_admin").
-		Fixed().
-		Description("Cập nhật thông tin profile theo user ID - chỉ dành cho admin và super_admin. Admin chỉ được cập nhật profile của chính mình hoặc profile có role khác 'admin'. Super_admin được phép cập nhật mọi profile").
-		Register()
-	auth.Delete("/profile", ak.AuthHandler.DeleteProfile).
-		Allow().
-		Fixed().
-		Description("Xóa tài khoản").
-		Register()
-	auth.Delete("/profile/:id", ak.AuthHandler.DeleteUserByID).
-		Allow("admin", "super_admin").
-		Fixed().
-		Description("Xóa user theo ID - chỉ dành cho admin và super_admin. Admin chỉ được xóa các user không có role 'admin' và 'super_admin' (soft delete). Super_admin được phép xóa bất kỳ user nào không chứa role 'super_admin' (hard delete)").
-		Register()
 	auth.Post("/change-password", ak.AuthHandler.ChangePassword).
 		Allow().
 		Fixed().
 		Description("Đổi mật khẩu").
+		Register()
+
+	// User management routes
+	users := apiRouter.Group("/user")
+	users.Get("/profile", ak.UserHandler.GetProfile).
+		Allow().
+		Fixed().
+		Description("Lấy thông tin profile của chính mình").
+		Register()
+	users.Put("/profile", ak.UserHandler.UpdateProfile).
+		Allow().
+		Fixed().
+		Description("Cập nhật thông tin profile của chính mình (chỉ user đang đăng nhập mới có thể cập nhật profile của chính mình)").
+		Register()
+	users.Delete("/profile", ak.UserHandler.DeleteProfile).
+		Allow().
+		Fixed().
+		Description("Xóa tài khoản").
+		Register()
+	users.Get("/:id", ak.UserHandler.GetProfileByID).
+		Allow("admin", "super_admin").
+		Fixed().
+		Description("Lấy thông tin profile theo identifier (id, email, hoặc mobile) kèm danh sách roles - chỉ dành cho admin và super_admin").
+		Register()
+	users.Put("/:id", ak.UserHandler.UpdateProfileByID).
+		Allow("admin", "super_admin").
+		Fixed().
+		Description("Cập nhật thông tin profile theo user ID - chỉ dành cho admin và super_admin. Admin chỉ được cập nhật profile của chính mình hoặc profile có role khác 'admin'. Super_admin được phép cập nhật mọi profile").
+		Register()
+	users.Delete("/:id", ak.UserHandler.DeleteUserByID).
+		Allow("admin", "super_admin").
+		Fixed().
+		Description("Xóa user theo ID - chỉ dành cho admin và super_admin. Admin chỉ được xóa các user không có role 'admin' và 'super_admin' (soft delete). Super_admin được phép xóa bất kỳ user nào không chứa role 'super_admin' (hard delete)").
+		Register()
+	users.Get("/", ak.UserHandler.ListUsers).
+		Allow("admin", "super_admin").
+		Fixed().
+		Description("Danh sách users với pagination (trả về id, email, full_name, mobile, address)").
 		Register()
 
 	// Blog routes
@@ -152,26 +160,26 @@ func setupRoutes(
 		Register()
 
 	// User role routes (admin only)
-	users := apiRouter.Group("/users")
-	users.Post("/:user_id/roles/:role_id", ak.RoleHandler.AddRoleToUser).
+	usersRoles := apiRouter.Group("/users")
+	usersRoles.Post("/:user_id/roles/:role_id", ak.RoleHandler.AddRoleToUser).
 		Allow("admin").
 		Fixed().
 		Description("Thêm role cho user").
 		Register()
 
-	users.Delete("/:user_id/roles/:role_id", ak.RoleHandler.RemoveRoleFromUser).
+	usersRoles.Delete("/:user_id/roles/:role_id", ak.RoleHandler.RemoveRoleFromUser).
 		Allow("admin").
 		Fixed().
 		Description("Xóa role của user").
 		Register()
 
-	users.Get("/:user_id/roles/:role_name/check", ak.RoleHandler.CheckUserHasRole).
+	usersRoles.Get("/:user_id/roles/:role_name/check", ak.RoleHandler.CheckUserHasRole).
 		Allow("admin").
 		Fixed().
 		Description("Kiểm tra user có role").
 		Register()
 
-	users.Put("/:userId/roles", ak.RoleHandler.UpdateUserRoles).
+	usersRoles.Put("/:userId/roles", ak.RoleHandler.UpdateUserRoles).
 		Allow("admin", "super_admin").
 		Fixed().
 		Description("Cập nhật danh sách roles cho user (chỉ admin và super_admin được phép)").
@@ -224,7 +232,7 @@ func setupRoutes(
 	// Bar route - cấm users có role "reader" hoặc "admin"
 	apiRouter.Get("/bar", demoHandler.Bar).
 		Forbid("reader", "editor", "admin").
-		Override().
+		//Override().
 		Description("Bar dùng Override() để ghi đè rule code từ database").
 		Register()
 }

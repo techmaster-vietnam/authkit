@@ -275,7 +275,7 @@ def test_access_token_expiry(session: requests.Session, access_token: str, wait_
     
     try:
         resp = session.get(
-            f"{base_url}/api/auth/profile",
+            f"{base_url}/api/user/profile",
             headers={"Authorization": f"Bearer {access_token}"},
             timeout=10
         )
