@@ -14,6 +14,7 @@ import (
 type UserFilter struct {
 	Email    string            // Filter email chứa text
 	FullName string            // Filter full_name chứa text
+	RoleName string            // Filter theo role name (user phải có role với name chứa text này)
 	Custom   map[string]string // Filter custom fields: key là tên field (snake_case hoặc PascalCase), value là text cần tìm
 	SortBy   string            // Trường để sort (email, full_name, hoặc custom field)
 	Order    string            // Thứ tự sort: "asc" hoặc "desc" (mặc định "asc")
@@ -105,6 +106,14 @@ func (r *BaseUserRepository[T]) List(offset, limit int, filter interface{}) ([]T
 			query = query.Where("full_name LIKE ?", "%"+userFilter.FullName+"%")
 		}
 
+		// Filter theo role name (JOIN với user_roles và roles)
+		if userFilter.RoleName != "" {
+			query = query.Joins("INNER JOIN user_roles ON users.id = user_roles.user_id").
+				Joins("INNER JOIN roles ON user_roles.role_id = roles.id").
+				Where("roles.name LIKE ?", "%"+userFilter.RoleName+"%").
+				Group("users.id") // Group để tránh duplicate users khi user có nhiều roles
+		}
+
 		// Filter custom fields động
 		if len(userFilter.Custom) > 0 {
 			query = r.applyCustomFilters(query, &zero, userFilter.Custom)
@@ -112,9 +121,36 @@ func (r *BaseUserRepository[T]) List(offset, limit int, filter interface{}) ([]T
 	}
 
 	// Count total với filters (không áp dụng sort cho count)
-	countQuery := query
-	if err := countQuery.Count(&total).Error; err != nil {
-		return nil, 0, err
+	// Nếu có filter role name với GROUP BY, cần count distinct users
+	if userFilter != nil && userFilter.RoleName != "" {
+		// Sử dụng subquery để count distinct users khi có JOIN và GROUP BY
+		// Tạo count query riêng với tất cả filters
+		var zeroCount T
+		countQuery := r.db.Model(&zeroCount).
+			Joins("INNER JOIN user_roles ON users.id = user_roles.user_id").
+			Joins("INNER JOIN roles ON user_roles.role_id = roles.id").
+			Where("roles.name LIKE ?", "%"+userFilter.RoleName+"%")
+		
+		// Áp dụng các filter khác nếu có
+		if userFilter.Email != "" {
+			countQuery = countQuery.Where("users.email LIKE ?", "%"+userFilter.Email+"%")
+		}
+		if userFilter.FullName != "" {
+			countQuery = countQuery.Where("users.full_name LIKE ?", "%"+userFilter.FullName+"%")
+		}
+		if len(userFilter.Custom) > 0 {
+			countQuery = r.applyCustomFilters(countQuery, &zeroCount, userFilter.Custom)
+		}
+		
+		// Count distinct users (không cần GROUP BY cho count)
+		if err := countQuery.Distinct("users.id").Count(&total).Error; err != nil {
+			return nil, 0, err
+		}
+	} else {
+		// Không có filter role name, count bình thường
+		if err := query.Count(&total).Error; err != nil {
+			return nil, 0, err
+		}
 	}
 
 	// Áp dụng sort nếu có
@@ -125,7 +161,12 @@ func (r *BaseUserRepository[T]) List(offset, limit int, filter interface{}) ([]T
 			if order != "asc" && order != "desc" {
 				order = "asc" // Fallback về "asc" nếu không hợp lệ
 			}
-			query = query.Order(columnName + " " + order)
+			// Nếu có JOIN (filter role name), cần prefix với table name để tránh ambiguity
+			if userFilter.RoleName != "" {
+				query = query.Order("users." + columnName + " " + order)
+			} else {
+				query = query.Order(columnName + " " + order)
+			}
 		}
 	}
 
@@ -163,6 +204,14 @@ func (r *BaseUserRepository[T]) Count(filter interface{}) (int64, error) {
 			query = query.Where("full_name LIKE ?", "%"+userFilter.FullName+"%")
 		}
 
+		// Filter theo role name (JOIN với user_roles và roles)
+		if userFilter.RoleName != "" {
+			query = query.Joins("INNER JOIN user_roles ON users.id = user_roles.user_id").
+				Joins("INNER JOIN roles ON user_roles.role_id = roles.id").
+				Where("roles.name LIKE ?", "%"+userFilter.RoleName+"%").
+				Group("users.id") // Group để tránh duplicate users khi user có nhiều roles
+		}
+
 		// Filter custom fields động
 		if len(userFilter.Custom) > 0 {
 			query = r.applyCustomFilters(query, &zero, userFilter.Custom)
@@ -170,8 +219,34 @@ func (r *BaseUserRepository[T]) Count(filter interface{}) (int64, error) {
 	}
 
 	// Count total với filters
-	if err := query.Count(&total).Error; err != nil {
-		return 0, err
+	// Nếu có filter role name, cần count distinct users
+	if userFilter != nil && userFilter.RoleName != "" {
+		// Tạo count query riêng với JOIN
+		var zeroCount T
+		countQuery := r.db.Model(&zeroCount).
+			Joins("INNER JOIN user_roles ON users.id = user_roles.user_id").
+			Joins("INNER JOIN roles ON user_roles.role_id = roles.id").
+			Where("roles.name LIKE ?", "%"+userFilter.RoleName+"%")
+		
+		// Áp dụng các filter khác nếu có
+		if userFilter.Email != "" {
+			countQuery = countQuery.Where("users.email LIKE ?", "%"+userFilter.Email+"%")
+		}
+		if userFilter.FullName != "" {
+			countQuery = countQuery.Where("users.full_name LIKE ?", "%"+userFilter.FullName+"%")
+		}
+		if len(userFilter.Custom) > 0 {
+			countQuery = r.applyCustomFilters(countQuery, &zeroCount, userFilter.Custom)
+		}
+		
+		// Count distinct users (không cần GROUP BY cho count)
+		if err := countQuery.Distinct("users.id").Count(&total).Error; err != nil {
+			return 0, err
+		}
+	} else {
+		if err := query.Count(&total).Error; err != nil {
+			return 0, err
+		}
 	}
 
 	return total, nil

@@ -103,8 +103,8 @@ def register_user(user_data: UserData) -> Tuple[bool, Optional[Dict], Optional[s
 
 def list_users(token: str, page: int = 1, page_size: int = 10, 
                email_filter: str = None, full_name_filter: str = None, 
-               address_filter: str = None, sort_by: str = None, 
-               order: str = "asc") -> Optional[Dict]:
+               address_filter: str = None, role_name_filter: str = None,
+               sort_by: str = None, order: str = "asc") -> Optional[Dict]:
     """
     Lấy danh sách users với pagination, filter và sort
     
@@ -115,6 +115,7 @@ def list_users(token: str, page: int = 1, page_size: int = 10,
         email_filter: Filter email chứa text
         full_name_filter: Filter full_name chứa text
         address_filter: Filter address chứa text
+        role_name_filter: Filter role_name chứa text
         sort_by: Trường để sort (email, full_name, address)
         order: Thứ tự sort (asc hoặc desc)
     
@@ -137,6 +138,8 @@ def list_users(token: str, page: int = 1, page_size: int = 10,
             params["full_name"] = full_name_filter
         if address_filter:
             params["address"] = address_filter
+        if role_name_filter:
+            params["role_name"] = role_name_filter
         
         # Thêm sort params (giả định API hỗ trợ)
         if sort_by:
@@ -317,12 +320,13 @@ def delete_role(token: str, role_name: str) -> bool:
         error(f"Lỗi khi xóa role: {str(e)}")
         return False
 
-def main():
-    """Hàm main để test list users"""
+def create_test_data() -> Tuple[List[str], List[str]]:
+    """
+    Tạo dữ liệu test: users và roles
     
-    print_section("BẮT ĐẦU SCRIPT TEST LIST USERS")
-    
-    # Khai báo biến toàn cục trong hàm
+    Returns:
+        Tuple (registered_user_ids, created_roles)
+    """
     registered_user_ids: List[str] = []
     created_roles: List[str] = []
     
@@ -334,7 +338,7 @@ def main():
     
     if not os.path.exists(users_file):
         error(f"Không tìm thấy file: {users_file}")
-        sys.exit(1)
+        return [], []
     
     try:
         with open(users_file, 'r', encoding='utf-8') as f:
@@ -342,7 +346,7 @@ def main():
         success(f"Đọc file thành công! Tổng số users: {len(users_data)}")
     except Exception as e:
         error(f"Lỗi khi đọc file: {str(e)}")
-        sys.exit(1)
+        return [], []
     
     print()
     
@@ -371,11 +375,11 @@ def main():
     print()
     
     if not registered_user_ids:
-        error("Không có user nào được đăng ký thành công. Không thể tiếp tục test.")
-        sys.exit(1)
+        error("Không có user nào được đăng ký thành công.")
+        return [], []
     
-    # Bước 2.5: Login với admin, tạo roles và gán roles cho users
-    print_section("BƯỚC 2.5: TẠO ROLES VÀ GÁN CHO USERS")
+    # Bước 3: Login với admin, tạo roles và gán roles cho users
+    print_section("BƯỚC 3: TẠO ROLES VÀ GÁN CHO USERS")
     
     # Login với admin@gmail.com
     config = get_config()
@@ -387,7 +391,7 @@ def main():
     
     if not login_success:
         error(f"Không thể đăng nhập với admin: {login_error}")
-        sys.exit(1)
+        return registered_user_ids, []
     
     success("Đăng nhập admin thành công!")
     print()
@@ -443,8 +447,51 @@ def main():
         info(f"Tổng kết gán roles: {assign_success_count} thành công, {assign_fail_count} thất bại")
         print()
     
-    # Bước 3: Login với admin/super_admin để test list users
-    print_section("BƯỚC 3: ĐĂNG NHẬP ADMIN")
+    return registered_user_ids, created_roles
+
+def main():
+    """Hàm main để test list users"""
+    
+    print_section("BẮT ĐẦU SCRIPT TEST LIST USERS")
+    
+    # Khai báo biến toàn cục trong hàm
+    registered_user_ids: List[str] = []
+    created_roles: List[str] = []
+    
+    # Hỏi người dùng có cần tạo dữ liệu user và role không
+    print()
+    print("=" * 80)
+    info("THIẾT LẬP DỮ LIỆU TEST")
+    print("=" * 80)
+    print()
+    print("Bạn có muốn tạo dữ liệu user và role để test không?")
+    print("  - Nhấn Enter hoặc gõ 'y'/'yes' để tạo dữ liệu")
+    print("  - Gõ 'n'/'no' để bỏ qua và chạy trực tiếp các test case")
+    print()
+    
+    try:
+        user_input = input("Lựa chọn của bạn (y/n): ").strip().lower()
+    except (KeyboardInterrupt, EOFError):
+        print()
+        info("Đã hủy bởi người dùng.")
+        sys.exit(0)
+    
+    should_create_data = user_input in ['', 'y', 'yes']
+    
+    if should_create_data:
+        info("Bắt đầu tạo dữ liệu test...")
+        print()
+        registered_user_ids, created_roles = create_test_data()
+        
+        if not registered_user_ids:
+            error("Không thể tạo dữ liệu test. Kết thúc script.")
+            sys.exit(1)
+    else:
+        info("Bỏ qua việc tạo dữ liệu. Chạy trực tiếp các test case.")
+        print()
+    
+    # Bước 4: Login với admin/super_admin để test list users
+    print_section("BƯỚC 4: ĐĂNG NHẬP ADMIN")
     
     login_success, admin_token, login_error = login_account("super_admin")
     
@@ -455,8 +502,8 @@ def main():
     success("Đăng nhập thành công!")
     print()
     
-    # Bước 4: Test các kịch bản list users
-    print_section("BƯỚC 4: TEST CÁC KỊCH BẢN LIST USERS")
+    # Bước 5: Test các kịch bản list users
+    print_section("BƯỚC 5: TEST CÁC KỊCH BẢN LIST USERS")
     
     # Test case A: Phân trang, sort theo email A-Z, in ra trang đầu tiên
     print()
@@ -530,75 +577,104 @@ def main():
     if response_h:
         print_users_list(response_h, "Kết quả Test Case H")
     
-    # Bước 5: Xác nhận để tiếp tục
-    print_section("BƯỚC 5: XÁC NHẬN ĐỂ TIẾP TỤC")
-    
+    # Test case I: Lọc ra users có role "tiger", sort theo email A-Z
     print()
-    print("Nhấn bất kỳ phím nào để tiếp tục xóa các users đã đăng ký...")
-    try:
-        input()
-    except KeyboardInterrupt:
-        print()
-        info("Đã hủy bởi người dùng.")
-        sys.exit(0)
-    except EOFError:
-        print()
-        info("Đã hủy bởi người dùng.")
-        sys.exit(0)
+    print("=" * 80)
+    info("TEST CASE I: Lọc users có role 'tiger', sort theo email A-Z")
+    print("=" * 80)
+    response_i = list_users(admin_token, page=1, page_size=10, role_name_filter="tiger", sort_by="email", order="asc")
+    if response_i:
+        print_users_list(response_i, "Kết quả Test Case I")
     
-    # Bước 6: Xóa toàn bộ users đã đăng ký (user_role sẽ tự động xóa khi xóa user)
-    print_section("BƯỚC 6: XÓA TOÀN BỘ USERS ĐÃ ĐĂNG KÝ")
-    
-    info(f"Tổng số user sẽ bị xóa: {len(registered_user_ids)}")
-    info("Lưu ý: Các bản ghi user_role tương ứng sẽ tự động bị xóa khi xóa user")
+    # Test case J: Lọc ra users có role "bird", sort theo full_name A-Z
     print()
+    print("=" * 80)
+    info("TEST CASE J: Lọc users có role 'bird', sort theo full_name A-Z")
+    print("=" * 80)
+    response_j = list_users(admin_token, page=1, page_size=10, role_name_filter="bird", sort_by="full_name", order="asc")
+    if response_j:
+        print_users_list(response_j, "Kết quả Test Case J")
     
-    delete_success_count = 0
-    delete_fail_count = 0
-    
-    for idx, user_id in enumerate(registered_user_ids, 1):
-        info(f"[{idx}/{len(registered_user_ids)}] Đang xóa user ID: {user_id}...")
-        delete_success, delete_error = delete_user(admin_token, user_id)
-        if delete_success:
-            delete_success_count += 1
-        else:
-            delete_fail_count += 1
-            error(f"Xóa user ID {user_id} thất bại: {delete_error}")
-        print()
-    
-    # Báo cáo kết quả xóa
+    # Test case K: Lọc ra users có role "snake", sort theo email Z-A
     print()
-    print_section("KẾT QUẢ XÓA USERS")
-    print(f"   ✅ Xóa thành công: {delete_success_count}")
-    print(f"   ❌ Xóa thất bại: {delete_fail_count}")
-    print()
+    print("=" * 80)
+    info("TEST CASE K: Lọc users có role 'snake', sort theo email Z-A")
+    print("=" * 80)
+    response_k = list_users(admin_token, page=1, page_size=10, role_name_filter="snake", sort_by="email", order="desc")
+    if response_k:
+        print_users_list(response_k, "Kết quả Test Case K")
     
-    # Bước 7: Xóa 5 roles đã tạo
-    print_section("BƯỚC 7: XÓA 5 ROLES ĐÃ TẠO")
-    
-    if created_roles:
-        info(f"Tổng số roles sẽ bị xóa: {len(created_roles)}")
-        print()
+    # Bước 6: Xác nhận để tiếp tục (chỉ nếu có dữ liệu đã tạo)
+    if registered_user_ids or created_roles:
+        print_section("BƯỚC 6: XÁC NHẬN ĐỂ TIẾP TỤC")
         
-        delete_role_success_count = 0
-        delete_role_fail_count = 0
+        print()
+        print("Nhấn bất kỳ phím nào để tiếp tục xóa các users và roles đã tạo...")
+        try:
+            input()
+        except KeyboardInterrupt:
+            print()
+            info("Đã hủy bởi người dùng.")
+            sys.exit(0)
+        except EOFError:
+            print()
+            info("Đã hủy bởi người dùng.")
+            sys.exit(0)
         
-        for idx, role_name in enumerate(created_roles, 1):
-            info(f"[{idx}/{len(created_roles)}] Đang xóa role: {role_name}...")
-            if delete_role(admin_token, role_name):
-                delete_role_success_count += 1
-            else:
-                delete_role_fail_count += 1
+        # Bước 7: Xóa toàn bộ users đã đăng ký (user_role sẽ tự động xóa khi xóa user)
+        if registered_user_ids:
+            print_section("BƯỚC 7: XÓA TOÀN BỘ USERS ĐÃ ĐĂNG KÝ")
+            
+            info(f"Tổng số user sẽ bị xóa: {len(registered_user_ids)}")
+            info("Lưu ý: Các bản ghi user_role tương ứng sẽ tự động bị xóa khi xóa user")
+            print()
+            
+            delete_success_count = 0
+            delete_fail_count = 0
+            
+            for idx, user_id in enumerate(registered_user_ids, 1):
+                info(f"[{idx}/{len(registered_user_ids)}] Đang xóa user ID: {user_id}...")
+                delete_success, delete_error = delete_user(admin_token, user_id)
+                if delete_success:
+                    delete_success_count += 1
+                else:
+                    delete_fail_count += 1
+                    error(f"Xóa user ID {user_id} thất bại: {delete_error}")
+                print()
+            
+            # Báo cáo kết quả xóa
+            print()
+            print_section("KẾT QUẢ XÓA USERS")
+            print(f"   ✅ Xóa thành công: {delete_success_count}")
+            print(f"   ❌ Xóa thất bại: {delete_fail_count}")
             print()
         
-        # Báo cáo kết quả xóa roles
-        print()
-        print_section("KẾT QUẢ XÓA ROLES")
-        print(f"   ✅ Xóa thành công: {delete_role_success_count}")
-        print(f"   ❌ Xóa thất bại: {delete_role_fail_count}")
-        print()
+        # Bước 8: Xóa 5 roles đã tạo
+        if created_roles:
+            print_section("BƯỚC 8: XÓA 5 ROLES ĐÃ TẠO")
+            
+            info(f"Tổng số roles sẽ bị xóa: {len(created_roles)}")
+            print()
+            
+            delete_role_success_count = 0
+            delete_role_fail_count = 0
+            
+            for idx, role_name in enumerate(created_roles, 1):
+                info(f"[{idx}/{len(created_roles)}] Đang xóa role: {role_name}...")
+                if delete_role(admin_token, role_name):
+                    delete_role_success_count += 1
+                else:
+                    delete_role_fail_count += 1
+                print()
+            
+            # Báo cáo kết quả xóa roles
+            print()
+            print_section("KẾT QUẢ XÓA ROLES")
+            print(f"   ✅ Xóa thành công: {delete_role_success_count}")
+            print(f"   ❌ Xóa thất bại: {delete_role_fail_count}")
+            print()
     else:
-        info("Không có role nào được tạo để xóa.")
+        info("Không có dữ liệu nào được tạo để xóa.")
         print()
 
 if __name__ == "__main__":

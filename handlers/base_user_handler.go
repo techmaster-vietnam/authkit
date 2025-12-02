@@ -338,12 +338,13 @@ func (h *BaseUserHandler[TUser, TRole]) DeleteUserByID(c *fiber.Ctx) error {
 }
 
 // ListUsers handles list users request với pagination và filter
-// GET /api/user?page=1&page_size=10&email=test&full_name=John&mobile=123&address=Hanoi
+// GET /api/user?page=1&page_size=10&email=test&full_name=John&role_name=admin&mobile=123&address=Hanoi
 // Chỉ dành cho admin và super_admin
 // Trả về danh sách users với các trường: id, email, full_name, mobile, address
 // Filter params:
 //   - email: filter email chứa text
 //   - full_name: filter full_name chứa text
+//   - role_name: filter user có role với name chứa text (user phải có ít nhất một role match)
 //   - mobile: filter mobile chứa text (custom field)
 //   - address: filter address chứa text (custom field)
 //   - Các custom fields khác có thể được thêm vào query params và sẽ được filter động
@@ -396,6 +397,7 @@ func (h *BaseUserHandler[TUser, TRole]) ListUsers(c *fiber.Ctx) error {
 	filter := &repository.UserFilter{
 		Email:    c.Query("email"),
 		FullName: c.Query("full_name"),
+		RoleName: c.Query("role_name"),
 		SortBy:   sortBy,
 		Order:    order,
 		Custom:   make(map[string]string),
@@ -418,6 +420,7 @@ func (h *BaseUserHandler[TUser, TRole]) ListUsers(c *fiber.Ctx) error {
 			"max_page_size":        true,
 			"email":                true,
 			"full_name":            true,
+			"role_name":            true,
 			"sort_by":              true,
 			"order":                true,
 		}
