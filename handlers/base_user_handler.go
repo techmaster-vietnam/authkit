@@ -447,6 +447,29 @@ func (h *BaseUserHandler[TUser, TRole]) ListUsers(c *fiber.Ctx) error {
 
 	// Tạo response DTO động - sử dụng map để hỗ trợ custom fields
 	userList := make([]map[string]interface{}, 0, len(result.Users))
+
+	// Tối ưu: Cache excludedFields map ra ngoài vòng lặp (chỉ tạo 1 lần)
+	excludedFields := map[string]bool{
+		"BaseUser":  true,
+		"ID":        true,
+		"Email":     true,
+		"Password":  true,
+		"FullName":  true,
+		"Active":    true,
+		"CreatedAt": true,
+		"UpdatedAt": true,
+		"DeletedAt": true,
+		"Roles":     true,
+	}
+
+	// Tối ưu: Cache reflection metadata và field name mapping (chỉ tính 1 lần cho type đầu tiên)
+	var cachedUserType reflect.Type
+	var cachedFieldMappings []struct {
+		index   int
+		jsonKey string
+		field   reflect.StructField
+	}
+
 	for _, user := range result.Users {
 		item := map[string]interface{}{
 			"id":        user.GetID(),
@@ -464,36 +487,48 @@ func (h *BaseUserHandler[TUser, TRole]) ListUsers(c *fiber.Ctx) error {
 		if userValue.Kind() == reflect.Struct {
 			userType := userValue.Type()
 
-			// Duyệt qua tất cả các fields của struct
-			for i := 0; i < userType.NumField(); i++ {
-				field := userType.Field(i)
-				fieldValue := userValue.Field(i)
+			// Tối ưu: Cache field mappings cho type đầu tiên, sau đó reuse
+			if cachedUserType != userType {
+				cachedUserType = userType
+				cachedFieldMappings = make([]struct {
+					index   int
+					jsonKey string
+					field   reflect.StructField
+				}, 0, userType.NumField())
 
-				// Bỏ qua các trường đã có trong BaseUser hoặc các trường đặc biệt
-				excludedFields := map[string]bool{
-					"BaseUser":  true,
-					"ID":        true,
-					"Email":     true,
-					"Password":  true,
-					"FullName":  true,
-					"Active":    true,
-					"CreatedAt": true,
-					"UpdatedAt": true,
-					"DeletedAt": true,
-					"Roles":     true,
-				}
+				// Duyệt qua tất cả các fields của struct một lần để cache metadata
+				for i := 0; i < userType.NumField(); i++ {
+					field := userType.Field(i)
 
-				if excludedFields[field.Name] {
-					continue
+					// Bỏ qua các trường đã có trong BaseUser hoặc các trường đặc biệt
+					if excludedFields[field.Name] {
+						continue
+					}
+
+					// Cache field index và JSON key để tái sử dụng
+					cachedFieldMappings = append(cachedFieldMappings, struct {
+						index   int
+						jsonKey string
+						field   reflect.StructField
+					}{
+						index:   i,
+						jsonKey: utils.PascalToSnakeCase(field.Name), // Chỉ convert 1 lần
+						field:   field,
+					})
 				}
+			}
+
+			// Sử dụng cached field mappings thay vì duyệt lại
+			for _, mapping := range cachedFieldMappings {
+				fieldValue := userValue.Field(mapping.index)
 
 				// Chỉ lấy các trường có thể convert sang JSON (string, int, bool, etc.)
 				if !fieldValue.IsValid() || !fieldValue.CanInterface() {
 					continue
 				}
 
-				// Convert field name sang snake_case cho JSON key
-				jsonKey := utils.PascalToSnakeCase(field.Name)
+				// Sử dụng cached JSON key
+				jsonKey := mapping.jsonKey
 
 				// Lấy giá trị field
 				fieldInterface := fieldValue.Interface()
