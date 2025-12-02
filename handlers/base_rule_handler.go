@@ -179,3 +179,27 @@ func (h *BaseRuleHandler[TUser, TRole]) GetByID(c *fiber.Ctx) error {
 		"data": rule,
 	})
 }
+
+// GetRulesByRole handles get rules by role request
+// GET /api/rules/role/:id_name
+// id_name can be either role ID (number) or role name (string)
+// Returns all rules that the role can access
+func (h *BaseRuleHandler[TUser, TRole]) GetRulesByRole(c *fiber.Ctx) error {
+	// Lấy id_name từ URL parameter
+	idName := c.Params("id_name")
+	if idName == "" {
+		return goerrorkit.NewValidationError("Role ID hoặc name không hợp lệ", map[string]interface{}{
+			"field": "id_name",
+		})
+	}
+
+	// Lấy rules từ service
+	rules, err := h.ruleService.GetRulesByRole(idName)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{
+		"data": rules,
+	})
+}

@@ -7,11 +7,11 @@ import (
 
 // RuleFilter represents filter parameters for listing rules
 type RuleFilter struct {
-	Method  string  // GET, POST, PUT, DELETE
-	Path    string  // Path chứa chuỗi (ví dụ: "blog")
-	Type    string  // PUBLIC, ALLOW, FORBID
-	Fixed   *bool   // true hoặc false (pointer để phân biệt không có giá trị và false)
-	Service string  // Service name để tìm kiếm trên cột service_name (case-insensitive)
+	Method  string // GET, POST, PUT, DELETE
+	Path    string // Path chứa chuỗi (ví dụ: "blog")
+	Type    string // PUBLIC, ALLOW, FORBID
+	Fixed   *bool  // true hoặc false (pointer để phân biệt không có giá trị và false)
+	Service string // Service name để tìm kiếm trên cột service_name (case-insensitive)
 }
 
 // RuleRepository handles rule database operations
@@ -112,5 +112,34 @@ func (r *RuleRepository) GetAllRulesForCache() ([]models.Rule, error) {
 		query = query.Where("service_name IS NULL OR service_name = ''")
 	}
 	err := query.Find(&rules).Error
+	return rules, err
+}
+
+// GetRulesByRole gets all rules that a specific role can access
+// Uses PostgreSQL function get_rules_by_role for better performance
+// If roleName is "super_admin", returns all rules
+// Otherwise, returns:
+// - All rules with type = "PUBLIC"
+// - All rules with type = "ALLOW" and roles = [] (empty array)
+// - All rules with type = "ALLOW" and roles contains roleID
+func (r *RuleRepository) GetRulesByRole(roleID uint, roleName string) ([]models.Rule, error) {
+	var rules []models.Rule
+
+	// Prepare service_name parameter (NULL for single-app mode)
+	var serviceNameParam interface{}
+	if r.serviceName != "" {
+		serviceNameParam = r.serviceName
+	} else {
+		serviceNameParam = nil
+	}
+
+	// Call PostgreSQL function using GORM Raw with Model() to ensure proper struct mapping
+	// Specify columns explicitly to match function return type
+	// Column order must match the struct field order: ID, Method, Path, Type, Roles, Fixed, Description, ServiceName
+	err := r.db.Model(&models.Rule{}).
+		Raw("SELECT id, method, path, type, roles, fixed, description, service_name FROM get_rules_by_role(?, ?, ?)",
+			roleID, roleName, serviceNameParam).
+		Scan(&rules).Error
+
 	return rules, err
 }

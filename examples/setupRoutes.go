@@ -199,6 +199,11 @@ func setupRoutes(
 		Fixed().
 		Description("Lấy thông tin rule theo ID (ID có dạng: GET|/api/blogs/*, cần URL encode khi gọi REST API)").
 		Register()
+	rules.Get("/role/:id_name", ak.RuleHandler.GetRulesByRole).
+		Allow("admin", "super_admin").
+		Fixed().
+		Description("Lấy rules chứa role cụ thể").
+		Register()
 	rules.Put("/", ak.RuleHandler.UpdateRule).
 		Allow("admin").
 		Fixed().

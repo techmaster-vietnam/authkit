@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"reflect"
+	"strconv"
 
 	"github.com/techmaster-vietnam/authkit/core"
 	"github.com/techmaster-vietnam/authkit/models"
@@ -231,4 +232,55 @@ func (s *RuleService) GetByID(ruleID string) (*models.Rule, error) {
 		return nil, err
 	}
 	return rule, nil
+}
+
+// GetRulesByRole gets all rules that a specific role can access
+// roleIDName can be either role ID (number) or role name (string)
+// Returns:
+// - All rules if role is "super_admin"
+// - Otherwise: PUBLIC rules + ALLOW rules with empty roles + ALLOW rules containing the role ID
+func (s *RuleService) GetRulesByRole(roleIDName string) ([]models.Rule, error) {
+	var roleID uint
+	var roleName string
+	var err error
+
+	// Try to parse as number (role ID)
+	parsedID, parseErr := strconv.ParseUint(roleIDName, 10, 32)
+	if parseErr == nil {
+		// It's a number, use as role ID
+		roleID = uint(parsedID)
+		// Get role name from ID
+		role, err := s.roleRepo.GetByID(roleID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, goerrorkit.NewBusinessError(404, "Không tìm thấy role").WithData(map[string]interface{}{
+					"role_id": roleIDName,
+				})
+			}
+			return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin role")
+		}
+		roleName = role.Name
+	} else {
+		// It's a string, treat as role name
+		roleName = roleIDName
+		// Get role ID from name
+		role, err := s.roleRepo.GetByName(roleName)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, goerrorkit.NewBusinessError(404, "Không tìm thấy role").WithData(map[string]interface{}{
+					"role_name": roleIDName,
+				})
+			}
+			return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy thông tin role")
+		}
+		roleID = role.ID
+	}
+
+	// Get rules from repository
+	rules, err := s.ruleRepo.GetRulesByRole(roleID, roleName)
+	if err != nil {
+		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách rules theo role")
+	}
+
+	return rules, nil
 }
