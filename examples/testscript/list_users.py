@@ -2,6 +2,7 @@
 """Script test list users với pagination, sort và filter"""
 import json
 import os
+import random
 import sys
 from typing import Dict, List, Optional, Tuple
 
@@ -13,7 +14,9 @@ except ImportError:
 
 from share import (
     info, success, error, get_base_url, print_section,
-    login_account, delete_user, handle_error_response
+    login_account, delete_user, handle_error_response,
+    create_role, update_user_roles, login_safe, get_config,
+    get_role_id_by_name
 )
 
 # Định nghĩa cấu trúc user
@@ -239,19 +242,89 @@ def print_users_list(response_data: Dict, title: str = "Danh sách users"):
         mobile = user.get("mobile", "N/A")
         address = user.get("address", "N/A")
         
+        # Lấy roles từ user (có thể là list hoặc không có)
+        roles = user.get("roles", [])
+        if not isinstance(roles, list):
+            roles = []
+        
+        # Format roles thành string (comma-separated)
+        # Roles có thể là list các string hoặc list các object với key "name" hoặc "role_name"
+        role_names = []
+        for role in roles:
+            if isinstance(role, str):
+                role_names.append(role)
+            elif isinstance(role, dict):
+                # Thử lấy từ các key có thể có
+                role_name = role.get("name") or role.get("role_name") or role.get("roleName")
+                if role_name:
+                    role_names.append(str(role_name))
+        
+        if role_names:
+            roles_str = ", ".join(role_names)
+        else:
+            roles_str = "(không có role)"
+        
         print(f"{idx}. ID: {user_id}")
         print(f"   Email: {email}")
         print(f"   Full Name: {full_name}")
         print(f"   Mobile: {mobile}")
         print(f"   Address: {address}")
+        print(f"   Roles: {roles_str}")
         print("-" * 80)
     
     print()
+
+def delete_role(token: str, role_name: str) -> bool:
+    """
+    Xóa role theo name
+    
+    Args:
+        token: JWT token để xác thực
+        role_name: Tên role cần xóa
+    
+    Returns:
+        True nếu thành công, False nếu thất bại
+    """
+    try:
+        # Tìm role_id từ role_name
+        role_id = get_role_id_by_name(token, role_name)
+        if role_id is None:
+            error(f"Không tìm thấy role với name '{role_name}'")
+            return False
+        
+        # Xóa role
+        info(f"Đang xóa role '{role_name}' (ID: {role_id})...")
+        resp = requests.delete(
+            f"{get_base_url()}/api/roles/{role_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        
+        try:
+            resp_data = resp.json()
+        except json.JSONDecodeError:
+            error(f"Response không phải JSON. Status: {resp.status_code}")
+            return False
+        
+        # Kiểm tra lỗi
+        if resp.status_code >= 400 or "error" in resp_data:
+            handle_error_response(resp_data, "xóa role")
+            return False
+        
+        success(f"Xóa role '{role_name}' thành công!")
+        return True
+        
+    except Exception as e:
+        error(f"Lỗi khi xóa role: {str(e)}")
+        return False
 
 def main():
     """Hàm main để test list users"""
     
     print_section("BẮT ĐẦU SCRIPT TEST LIST USERS")
+    
+    # Khai báo biến toàn cục trong hàm
+    registered_user_ids: List[str] = []
+    created_roles: List[str] = []
     
     # Bước 1: Đọc file users.json
     print_section("BƯỚC 1: ĐỌC FILE USERS.JSON")
@@ -276,7 +349,6 @@ def main():
     # Bước 2: Register users
     print_section("BƯỚC 2: ĐĂNG KÝ USERS")
     
-    registered_user_ids: List[str] = []
     success_count = 0
     error_count = 0
     
@@ -301,6 +373,75 @@ def main():
     if not registered_user_ids:
         error("Không có user nào được đăng ký thành công. Không thể tiếp tục test.")
         sys.exit(1)
+    
+    # Bước 2.5: Login với admin, tạo roles và gán roles cho users
+    print_section("BƯỚC 2.5: TẠO ROLES VÀ GÁN CHO USERS")
+    
+    # Login với admin@gmail.com
+    config = get_config()
+    admin_email = config.get("admin_email", "admin@gmail.com")
+    admin_password = config.get("admin_password", "123456")
+    
+    info(f"Đang đăng nhập với {admin_email}...")
+    login_success, admin_token, login_error = login_safe(admin_email, admin_password)
+    
+    if not login_success:
+        error(f"Không thể đăng nhập với admin: {login_error}")
+        sys.exit(1)
+    
+    success("Đăng nhập admin thành công!")
+    print()
+    
+    # Tạo 5 roles mới
+    role_names = ["tiger", "bird", "snake", "dog", "cat"]
+    
+    info("Đang tạo 5 roles mới...")
+    print()
+    
+    # Bắt đầu role_id từ một số lớn để tránh conflict
+    start_role_id = 1000
+    
+    for idx, role_name in enumerate(role_names, 1):
+        role_id = start_role_id + idx
+        info(f"[{idx}/5] Đang tạo role: {role_name} (ID: {role_id})...")
+        if create_role(admin_token, role_id, role_name, is_system=False):
+            created_roles.append(role_name)
+            success(f"Tạo role '{role_name}' thành công!")
+        else:
+            error(f"Tạo role '{role_name}' thất bại!")
+        print()
+    
+    info(f"Tổng kết tạo roles: {len(created_roles)}/{len(role_names)} thành công")
+    print()
+    
+    # Gán roles ngẫu nhiên cho từng user
+    if created_roles:
+        info("Đang gán roles ngẫu nhiên cho các users...")
+        print()
+        
+        assign_success_count = 0
+        assign_fail_count = 0
+        
+        for idx, user_id in enumerate(registered_user_ids, 1):
+            # Chọn ngẫu nhiên 0 đến 4 roles
+            num_roles = random.randint(0, min(4, len(created_roles)))
+            selected_roles = random.sample(created_roles, num_roles) if num_roles > 0 else []
+            
+            info(f"[{idx}/{len(registered_user_ids)}] User ID: {user_id}")
+            if selected_roles:
+                info(f"  Gán {len(selected_roles)} roles: {', '.join(selected_roles)}")
+            else:
+                info(f"  Không gán role nào")
+            
+            success_flag, _ = update_user_roles(admin_token, user_id, selected_roles)
+            if success_flag:
+                assign_success_count += 1
+            else:
+                assign_fail_count += 1
+            print()
+        
+        info(f"Tổng kết gán roles: {assign_success_count} thành công, {assign_fail_count} thất bại")
+        print()
     
     # Bước 3: Login với admin/super_admin để test list users
     print_section("BƯỚC 3: ĐĂNG NHẬP ADMIN")
@@ -405,10 +546,11 @@ def main():
         info("Đã hủy bởi người dùng.")
         sys.exit(0)
     
-    # Bước 6: Xóa toàn bộ users đã đăng ký
+    # Bước 6: Xóa toàn bộ users đã đăng ký (user_role sẽ tự động xóa khi xóa user)
     print_section("BƯỚC 6: XÓA TOÀN BỘ USERS ĐÃ ĐĂNG KÝ")
     
     info(f"Tổng số user sẽ bị xóa: {len(registered_user_ids)}")
+    info("Lưu ý: Các bản ghi user_role tương ứng sẽ tự động bị xóa khi xóa user")
     print()
     
     delete_success_count = 0
@@ -430,6 +572,34 @@ def main():
     print(f"   ✅ Xóa thành công: {delete_success_count}")
     print(f"   ❌ Xóa thất bại: {delete_fail_count}")
     print()
+    
+    # Bước 7: Xóa 5 roles đã tạo
+    print_section("BƯỚC 7: XÓA 5 ROLES ĐÃ TẠO")
+    
+    if created_roles:
+        info(f"Tổng số roles sẽ bị xóa: {len(created_roles)}")
+        print()
+        
+        delete_role_success_count = 0
+        delete_role_fail_count = 0
+        
+        for idx, role_name in enumerate(created_roles, 1):
+            info(f"[{idx}/{len(created_roles)}] Đang xóa role: {role_name}...")
+            if delete_role(admin_token, role_name):
+                delete_role_success_count += 1
+            else:
+                delete_role_fail_count += 1
+            print()
+        
+        # Báo cáo kết quả xóa roles
+        print()
+        print_section("KẾT QUẢ XÓA ROLES")
+        print(f"   ✅ Xóa thành công: {delete_role_success_count}")
+        print(f"   ❌ Xóa thất bại: {delete_role_fail_count}")
+        print()
+    else:
+        info("Không có role nào được tạo để xóa.")
+        print()
 
 if __name__ == "__main__":
     main()

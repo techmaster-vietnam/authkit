@@ -927,12 +927,13 @@ func (s *BaseAuthService[TUser, TRole]) ResetPassword(token string, newPassword 
 // BaseListUsersResponse represents paginated list users response
 // Hỗ trợ cả trường hợp có và không có pagination
 type BaseListUsersResponse[TUser core.UserInterface] struct {
-	Users             []TUser `json:"users"`
-	Total             int64   `json:"total"`
-	Page              *int    `json:"page,omitempty"`        // nil khi không dùng pagination
-	PageSize          *int    `json:"page_size,omitempty"`   // nil khi không dùng pagination
-	TotalPages        *int    `json:"total_pages,omitempty"` // nil khi không dùng pagination
-	PaginationEnabled bool    `json:"pagination_enabled"`    // true nếu đang dùng pagination
+	Users             []TUser            `json:"users"`
+	RoleNames         map[string][]string `json:"role_names,omitempty"` // Map userID -> []roleName
+	Total             int64              `json:"total"`
+	Page              *int               `json:"page,omitempty"`        // nil khi không dùng pagination
+	PageSize          *int               `json:"page_size,omitempty"`   // nil khi không dùng pagination
+	TotalPages        *int               `json:"total_pages,omitempty"` // nil khi không dùng pagination
+	PaginationEnabled bool               `json:"pagination_enabled"`    // true nếu đang dùng pagination
 }
 
 // ListUsersOptions chứa các tùy chọn cho ListUsers
@@ -1072,9 +1073,23 @@ func (s *BaseAuthService[TUser, TRole]) ListUsersWithOptions(options ListUsersOp
 		return nil, goerrorkit.WrapWithMessage(err, "Lỗi khi lấy danh sách users")
 	}
 
-	// Bước 5: Tạo response
+	// Bước 5: Lấy role names cho tất cả users cùng lúc (tối ưu với một query duy nhất)
+	userIDs := make([]string, 0, len(users))
+	for _, user := range users {
+		userIDs = append(userIDs, user.GetID())
+	}
+
+	roleNamesMap, err := s.roleRepo.GetRoleNamesByUserIDs(userIDs)
+	if err != nil {
+		// Log error nhưng không fail request (role names là optional)
+		// Có thể trả về empty map nếu có lỗi
+		roleNamesMap = make(map[string][]string)
+	}
+
+	// Bước 6: Tạo response
 	response := &BaseListUsersResponse[TUser]{
 		Users:             users,
+		RoleNames:         roleNamesMap,
 		Total:             total,
 		PaginationEnabled: usePagination,
 	}

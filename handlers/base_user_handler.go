@@ -471,10 +471,24 @@ func (h *BaseUserHandler[TUser, TRole]) ListUsers(c *fiber.Ctx) error {
 	}
 
 	for _, user := range result.Users {
+		userID := user.GetID()
 		item := map[string]interface{}{
-			"id":        user.GetID(),
+			"id":        userID,
 			"email":     user.GetEmail(),
 			"full_name": user.GetFullName(),
+		}
+
+		// Thêm roles vào response từ roleNames map
+		if result.RoleNames != nil {
+			if roleNames, exists := result.RoleNames[userID]; exists {
+				item["roles"] = roleNames
+			} else {
+				// User không có role nào
+				item["roles"] = []string{}
+			}
+		} else {
+			// Fallback: nếu roleNames map không có, trả về empty array
+			item["roles"] = []string{}
 		}
 
 		// Lấy tất cả các trường custom bằng reflection

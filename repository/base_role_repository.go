@@ -480,6 +480,58 @@ func (r *BaseRoleRepository[T]) removeFromCache(id uint, name string) {
 	delete(r.cache.nameToID, name)
 }
 
+// GetRoleNamesByUserIDs lấy role names cho nhiều users cùng lúc (tối ưu với một query duy nhất)
+// Trả về map[userID][]roleName - map user ID sang mảng role names
+// Sử dụng LEFT JOIN và GROUP BY để tối ưu hiệu suất
+func (r *BaseRoleRepository[T]) GetRoleNamesByUserIDs(userIDs []string) (map[string][]string, error) {
+	if len(userIDs) == 0 {
+		return make(map[string][]string), nil
+	}
+
+	// Sử dụng raw SQL với PostgreSQL STRING_AGG để group role names theo user_id
+	// Query tối ưu: một query duy nhất với LEFT JOIN và GROUP BY
+	type Result struct {
+		UserID   string
+		RoleNames string // Comma-separated role names
+	}
+
+	var results []Result
+	// Sử dụng GORM's Where để xử lý IN clause với slice một cách an toàn
+	query := r.db.Table("user_roles").
+		Select("user_roles.user_id, COALESCE(STRING_AGG(roles.name, ', ' ORDER BY roles.name), '') as role_names").
+		Joins("LEFT JOIN roles ON user_roles.role_id = roles.id").
+		Where("user_roles.user_id IN ?", userIDs).
+		Group("user_roles.user_id")
+	
+	err := query.Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert kết quả sang map[userID][]roleName
+	resultMap := make(map[string][]string, len(results))
+	for _, res := range results {
+		if res.RoleNames == "" {
+			// User không có role nào
+			resultMap[res.UserID] = []string{}
+		} else {
+			// Split comma-separated string thành mảng
+			roleNames := strings.Split(res.RoleNames, ", ")
+			resultMap[res.UserID] = roleNames
+		}
+	}
+
+	// Đảm bảo tất cả userIDs đều có trong map (kể cả những user không có role)
+	for _, userID := range userIDs {
+		if _, exists := resultMap[userID]; !exists {
+			resultMap[userID] = []string{}
+		}
+	}
+
+	return resultMap, nil
+}
+
 // DB trả về interface{} để match với RoleRepositoryInterface
 func (r *BaseRoleRepository[T]) DB() interface{} {
 	return r.db
